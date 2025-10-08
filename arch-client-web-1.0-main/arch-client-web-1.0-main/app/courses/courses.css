@@ -1,0 +1,110 @@
+/* Courses Portal Specific Styles */
+
+/* Background pattern */
+.bg-pattern-dots {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Button animation */
+.btn-animated {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-animated:hover {
+  transform: translateY(-2px);
+}
+
+.btn-animated::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease;
+}
+
+.btn-animated:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* Smooth fade-in animation */
+.fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Rating stars hover effect */
+.star-rating .star:hover ~ .star,
+.star-rating:hover .star {
+  transform: scale(1.2);
+}
+
+/* Filter dropdown hover effect */
+.filter-dropdown:hover .dropdown-menu {
+  display: block;
+  animation: fadeInDown 0.3s ease-out forwards;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Course card badge styles */
+.course-badge {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.course-badge-new {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.course-badge-trending {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.course-badge-free {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}

@@ -1,0 +1,88 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments
+venv/
+winvenv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Uploads
+uploads/videos/*.mp4
+uploads/videos/*.mov
+uploads/videos/*.avi
+uploads/materials/*.pdf
+uploads/materials/*.zip
+uploads/materials/*.docx
+
+# Keep upload directories but ignore content
+!uploads/videos/.gitkeep
+!uploads/materials/.gitkeep
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# OS specific
+Thumbs.db
+.DS_Store
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Alembic (if using migrations)
+alembic/versions/*.pyc

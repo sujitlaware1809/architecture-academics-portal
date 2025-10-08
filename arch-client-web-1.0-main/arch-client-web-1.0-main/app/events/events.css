@@ -1,0 +1,137 @@
+/* Event portal specific styles */
+
+.event-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.date-badge {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.date-badge .month {
+  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+  color: white;
+  font-weight: 600;
+  padding: 4px 10px;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.date-badge .day {
+  background: white;
+  color: #334155;
+  font-weight: 700;
+  padding: 4px 0;
+  text-align: center;
+  font-size: 1.25rem;
+}
+
+.category-tag {
+  border-radius: 9999px;
+  padding: 2px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.category-tag.conference {
+  background-color: rgba(14, 165, 233, 0.15);
+  color: #0284c7;
+}
+
+.category-tag.workshop {
+  background-color: rgba(20, 184, 166, 0.15);
+  color: #0d9488;
+}
+
+.category-tag.seminar {
+  background-color: rgba(249, 115, 22, 0.15);
+  color: #ea580c;
+}
+
+.category-tag.hackathon {
+  background-color: rgba(139, 92, 246, 0.15);
+  color: #7c3aed;
+}
+
+.category-tag.exhibition {
+  background-color: rgba(236, 72, 153, 0.15);
+  color: #db2777;
+}
+
+.event-modal {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.hero-section {
+  background-image: linear-gradient(135deg, rgba(20, 184, 166, 0.8), rgba(14, 165, 233, 0.8));
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/placeholder.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.search-card {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  margin-top: -50px;
+  background: white;
+  position: relative;
+  z-index: 10;
+}
+
+.explore-button {
+  background-color: white;
+  color: #0d9488;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.explore-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 20px -3px rgba(0, 0, 0, 0.15);
+  background-color: #f8fafc;
+}
+
+.filter-select {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.filter-select:focus {
+  border-color: #14b8a6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
+}
