@@ -162,6 +162,7 @@ export default function JobsPortal() {
   const [coverLetterInput, setCoverLetterInput] = useState<string>('')
   const [resumeUrlInput, setResumeUrlInput] = useState<string>('')
   const [refreshTrigger, setRefreshTrigger] = useState(0) // Add this state for refresh
+  const [resumeFile, setResumeFile] = useState<File | null>(null)
 
   useEffect(() => {
     // Check authentication status
@@ -220,6 +221,7 @@ export default function JobsPortal() {
     setApplyJobId(jobId)
     setCoverLetterInput('')
     setResumeUrlInput('')
+    setResumeFile(null)
     setApplyModalOpen(true)
   }
 
@@ -227,16 +229,40 @@ export default function JobsPortal() {
     if (!applyJobId) return
     setApplying(applyJobId)
     try {
-      const response = await api.applyForJob(applyJobId, {
-        cover_letter: coverLetterInput || `I am interested in applying for this position.`,
-        resume_url: resumeUrlInput || undefined,
-      })
+      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const token = api.getStoredToken()
+      if (!token) throw new Error('Login required')
+      let ok = false
+      if (resumeFile) {
+        const form = new FormData()
+        form.append('cover_letter', coverLetterInput || `I am interested in applying for this position.`)
+        form.append('resume_file', resumeFile)
+        const res = await fetch(`${base}/jobs/${applyJobId}/apply/upload`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: form
+        })
+        ok = res.ok
+      } else {
+        const res = await fetch(`${base}/jobs/${applyJobId}/apply`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            cover_letter: coverLetterInput || `I am interested in applying for this position.`,
+            resume_url: resumeUrlInput || undefined,
+          })
+        })
+        ok = res.ok
+      }
 
-      if (response.data) {
+      if (ok) {
         alert('Application submitted successfully!')
         setApplyModalOpen(false)
-      } else if (response.error) {
-        alert(response.error)
+      } else {
+        alert('Failed to submit application')
       }
     } catch (error) {
       console.error('Error applying for job:', error)
@@ -433,6 +459,13 @@ export default function JobsPortal() {
                 <span>Filters</span>
                 <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
               </button>
+                <div className="text-sm text-gray-500 mb-1">Or upload a file (PDF/DOCX)</div>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+                  className="w-full"
+                />
             </div>
 
             {/* Filter Dropdowns */}
@@ -493,106 +526,136 @@ export default function JobsPortal() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredJobs.map((job) => (
-              <Card key={job.id} className="group hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="text-2xl">{job.logo}</div>
-                      <div>
-                        <h3 className="font-bold text-lg text-gray-900 group-hover:text-purple-600 transition-colors">
-                          {job.title}
-                        </h3>
-                        <p className="text-gray-600 font-medium">{job.company}</p>
+              <article key={job.id} className="group cursor-pointer h-full">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 h-full flex flex-col">
+                  {/* Header with Gradient */}
+                  <div className="relative p-6 bg-gradient-to-br from-purple-50 via-indigo-50 to-sky-50 border-b border-gray-100">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-white shadow-md flex items-center justify-center text-2xl">
+                          {job.logo}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">
+                            {job.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 font-medium line-clamp-1">{job.company}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => toggleSaveJob(job.id)}
+                        className="p-2 hover:bg-white/80 rounded-lg transition-colors flex-shrink-0"
+                      >
+                        <Bookmark 
+                          className={`h-5 w-5 ${savedJobs.includes(job.id) ? 'fill-purple-600 text-purple-600' : 'text-gray-400'}`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Job Type & Remote Badge */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                        {job.type}
+                      </span>
+                      {job.remote && (
+                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                          🌐 Remote
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 flex-1 flex flex-col">
+                    {/* Location & Salary */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                        <span className="line-clamp-1">{job.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-lg font-bold text-purple-600">
+                        <DollarSign className="h-5 w-5 flex-shrink-0" />
+                        <span>{formatSalary(job)}</span>
                       </div>
                     </div>
-                    <button
-                      onClick={() => toggleSaveJob(job.id)}
-                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    >
-                      <Bookmark 
-                        className={`h-5 w-5 ${savedJobs.includes(job.id) ? 'fill-purple-600 text-purple-600' : 'text-gray-400'}`}
-                      />
-                    </button>
-                  </div>
-                </CardHeader>
 
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-4 text-sm text-gray-600">
-                    <div className="flex items-center space-x-1">
-                      <MapPin className="h-4 w-4" />
-                      <span>{job.location}</span>
+                    {/* Description */}
+                    <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3 flex-1">
+                      {job.description}
+                    </p>
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {(() => {
+                        let tags: string[] = [];
+                        if (typeof job.tags === 'string') {
+                          tags = (job.tags as string).split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0);
+                        } else if (Array.isArray(job.tags)) {
+                          tags = job.tags as string[];
+                        }
+
+                        return (
+                          <>
+                            {tags.slice(0, 3).map((tag: string, index: number) => (
+                              <span
+                                key={index}
+                                className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded"
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                            {tags.length > 3 && (
+                              <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded">
+                                +{tags.length - 3}
+                              </span>
+                            )}
+                          </>
+                        )
+                      })()}
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Briefcase className="h-4 w-4" />
-                      <span>{job.type}</span>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {job.postedDate}
+                      </span>
+                      <button 
+                        onClick={() => openApplyModal(job.id)}
+                        disabled={applying === job.id}
+                        className="px-4 py-2 bg-gradient-to-r from-purple-600 to-sky-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      >
+                        <span>
+                          {applying === job.id 
+                            ? 'Applying...' 
+                            : isAuthenticated 
+                              ? 'Apply' 
+                              : 'Login'
+                          }
+                        </span>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   </div>
-
-                  {job.remote && (
-                    <div className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
-                      Remote Friendly
-                    </div>
-                  )}
-
-                  <div className="flex items-center space-x-1 text-lg font-semibold text-purple-600">
-                    <DollarSign className="h-5 w-5" />
-                    <span>{formatSalary(job)}</span>
-                  </div>
-
-                  <p className="text-gray-600 text-sm line-clamp-2">{job.description}</p>
-
-                  <div className="flex flex-wrap gap-2">
-                    {(() => {
-                      // Parse tags whether backend returns a comma string or an array
-                      let tags: string[] = [];
-                      if (typeof job.tags === 'string') {
-                        tags = (job.tags as string).split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0);
-                      } else if (Array.isArray(job.tags)) {
-                        tags = job.tags as string[];
-                      }
-
-                      return (
-                        <>
-                          {tags.slice(0, 3).map((tag: string, index: number) => (
-                            <span
-                              key={index}
-                              className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {tags.length > 3 && (
-                            <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-                              +{tags.length - 3} more
-                            </span>
-                          )}
-                        </>
-                      )
-                    })()}
-                  </div>
-                </CardContent>
-
-                <CardFooter className="pt-4 flex items-center justify-between">
-                  <span className="text-xs text-gray-500">{job.postedDate}</span>
-                  <button 
-                    onClick={() => openApplyModal(job.id)}
-                    disabled={applying === job.id}
-                    className="px-6 py-2 bg-gradient-to-r from-purple-600 to-sky-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span>
-                      {applying === job.id 
-                        ? 'Applying...' 
-                        : isAuthenticated 
-                          ? 'Apply Now' 
-                          : 'Login to Apply'
-                      }
-                    </span>
-                    <ExternalLink className="h-4 w-4" />
-                  </button>
-                </CardFooter>
-              </Card>
+                </div>
+                
+                <style jsx>{`
+                  .line-clamp-1 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 1;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                  }
+                  .line-clamp-3 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                  }
+                `}</style>
+              </article>
             ))}
           </div>
 

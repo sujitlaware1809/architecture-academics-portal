@@ -1,291 +1,336 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { api } from "@/lib/api"
-import {
-  Search,
-  MessageSquare,
-  Heart,
-  Eye,
-  Clock,
-  User,
-  ChevronRight,
-  TrendingUp,
-  Plus
-} from "lucide-react"
+import { Search, MessageSquare, Heart, Eye, Clock, User, ChevronRight, TrendingUp, Plus, Edit, Trash2, Loader2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 interface Blog {
-  id: number
-  title: string
-  excerpt: string
-  content: string
-  category: string
-  tags: string
-  featured_image: string | null
-  is_featured: boolean
-  status: string
-  views_count: number
-  likes_count: number
-  comments_count: number
-  slug: string
-  author_id: number
-  author: {
-    id: number
-    first_name: string
-    last_name: string
-    email: string
-  }
-  created_at: string
-  updated_at: string
+  id: number; title: string; excerpt: string; content: string; category: string; tags: string
+  featured_image: string | null; is_featured: boolean; status: string
+  views_count: number; likes_count: number; comments_count: number; slug: string; author_id: number
+  author: { id: number; first_name: string; last_name: string; email: string }
+  created_at: string; updated_at: string
+}
+
+interface User {
+  id: number; email: string; first_name: string; last_name: string; role: string
 }
 
 const categories = [
-  { value: "all", label: "All" },
-  { value: "Architecture News", label: "Architecture News" },
-  { value: "Design Trends", label: "Design Trends" },
-  { value: "Sustainable Design", label: "Sustainable Design" },
-  { value: "Technology", label: "Technology" },
-  { value: "Career Advice", label: "Career Advice" },
-  { value: "Project Showcase", label: "Project Showcase" },
-  { value: "Education", label: "Education" },
-  { value: "Industry Insights", label: "Industry Insights" },
-  { value: "General", label: "General" },
+  { value: "all", label: "All" }, { value: "Architecture News", label: "Architecture News" },
+  { value: "Design Trends", label: "Design Trends" }, { value: "Sustainable Design", label: "Sustainable Design" },
+  { value: "Technology", label: "Technology" }, { value: "Career Advice", label: "Career Advice" },
+  { value: "Project Showcase", label: "Project Showcase" }, { value: "Education", label: "Education" },
+  { value: "Industry Insights", label: "Industry Insights" }, { value: "General", label: "General" }
 ]
 
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([])
   const [featuredBlog, setFeaturedBlog] = useState<Blog | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [showBlogDialog, setShowBlogDialog] = useState(false)
+  const [editingBlog, setEditingBlog] = useState<Blog | null>(null)
+  const [blogForm, setBlogForm] = useState({ title: "", content: "", excerpt: "", category: "General", tags: "", status: "published" })
+  const [submitting, setSubmitting] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [blogToDelete, setBlogToDelete] = useState<number | null>(null)
 
-  useEffect(() => {
-    setIsAuthenticated(api.isAuthenticated())
-    fetchBlogs()
-  }, [selectedCategory, searchQuery])
+  useEffect(() => { fetchCurrentUser(); fetchBlogs() }, [])
+
+  const fetchCurrentUser = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      if (token) { const response = await api.get("/auth/me"); setCurrentUser(response as User) }
+    } catch (err) { console.error("Failed to fetch current user:", err) }
+  }
 
   const fetchBlogs = async () => {
     try {
-      setLoading(true)
-      const params: any = {
-        limit: 50,
-        status: "published"
-      }
-      
-      if (searchQuery) {
-        params.search = searchQuery
-      }
-      
-      if (selectedCategory && selectedCategory !== "all") {
-        params.category = selectedCategory
-      }
+      setLoading(true); setError(null)
+      const response = await api.get("/blogs")
+      const blogsData = response as Blog[]
+      setBlogs(blogsData)
+      const featured = blogsData.find((blog: Blog) => blog.is_featured)
+      setFeaturedBlog(featured || null)
+    } catch (err: any) {
+      console.error("Error fetching blogs:", err)
+      setError(err.message || "Failed to fetch blogs")
+    } finally { setLoading(false) }
+  }
 
-      const response = await api.get("/blogs", { params })
-      const allBlogs = response.data
-      
-      // Set featured blog (first one)
-      if (allBlogs.length > 0 && allBlogs[0].is_featured) {
-        setFeaturedBlog(allBlogs[0])
-        setBlogs(allBlogs.slice(1))
-      } else {
-        setFeaturedBlog(null)
-        setBlogs(allBlogs)
-      }
-    } catch (error) {
-      console.error("Error fetching blogs:", error)
-    } finally {
-      setLoading(false)
+  const handleCreateBlog = () => {
+    setEditingBlog(null)
+    setBlogForm({ title: "", content: "", excerpt: "", category: "General", tags: "", status: "published" })
+    setShowBlogDialog(true)
+  }
+
+  const handleEditBlog = (blog: Blog) => {
+    setEditingBlog(blog)
+    setBlogForm({ title: blog.title, content: blog.content, excerpt: blog.excerpt, category: blog.category, tags: blog.tags, status: blog.status })
+    setShowBlogDialog(true)
+  }
+
+  const handleSubmitBlog = async () => {
+    if (!blogForm.title || !blogForm.content) { alert("Please fill in title and content"); return }
+    try {
+      setSubmitting(true)
+      if (editingBlog) { await api.put(`/blogs/${editingBlog.id}`, blogForm) }
+      else { await api.post("/blogs", blogForm) }
+      setShowBlogDialog(false); fetchBlogs()
+    } catch (err: any) {
+      console.error("Error saving blog:", err); alert(err.message || "Failed to save blog")
+    } finally { setSubmitting(false) }
+  }
+
+  const handleDeleteBlog = async () => {
+    if (!blogToDelete) return
+    try {
+      await api.delete(`/blogs/${blogToDelete}`)
+      setShowDeleteDialog(false); setBlogToDelete(null); fetchBlogs()
+    } catch (err: any) {
+      console.error("Error deleting blog:", err); alert(err.message || "Failed to delete blog")
     }
   }
 
+  const confirmDeleteBlog = (blogId: number) => { setBlogToDelete(blogId); setShowDeleteDialog(true) }
+
+  const filteredBlogs = blogs.filter((blog) => {
+    const matchesSearch = searchQuery === "" || blog.title.toLowerCase().includes(searchQuery.toLowerCase()) || blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) || blog.tags.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === "all" || blog.category === selectedCategory
+    return matchesSearch && matchesCategory && blog.status === "published"
+  })
+
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    const date = new Date(dateString); const now = new Date()
+    const diffTime = Math.abs(now.getTime() - date.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    if (diffDays === 0) return "Today"
+    if (diffDays === 1) return "Yesterday"
+    if (diffDays < 7) return `${diffDays} days ago`
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`
+    return date.toLocaleDateString()
   }
 
-  const getReadingTime = (content: string) => {
-    const wordsPerMinute = 200
-    const words = content.split(/\s+/).length
-    const minutes = Math.ceil(words / wordsPerMinute)
-    return `${minutes} min read`
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600">Loading blogs...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={fetchBlogs}>Try Again</Button>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Medium-style Header */}
-      <div className="border-b border-gray-200 sticky top-0 bg-white z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 max-w-2xl">
-              <div className="relative">
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">Architecture Insights & Inspiration</h1>
+            <p className="text-xl text-blue-100 mb-8">Explore the latest trends, techniques, and stories from the world of architecture</p>
+            <div className="flex gap-4 justify-center">
+              <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Search blogs..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-full border-gray-300 focus:border-gray-900 focus:ring-gray-900 rounded-full"
-                />
+                <Input placeholder="Search articles..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-white text-gray-900" />
               </div>
-            </div>
-            {isAuthenticated && (
-              <Link href="/blogs/new">
-                <Button className="ml-4 bg-gray-900 hover:bg-gray-800 text-white rounded-full">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Write
+              {currentUser && (
+                <Button onClick={handleCreateBlog} className="bg-white text-blue-600 hover:bg-blue-50">
+                  <Plus className="h-4 w-4 mr-2" />Write Article
                 </Button>
-              </Link>
-            )}
+              )}
+            </div>
           </div>
+        </div>
+      </div>
 
-          {/* Category Filter */}
-          <div className="mt-6 flex items-center gap-3 overflow-x-auto hide-scrollbar">
-            {categories.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => setSelectedCategory(cat.value)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  selectedCategory === cat.value
-                    ? "bg-gray-900 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {cat.label}
-              </button>
+      <div className="bg-white border-b">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex gap-2 overflow-x-auto">
+            {categories.map((category) => (
+              <Button key={category.value} variant={selectedCategory === category.value ? "default" : "outline"} size="sm"
+                onClick={() => setSelectedCategory(category.value)} className="whitespace-nowrap">{category.label}</Button>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {loading ? (
-          <div className="space-y-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-8 bg-gray-200 rounded w-3/4 mb-3"></div>
-                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+      <div className="container mx-auto px-4 py-8">
+        {featuredBlog && selectedCategory === "all" && searchQuery === "" && (
+          <div className="mb-12">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+              <h2 className="text-2xl font-bold">Featured Article</h2>
+            </div>
+            <Link href={`/blogs/${featuredBlog.slug}`}>
+              <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <div className="p-8">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Badge className="bg-blue-100 text-blue-800">{featuredBlog.category}</Badge>
+                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Featured</Badge>
+                  </div>
+                  <h3 className="text-3xl font-bold mb-4">{featuredBlog.title}</h3>
+                  <p className="text-gray-600 mb-6 text-lg">{featuredBlog.excerpt}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">{featuredBlog.author.first_name} {featuredBlog.author.last_name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">{formatDate(featuredBlog.created_at)}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1"><Eye className="h-4 w-4 text-gray-400" /><span className="text-sm text-gray-600">{featuredBlog.views_count}</span></div>
+                      <div className="flex items-center gap-1"><Heart className="h-4 w-4 text-gray-400" /><span className="text-sm text-gray-600">{featuredBlog.likes_count}</span></div>
+                      <div className="flex items-center gap-1"><MessageSquare className="h-4 w-4 text-gray-400" /><span className="text-sm text-gray-600">{featuredBlog.comments_count}</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        )}
+
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold mb-6">{selectedCategory === "all" ? "All Articles" : categories.find(c => c.value === selectedCategory)?.label}
+            <span className="text-gray-400 font-normal ml-2">({filteredBlogs.length})</span>
+          </h2>
+        </div>
+
+        {filteredBlogs.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-4">No articles found</p>
+            {currentUser && <Button onClick={handleCreateBlog}><Plus className="h-4 w-4 mr-2" />Write the first article</Button>}
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredBlogs.map((blog) => (
+              <div key={blog.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+                <Link href={`/blogs/${blog.slug}`}>
+                  <div className="p-6">
+                    <Badge className="mb-3 bg-blue-100 text-blue-800">{blog.category}</Badge>
+                    <h3 className="text-xl font-bold mb-2 line-clamp-2 hover:text-blue-600">{blog.title}</h3>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{blog.excerpt}</p>
+                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                      <div className="flex items-center gap-1"><User className="h-4 w-4" /><span>{blog.author.first_name} {blog.author.last_name}</span></div>
+                      <div className="flex items-center gap-1"><Clock className="h-4 w-4" /><span>{formatDate(blog.created_at)}</span></div>
+                    </div>
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1"><Eye className="h-4 w-4 text-gray-400" /><span className="text-sm text-gray-600">{blog.views_count}</span></div>
+                        <div className="flex items-center gap-1"><Heart className="h-4 w-4 text-gray-400" /><span className="text-sm text-gray-600">{blog.likes_count}</span></div>
+                        <div className="flex items-center gap-1"><MessageSquare className="h-4 w-4 text-gray-400" /><span className="text-sm text-gray-600">{blog.comments_count}</span></div>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                    </div>
+                  </div>
+                </Link>
+                {currentUser && blog.author_id === currentUser.id && (
+                  <div className="px-6 pb-4 flex gap-2 border-t pt-4">
+                    <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); handleEditBlog(blog) }}>
+                      <Edit className="h-3 w-3 mr-1" />Edit
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); confirmDeleteBlog(blog.id) }} className="text-red-600 hover:text-red-700">
+                      <Trash2 className="h-3 w-3 mr-1" />Delete
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        ) : (
-          <>
-            {/* Featured Blog */}
-            {featuredBlog && (
-              <Link href={`/blogs/${featuredBlog.slug}`}>
-                <div className="mb-16 pb-12 border-b border-gray-200 cursor-pointer group">
-                  <Badge className="mb-3 bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-                    Featured
-                  </Badge>
-                  <h1 className="text-5xl font-bold text-gray-900 mb-4 leading-tight group-hover:text-gray-700 transition-colors">
-                    {featuredBlog.title}
-                  </h1>
-                  <p className="text-xl text-gray-600 mb-6 leading-relaxed">
-                    {featuredBlog.excerpt}
-                  </p>
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-semibold">
-                        {featuredBlog.author.first_name[0]}{featuredBlog.author.last_name[0]}
-                      </div>
-                      <span className="font-medium text-gray-900">
-                        {featuredBlog.author.first_name} {featuredBlog.author.last_name}
-                      </span>
-                    </div>
-                    <span>·</span>
-                    <span>{formatDate(featuredBlog.created_at)}</span>
-                    <span>·</span>
-                    <span>{getReadingTime(featuredBlog.content)}</span>
-                  </div>
-                </div>
-              </Link>
-            )}
-
-            {/* Blog List */}
-            <div className="space-y-12">
-              {blogs.length === 0 ? (
-                <div className="text-center py-16">
-                  <p className="text-gray-500 text-lg">No blogs found. Try a different search or category.</p>
-                </div>
-              ) : (
-                blogs.map((blog) => (
-                  <Link key={blog.id} href={`/blogs/${blog.slug}`}>
-                    <article className="group cursor-pointer">
-                      <div className="flex items-start gap-6">
-                        {/* Content */}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold">
-                              {blog.author.first_name[0]}{blog.author.last_name[0]}
-                            </div>
-                            <span className="text-sm text-gray-700 font-medium">
-                              {blog.author.first_name} {blog.author.last_name}
-                            </span>
-                          </div>
-                          
-                          <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight group-hover:text-gray-700 transition-colors">
-                            {blog.title}
-                          </h2>
-                          
-                          <p className="text-gray-600 mb-4 leading-relaxed line-clamp-2">
-                            {blog.excerpt}
-                          </p>
-                          
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <Badge variant="secondary" className="text-xs">
-                              {blog.category}
-                            </Badge>
-                            <span>{formatDate(blog.created_at)}</span>
-                            <span>·</span>
-                            <span>{getReadingTime(blog.content)}</span>
-                            <span>·</span>
-                            <div className="flex items-center gap-4">
-                              <span className="flex items-center gap-1">
-                                <Heart className="h-4 w-4" />
-                                {blog.likes_count}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <MessageSquare className="h-4 w-4" />
-                                {blog.comments_count}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Optional: Thumbnail placeholder */}
-                        {blog.featured_image && (
-                          <div className="w-32 h-32 bg-gray-100 rounded flex-shrink-0"></div>
-                        )}
-                      </div>
-                    </article>
-                  </Link>
-                ))
-              )}
-            </div>
-          </>
         )}
       </div>
 
-      <style jsx global>{`
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
+      <Dialog open={showBlogDialog} onOpenChange={setShowBlogDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingBlog ? "Edit Article" : "Write New Article"}</DialogTitle>
+            <DialogDescription>{editingBlog ? "Update your article details below" : "Share your knowledge and insights with the community"}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div><Label htmlFor="title">Title *</Label>
+              <Input id="title" value={blogForm.title} onChange={(e) => setBlogForm({ ...blogForm, title: e.target.value })} placeholder="Enter article title" />
+            </div>
+            <div><Label htmlFor="excerpt">Excerpt *</Label>
+              <Textarea id="excerpt" value={blogForm.excerpt} onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })} placeholder="Brief summary of your article" rows={2} />
+            </div>
+            <div><Label htmlFor="content">Content *</Label>
+              <Textarea id="content" value={blogForm.content} onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })} placeholder="Write your article content here..." rows={10} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label htmlFor="category">Category</Label>
+                <Select value={blogForm.category} onValueChange={(value: string) => setBlogForm({ ...blogForm, category: value })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {categories.filter(c => c.value !== "all").map((category) => (
+                      <SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label htmlFor="status">Status</Label>
+                <Select value={blogForm.status} onValueChange={(value: string) => setBlogForm({ ...blogForm, status: value })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div><Label htmlFor="tags">Tags</Label>
+              <Input id="tags" value={blogForm.tags} onChange={(e) => setBlogForm({ ...blogForm, tags: e.target.value })} placeholder="Comma-separated tags (e.g., Design, Technology)" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBlogDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitBlog} disabled={submitting}>
+              {submitting ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>) : (editingBlog ? "Update Article" : "Publish Article")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone. This will permanently delete your article.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteBlog} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

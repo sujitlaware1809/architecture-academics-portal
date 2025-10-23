@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func
-from database import User, Job, JobApplication, SavedJob, Course, CourseEnrollment, Workshop, WorkshopRegistration, SystemSettings, CourseLesson, CourseMaterial, LessonProgress
+from database import User, Job, JobApplication, SavedJob, Course, CourseEnrollment, Workshop, WorkshopRegistration, Event, EventRegistration, SystemSettings, CourseLesson, CourseMaterial, LessonProgress
 import schemas
 from auth import get_password_hash, verify_password
 from typing import Optional, List
@@ -119,6 +119,27 @@ def get_jobs(
 def get_recruiter_jobs(db: Session, recruiter_id: int, skip: int = 0, limit: int = 50):
     return db.query(Job).filter(Job.recruiter_id == recruiter_id).offset(skip).limit(limit).all()
 
+def get_all_jobs(db: Session, skip: int = 0, limit: int = 100):
+    """Get all jobs for admin management with pagination"""
+    jobs = db.query(Job).order_by(Job.created_at.desc()).offset(skip).limit(limit).all()
+    # Enrich with UI convenience fields
+    for j in jobs:
+        try:
+            j.applications_count = len(j.applications)
+            # salary_range formatted string if both present
+            if j.salary_min is not None and j.salary_max is not None:
+                j.salary_range = f"₹{int(float(j.salary_min)):,} - ₹{int(float(j.salary_max)):,}"
+            elif j.salary_min is not None:
+                j.salary_range = f"₹{int(float(j.salary_min)):,}+"
+            elif j.salary_max is not None:
+                j.salary_range = f"Up to ₹{int(float(j.salary_max)):,}"
+            else:
+                j.salary_range = "Not specified"
+            j.closing_date = j.application_deadline
+        except Exception:
+            pass
+    return jobs
+
 def update_job(db: Session, job_id: int, job_update: schemas.JobUpdate, recruiter_id: int):
     db_job = db.query(Job).filter(
         and_(Job.id == job_id, Job.recruiter_id == recruiter_id)
@@ -147,6 +168,28 @@ def delete_job(db: Session, job_id: int, recruiter_id: int):
     db.delete(db_job)
     db.commit()
     return db_job
+
+def update_job_admin(db: Session, job_id: int, job_update: schemas.JobUpdate):
+    """Update job without recruiter ownership constraints (admin only)"""
+    db_job = db.query(Job).filter(Job.id == job_id).first()
+    if not db_job:
+        return None
+    update_data = job_update.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_job, field, value)
+    db_job.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_job)
+    return db_job
+
+def delete_job_admin(db: Session, job_id: int):
+    """Delete job without recruiter ownership constraints (admin only)"""
+    db_job = db.query(Job).filter(Job.id == job_id).first()
+    if not db_job:
+        return False
+    db.delete(db_job)
+    db.commit()
+    return True
 
 # Job Application CRUD operations
 def create_job_application(db: Session, application: schemas.JobApplicationCreate, applicant_id: int):
@@ -197,6 +240,14 @@ def get_recruiter_applications(db: Session, recruiter_id: int, skip: int = 0, li
     return db.query(JobApplication).join(Job, JobApplication.job_id == Job.id).filter(
         Job.recruiter_id == recruiter_id
     ).offset(skip).limit(limit).all()
+
+def get_job_applications_admin(db: Session, job_id: int, skip: int = 0, limit: int = 50):
+    """Admin: Get applications for a specific job (no ownership constraint)"""
+    return db.query(JobApplication).filter(JobApplication.job_id == job_id).order_by(JobApplication.applied_at.desc()).offset(skip).limit(limit).all()
+
+def get_all_applications_admin(db: Session, skip: int = 0, limit: int = 100):
+    """Admin: Get all job applications across all jobs"""
+    return db.query(JobApplication).order_by(JobApplication.applied_at.desc()).offset(skip).limit(limit).all()
 
 def update_application_status(db: Session, application_id: int, status: str, recruiter_id: int):
     application = db.query(JobApplication).join(Job).filter(
@@ -318,10 +369,41 @@ def create_predefined_recruiter(db: Session):
     
     return recruiter
 
+# Create predefined admin account
+def create_predefined_admin(db: Session):
+    # Check if admin already exists
+    existing_admin = get_user_by_email(db, "admin@architectureacademics.com")
+    if existing_admin:
+        return existing_admin
+    
+    admin_data = schemas.UserCreate(
+        email="admin@architectureacademics.com",
+        password="Admin@123",
+        confirm_password="Admin@123",
+        first_name="System",
+        last_name="Administrator",
+        role=schemas.UserRole.ADMIN
+    )
+    
+    admin = create_user(db, admin_data)
+    
+    # Update admin profile
+    profile_data = schemas.UserProfileUpdate(
+        company_name="Architecture Academics",
+        location="Mumbai, India"
+    )
+    
+    update_user_profile(db, admin.id, profile_data)
+    
+    return admin
+
 # Course CRUD operations
-def get_courses(db: Session, skip: int = 0, limit: int = 100) -> List[Course]:
-    """Get all courses with pagination"""
-    courses = db.query(Course).offset(skip).limit(limit).all()
+def get_courses(db: Session, skip: int = 0, limit: int = 100, status: Optional[str] = None) -> List[Course]:
+    """Get all courses with pagination and optional status filter"""
+    query = db.query(Course)
+    if status:
+        query = query.filter(Course.status == status)
+    courses = query.offset(skip).limit(limit).all()
     for course in courses:
         course.enrolled_count = db.query(CourseEnrollment).filter(CourseEnrollment.course_id == course.id).count()
     return courses
@@ -375,7 +457,12 @@ def get_course_by_id(db: Session, course_id: int) -> Optional[Course]:
 
 def create_course(db: Session, course: schemas.CourseCreate) -> Course:
     """Create a new course"""
-    db_course = Course(**course.dict())
+    course_data = course.dict()
+    # Set status to PUBLISHED by default for new courses
+    if 'status' not in course_data or course_data.get('status') is None:
+        course_data['status'] = schemas.CourseStatus.PUBLISHED
+    
+    db_course = Course(**course_data)
     db.add(db_course)
     db.commit()
     db.refresh(db_course)
@@ -409,9 +496,12 @@ def delete_course(db: Session, course_id: int) -> bool:
     return True
 
 # Workshop CRUD operations
-def get_workshops(db: Session, skip: int = 0, limit: int = 100) -> List[Workshop]:
-    """Get all workshops with pagination"""
-    workshops = db.query(Workshop).offset(skip).limit(limit).all()
+def get_workshops(db: Session, skip: int = 0, limit: int = 100, status: Optional[str] = None) -> List[Workshop]:
+    """Get all workshops with pagination and optional status filter"""
+    query = db.query(Workshop)
+    if status:
+        query = query.filter(Workshop.status == status)
+    workshops = query.offset(skip).limit(limit).all()
     for workshop in workshops:
         workshop.registered_count = db.query(WorkshopRegistration).filter(WorkshopRegistration.workshop_id == workshop.id).count()
     return workshops
@@ -1227,4 +1317,427 @@ def check_user_liked_discussion(db: Session, discussion_id: int, user_id: int) -
     ).first()
     
     return like is not None
+
+# Event CRUD operations
+def create_event(db: Session, event: schemas.EventCreate, organizer_id: Optional[int] = None):
+    """Create a new event"""
+    db_event = Event(
+        **event.dict(),
+        organizer_id=organizer_id
+    )
+    db.add(db_event)
+    db.commit()
+    db.refresh(db_event)
+    # Add participants_count for response validation
+    db_event.participants_count = 0
+    return db_event
+
+def get_event(db: Session, event_id: int):
+    """Get event by ID"""
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if event:
+        # Add participants_count dynamically
+        event.participants_count = len(event.registrations)
+    return event
+
+def get_events(db: Session, skip: int = 0, limit: int = 50, status: Optional[str] = None):
+    """Get all events with optional filtering"""
+    query = db.query(Event)
+    
+    if status:
+        query = query.filter(Event.status == status)
+    
+    events = query.order_by(Event.date.desc()).offset(skip).limit(limit).all()
+    
+    # Add participants_count to each event
+    for event in events:
+        event.participants_count = len(event.registrations)
+    
+    return events
+
+def update_event(db: Session, event_id: int, event_update: schemas.EventUpdate):
+    """Update event"""
+    db_event = db.query(Event).filter(Event.id == event_id).first()
+    if not db_event:
+        return None
+    
+    update_data = event_update.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_event, field, value)
+    
+    db_event.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_event)
+    
+    # Add participants_count
+    db_event.participants_count = len(db_event.registrations)
+    return db_event
+
+def delete_event(db: Session, event_id: int):
+    """Delete event"""
+    db_event = db.query(Event).filter(Event.id == event_id).first()
+    if db_event:
+        db.delete(db_event)
+        db.commit()
+        return True
+    return False
+
+def register_for_event(db: Session, event_id: int, user_id: int):
+    """Register user for event"""
+    # Check if already registered
+    existing = db.query(EventRegistration).filter(
+        and_(
+            EventRegistration.event_id == event_id,
+            EventRegistration.participant_id == user_id
+        )
+    ).first()
+    
+    if existing:
+        return None
+    
+    registration = EventRegistration(
+        event_id=event_id,
+        participant_id=user_id
+    )
+    db.add(registration)
+    db.commit()
+    db.refresh(registration)
+    return registration
+
+def register_for_workshop(db: Session, workshop_id: int, user_id: int):
+    """Register user for workshop"""
+    # Check if already registered
+    existing = db.query(WorkshopRegistration).filter(
+        and_(
+            WorkshopRegistration.workshop_id == workshop_id,
+            WorkshopRegistration.participant_id == user_id
+        )
+    ).first()
+    
+    if existing:
+        return None
+    
+    registration = WorkshopRegistration(
+        workshop_id=workshop_id,
+        participant_id=user_id
+    )
+    db.add(registration)
+    db.commit()
+    db.refresh(registration)
+    return registration
+
+# Admin CRUD operations
+def get_all_users_admin(db: Session, skip: int = 0, limit: int = 100, search: Optional[str] = None, role: Optional[str] = None):
+    """Get all users for admin with filtering"""
+    query = db.query(User)
+    
+    if search:
+        query = query.filter(
+            or_(
+                User.email.contains(search),
+                User.first_name.contains(search),
+                User.last_name.contains(search)
+            )
+        )
+    
+    if role:
+        query = query.filter(User.role == role)
+    
+    return query.order_by(User.created_at.desc()).offset(skip).limit(limit).all()
+
+def update_user_role(db: Session, user_id: int, role: schemas.UserRole):
+    """Update user role"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return None
+    
+    user.role = role
+    user.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(user)
+    return user
+
+def toggle_user_status(db: Session, user_id: int):
+    """Toggle user active status"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return None
+    
+    user.is_active = not user.is_active
+    user.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(user)
+    return user
+
+def delete_user(db: Session, user_id: int):
+    """Delete user"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if user:
+        db.delete(user)
+        db.commit()
+        return True
+    return False
+
+def get_admin_stats(db: Session):
+    """Get admin dashboard statistics"""
+    return {
+        "total_users": db.query(User).count(),
+        "total_courses": db.query(Course).count(),
+        "total_workshops": db.query(Workshop).count(),
+        "total_events": db.query(Event).count(),
+        "total_jobs": db.query(Job).count(),
+        "active_users": db.query(User).filter(User.is_active == True).count(),
+        "published_courses": db.query(Course).filter(Course.status == "published").count(),
+        "upcoming_workshops": db.query(Workshop).filter(Workshop.status == "upcoming").count(),
+        "upcoming_events": db.query(Event).filter(Event.status == "upcoming").count(),
+        "published_jobs": db.query(Job).filter(Job.status == "published").count(),
+    }
+
+# ===========================
+# Course Enrollment CRUD
+# ===========================
+
+def create_enrollment(db: Session, course_id: int, student_id: int):
+    """Create a new course enrollment"""
+    from database import CourseEnrollment
+    
+    # Check if already enrolled
+    existing = db.query(CourseEnrollment).filter(
+        CourseEnrollment.course_id == course_id,
+        CourseEnrollment.student_id == student_id
+    ).first()
+    
+    if existing:
+        return existing
+    
+    enrollment = CourseEnrollment(
+        course_id=course_id,
+        student_id=student_id,
+        enrolled_at=datetime.utcnow()
+    )
+    db.add(enrollment)
+    db.commit()
+    db.refresh(enrollment)
+    return enrollment
+
+def get_user_enrollments(db: Session, student_id: int):
+    """Get all enrollments for a student"""
+    from database import CourseEnrollment
+    return db.query(CourseEnrollment).filter(
+        CourseEnrollment.student_id == student_id
+    ).all()
+
+def get_enrollment(db: Session, course_id: int, student_id: int):
+    """Get specific enrollment"""
+    from database import CourseEnrollment
+    return db.query(CourseEnrollment).filter(
+        CourseEnrollment.course_id == course_id,
+        CourseEnrollment.student_id == student_id
+    ).first()
+
+def get_course_enrollments(db: Session, course_id: int):
+    """Get all enrollments for a course"""
+    from database import CourseEnrollment
+    return db.query(CourseEnrollment).filter(
+        CourseEnrollment.course_id == course_id
+    ).all()
+
+def update_enrollment_progress(db: Session, enrollment_id: int, progress_percentage: float):
+    """Update enrollment progress"""
+    from database import CourseEnrollment
+    enrollment = db.query(CourseEnrollment).filter(
+        CourseEnrollment.id == enrollment_id
+    ).first()
+    
+    if enrollment:
+        enrollment.progress_percentage = progress_percentage
+        enrollment.last_accessed_at = datetime.utcnow()
+        
+        if progress_percentage >= 100:
+            enrollment.completed = True
+        
+        db.commit()
+        db.refresh(enrollment)
+    
+    return enrollment
+
+# ===========================
+# Lesson Progress CRUD
+# ===========================
+
+def create_or_update_lesson_progress(
+    db: Session, 
+    lesson_id: int, 
+    enrollment_id: int,
+    current_time: int = 0,
+    completed: bool = False
+):
+    """Create or update lesson progress"""
+    from database import LessonProgress
+    
+    progress = db.query(LessonProgress).filter(
+        LessonProgress.lesson_id == lesson_id,
+        LessonProgress.enrollment_id == enrollment_id
+    ).first()
+    
+    if progress:
+        progress.current_time = current_time
+        progress.completed = completed
+        progress.last_watched_at = datetime.utcnow()
+    else:
+        progress = LessonProgress(
+            lesson_id=lesson_id,
+            enrollment_id=enrollment_id,
+            current_time=current_time,
+            completed=completed,
+            last_watched_at=datetime.utcnow()
+        )
+        db.add(progress)
+    
+    db.commit()
+    db.refresh(progress)
+    return progress
+
+def get_lesson_progress(db: Session, lesson_id: int, enrollment_id: int):
+    """Get progress for a specific lesson"""
+    from database import LessonProgress
+    return db.query(LessonProgress).filter(
+        LessonProgress.lesson_id == lesson_id,
+        LessonProgress.enrollment_id == enrollment_id
+    ).first()
+
+def get_enrollment_progress(db: Session, enrollment_id: int):
+    """Get all lesson progress for an enrollment"""
+    from database import LessonProgress
+    return db.query(LessonProgress).filter(
+        LessonProgress.enrollment_id == enrollment_id
+    ).all()
+
+# ===========================
+# Course Question CRUD
+# ===========================
+
+def create_course_question(db: Session, question: schemas.CourseQuestionCreate, student_id: int):
+    """Create a new course question"""
+    from database import CourseQuestion
+    
+    db_question = CourseQuestion(
+        lesson_id=question.lesson_id,
+        student_id=student_id,
+        title=question.title,
+        content=question.content,
+        timestamp=question.timestamp,
+        created_at=datetime.utcnow()
+    )
+    db.add(db_question)
+    db.commit()
+    db.refresh(db_question)
+    return db_question
+
+def get_lesson_questions(db: Session, lesson_id: int):
+    """Get all questions for a lesson"""
+    from database import CourseQuestion
+    return db.query(CourseQuestion).filter(
+        CourseQuestion.lesson_id == lesson_id
+    ).order_by(CourseQuestion.created_at.desc()).all()
+
+def get_question_by_id(db: Session, question_id: int):
+    """Get question by ID"""
+    from database import CourseQuestion
+    return db.query(CourseQuestion).filter(
+        CourseQuestion.id == question_id
+    ).first()
+
+def update_question(db: Session, question_id: int, question_update: schemas.CourseQuestionUpdate):
+    """Update a question"""
+    from database import CourseQuestion
+    
+    db_question = db.query(CourseQuestion).filter(
+        CourseQuestion.id == question_id
+    ).first()
+    
+    if db_question:
+        if question_update.title is not None:
+            db_question.title = question_update.title
+        if question_update.content is not None:
+            db_question.content = question_update.content
+        if question_update.is_resolved is not None:
+            db_question.is_resolved = question_update.is_resolved
+        
+        db_question.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(db_question)
+    
+    return db_question
+
+def delete_question(db: Session, question_id: int):
+    """Delete a question"""
+    from database import CourseQuestion
+    
+    question = db.query(CourseQuestion).filter(
+        CourseQuestion.id == question_id
+    ).first()
+    
+    if question:
+        db.delete(question)
+        db.commit()
+        return True
+    return False
+
+# ===========================
+# Question Reply CRUD
+# ===========================
+
+def create_question_reply(db: Session, reply: schemas.QuestionReplyCreate, author_id: int, is_instructor: bool = False):
+    """Create a reply to a question"""
+    from database import QuestionReply
+    
+    db_reply = QuestionReply(
+        question_id=reply.question_id,
+        author_id=author_id,
+        content=reply.content,
+        is_instructor=is_instructor,
+        created_at=datetime.utcnow()
+    )
+    db.add(db_reply)
+    db.commit()
+    db.refresh(db_reply)
+    return db_reply
+
+def get_question_replies(db: Session, question_id: int):
+    """Get all replies for a question"""
+    from database import QuestionReply
+    return db.query(QuestionReply).filter(
+        QuestionReply.question_id == question_id
+    ).order_by(QuestionReply.created_at.asc()).all()
+
+def update_question_reply(db: Session, reply_id: int, reply_update: schemas.QuestionReplyUpdate):
+    """Update a reply"""
+    from database import QuestionReply
+    
+    db_reply = db.query(QuestionReply).filter(
+        QuestionReply.id == reply_id
+    ).first()
+    
+    if db_reply:
+        db_reply.content = reply_update.content
+        db_reply.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(db_reply)
+    
+    return db_reply
+
+def delete_question_reply(db: Session, reply_id: int):
+    """Delete a reply"""
+    from database import QuestionReply
+    
+    reply = db.query(QuestionReply).filter(
+        QuestionReply.id == reply_id
+    ).first()
+    
+    if reply:
+        db.delete(reply)
+        db.commit()
+        return True
+    return False
 

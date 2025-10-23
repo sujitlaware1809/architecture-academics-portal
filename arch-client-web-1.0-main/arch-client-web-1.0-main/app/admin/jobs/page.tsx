@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2, Plus, Briefcase, MapPin, DollarSign, Clock, Users } from 'lucide-react';
+import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 
 interface Job {
@@ -36,6 +37,10 @@ export default function AdminJobsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const { toast } = useToast();
+  const pollSinceRef = useRef<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [limit, setLimit] = useState(20);
+  const [newAppCount, setNewAppCount] = useState(0);
   const [formData, setFormData] = useState({
     title: '',
     company: '',
@@ -53,7 +58,15 @@ export default function AdminJobsPage() {
   // Fetch jobs from backend
   const fetchJobs = async () => {
     try {
-      const response = await fetch('/api/admin/jobs');
+      const token = api.getStoredToken();
+      if (!token) throw new Error('Not authenticated');
+      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const url = new URL(`${base}/api/admin/jobs`);
+      url.searchParams.set('skip', String(page * limit));
+      url.searchParams.set('limit', String(limit));
+      const response = await fetch(url.toString(), {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (response.ok) {
         const data = await response.json();
         setJobs(data);
@@ -127,22 +140,26 @@ export default function AdminJobsPage() {
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [page, limit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
+      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const url = editingJob 
-        ? `/api/admin/jobs/${editingJob.id}`
-        : '/api/admin/jobs';
+        ? `${base}/api/admin/jobs/${editingJob.id}`
+        : `${base}/api/admin/jobs`;
       
       const method = editingJob ? 'PUT' : 'POST';
       
+      const token = api.getStoredToken();
+      if (!token) throw new Error('Not authenticated');
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           ...formData,
@@ -210,8 +227,11 @@ export default function AdminJobsPage() {
     if (!confirm('Are you sure you want to delete this job posting?')) return;
 
     try {
-      const response = await fetch(`/api/admin/jobs/${id}`, {
+      const token = api.getStoredToken();
+      if (!token) throw new Error('Not authenticated');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/jobs/${id}`, {
         method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
       });
 
       if (response.ok) {
@@ -266,6 +286,11 @@ export default function AdminJobsPage() {
         <div>
           <h1 className="text-3xl font-bold">Job Management</h1>
           <p className="text-muted-foreground">Manage job postings and applications</p>
+          {newAppCount > 0 && (
+            <div className="mt-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
+              {newAppCount} new application{newAppCount > 1 ? 's' : ''}
+            </div>
+          )}
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -334,12 +359,12 @@ export default function AdminJobsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="salary_range">Salary Range</Label>
+                  <Label htmlFor="salary_range">Salary Range (₹)</Label>
                   <Input
                     id="salary_range"
                     value={formData.salary_range}
                     onChange={(e) => setFormData({ ...formData, salary_range: e.target.value })}
-                    placeholder="e.g., $60,000 - $80,000"
+                    placeholder="e.g., ₹6,00,000 - ₹8,00,000"
                     required
                   />
                 </div>
@@ -442,6 +467,11 @@ export default function AdminJobsPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Admin notifications (polling) */}
+      <AdminJobEvents onNewEvent={(ev) => {
+        setNewAppCount(c => c + 1);
+      }} pollSinceRef={pollSinceRef} />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -579,7 +609,57 @@ export default function AdminJobsPage() {
             </TableBody>
           </Table>
         </CardContent>
+        <div className="p-4 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">Page {page + 1}</div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>Prev</Button>
+            <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)}>Next</Button>
+            <select
+              value={limit}
+              onChange={(e) => { setPage(0); setLimit(Number(e.target.value)); }}
+              className="ml-2 text-sm border rounded-md px-2 py-1"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+        </div>
       </Card>
     </div>
   );
+}
+
+function AdminJobEvents({ onNewEvent, pollSinceRef }: { onNewEvent: (ev: any) => void, pollSinceRef: React.MutableRefObject<string | null> }) {
+  const { toast } = useToast();
+  useEffect(() => {
+    let mounted = true;
+    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const tick = async () => {
+      try {
+        const token = api.getStoredToken();
+        if (!token) return;
+        const params = new URLSearchParams();
+        if (pollSinceRef.current) params.set('since', pollSinceRef.current);
+        const res = await fetch(`${base}/api/admin/jobs/applications/events?${params.toString()}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const events = await res.json();
+          if (events && events.length > 0) {
+            const lastTs = events[events.length - 1]?.timestamp;
+            if (lastTs) pollSinceRef.current = lastTs;
+            events.forEach((ev: any) => {
+              onNewEvent(ev);
+              toast({ title: 'New Application', description: `Job #${ev.job_id} received a new application` });
+            });
+          }
+        }
+      } catch {}
+    };
+    const interval = setInterval(tick, 5000);
+    tick();
+    return () => { mounted = false; clearInterval(interval); };
+  }, [onNewEvent, pollSinceRef]);
+  return null;
 }

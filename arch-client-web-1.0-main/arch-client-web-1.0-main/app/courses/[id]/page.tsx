@@ -15,138 +15,28 @@ import {
   Share2,
   FileText,
   Play,
+  PlayCircle,
   Check,
   Download,
   MessageSquare,
   Award,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { VideoPlayer } from "@/components/ui/video-player"
+import VideoPlayer from "@/components/video-player"
+import CoursePlayer from "@/components/course-player"
 
-// Mock course data - In a real app, you would fetch this data based on the course ID
-const courseMock = {
-  id: 1,
-  title: "Fundamentals of Architectural Design",
-  description: "Learn the fundamental principles of architectural design including composition, form, space, and structure. This course covers both theoretical concepts and practical applications through a series of lectures, case studies, and hands-on design exercises.",
-  thumbnail: "/placeholder.jpg",
-  tags: ["Beginner", "Design", "Theory"],
-  rating: 4.5,
-  reviewCount: 128,
-  students: 1243,
-  duration: "12 weeks",
-  lastUpdated: "August 2025",
-  isFree: false,
-  hasFreePreview: true,
-  totalLessons: 24,
-  freeLessons: 2,
-  isNew: true,
-  isTrending: true,
-  language: "English",
-  features: [
-    "24 video lectures",
-    "12 practical assignments",
-    "5 case studies",
-    "Digital resources",
-    "Course completion certificate",
-    "Lifetime access"
-  ],
-  requirements: [
-    "Basic understanding of drawing principles",
-    "No prior architecture knowledge required",
-    "Computer with design software (free alternatives provided)"
-  ],
-  syllabus: [
-    {
-      title: "Module 1: Introduction to Architectural Principles",
-      lessons: [
-        {
-          title: "1.1 Understanding Architecture as a Discipline",
-          duration: "15:30",
-          isFree: true,
-          videoUrl: "/AWS.mp4",
-          description: "FREE - Learn the fundamental principles that guide architectural design"
-        },
-        {
-          title: "1.2 Historical Context and Evolution",
-          duration: "12:20",
-          isFree: true,
-          videoUrl: "/AWS.mp4",
-          description: "FREE - Overview of architectural evolution through history"
-        },
-        {
-          title: "1.3 The Design Process",
-          duration: "18:45",
-          isFree: false,
-          videoUrl: "/AWS.mp4",
-          description: "Professional design methodology and workflow"
-        }
-      ]
-    },
-    {
-      title: "Module 2: Form and Space Analysis",
-      lessons: [
-        "2.1 Elements of Form",
-        "2.2 Spatial Relationships",
-        "2.3 Organizational Principles"
-      ]
-    },
-    {
-      title: "Module 3: Structural Concepts",
-      lessons: [
-        "3.1 Basic Structural Systems",
-        "3.2 Material Properties",
-        "3.3 Load Distribution and Support"
-      ]
-    },
-    {
-      title: "Module 4: Design Process Methodology",
-      lessons: [
-        "4.1 Site Analysis",
-        "4.2 Programming and Spatial Planning",
-        "4.3 Conceptual Development"
-      ]
-    },
-    {
-      title: "Module 5: Case Studies of Influential Buildings",
-      lessons: [
-        "5.1 Classical Masterpieces",
-        "5.2 Modern Innovations",
-        "5.3 Contemporary Approaches"
-      ]
-    }
-  ],
-  reviews: [
-    {
-      id: 1,
-      user: "Michael P.",
-      avatar: "/placeholder-user.jpg",
-      date: "August 15, 2025",
-      rating: 5,
-      content: "Excellent course that provided a comprehensive foundation in architectural design. The instructor explains complex concepts in an accessible way."
-    },
-    {
-      id: 2,
-      user: "Jennifer K.",
-      avatar: "/placeholder-user.jpg",
-      date: "July 28, 2025",
-      rating: 4,
-      content: "Very informative content with practical examples. I would have liked more feedback on the assignments, but overall a great learning experience."
-    },
-    {
-      id: 3,
-      user: "David R.",
-      avatar: "/placeholder-user.jpg",
-      date: "August 2, 2025",
-      rating: 5,
-      content: "Dr. Johnson is an outstanding instructor. Her expertise and teaching style made complex architectural principles easy to understand and apply."
-    }
-  ]
-};
+// We'll fetch course data from backend; keep minimal local fallback
 
 export default function CourseDetail({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const [course, setCourse] = useState(courseMock);
+  // Unwrap params using React.use()
+  const unwrappedParams = use(params);
+  const courseId = unwrappedParams.id;
+  
+  const [course, setCourse] = useState<any | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [enrollmentId, setEnrollmentId] = useState<number | null>(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isEnrolling, setIsEnrolling] = useState(false);
   const [expandedModule, setExpandedModule] = useState<number | null>(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
@@ -162,24 +52,72 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
     // Fetch course data based on ID
     const fetchCourseData = async () => {
       try {
-        // For now, we'll use mock data but adjust based on the ID
-        const courseId = parseInt(resolvedParams.id);
-        
-        // Update course mock to match the ID
-        const updatedCourse = {
-          ...courseMock,
-          id: courseId,
-          // Add course-specific data based on ID if needed
-        };
-        
-        setCourse(updatedCourse);
+        const response = await api.get(`/api/courses/${courseId}`)
+        if (response && response.data) {
+          // Ensure all expected properties exist with defaults
+          const courseData = {
+            ...response.data,
+            tags: response.data.tags || [response.data.level || 'General'],
+            features: response.data.features || [],
+            syllabus: response.data.syllabus || [],
+            requirements: response.data.requirements || [],
+            reviews: response.data.reviews || [],
+            lessons: response.data.lessons || [],
+            materials: response.data.materials || [],
+            students: response.data.students || response.data.enrolled_count || 0,
+            rating: response.data.rating || 0,
+            duration: response.data.duration || 'N/A',
+            totalLessons: response.data.totalLessons || (response.data.lessons?.length || 0),
+            lastUpdated: response.data.lastUpdated || response.data.updated_at || 'Recently',
+            thumbnail: response.data.thumbnail || response.data.image_url || 'https://placehold.co/800x450/png?text=Course+Image',
+            isFree: response.data.isFree !== undefined ? response.data.isFree : (!response.data.price || response.data.price === 0),
+            freeLessons: response.data.freeLessons || (response.data.lessons?.filter((l: any) => l.is_free).length || 1),
+            reviewCount: response.data.reviewCount || 0
+          }
+          setCourse(courseData)
+        }
       } catch (error) {
-        console.error('Error fetching course:', error);
+        console.error('Error fetching course:', error)
       }
-    };
+    }
+
+    // Check if user is already enrolled
+    const checkEnrollment = async () => {
+      if (!api.isAuthenticated()) {
+        setIsEnrolled(false);
+        return;
+      }
+      
+      try {
+        const response = await api.get(`/api/enrollments/course/${courseId}`)
+        if (response && response.data) {
+          setIsEnrolled(true)
+          setEnrollmentId(response.data.id)
+        } else {
+          setIsEnrolled(false)
+        }
+      } catch (error: any) {
+        // 404 means not enrolled, which is expected
+        if (error?.response?.status === 404) {
+          setIsEnrolled(false)
+        } else {
+          console.error('Error checking enrollment:', error)
+          setIsEnrolled(false)
+        }
+      }
+    }
 
     fetchCourseData();
-  }, [resolvedParams.id]);
+    checkEnrollment();
+  }, [courseId]);
+
+  if (!course) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Loading course...</div>
+      </div>
+    );
+  }
 
   const toggleModule = (index: number) => {
     setExpandedModule(expandedModule === index ? null : index);
@@ -189,6 +127,56 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
     setIsBookmarked(!isBookmarked);
     // In a real app, you would call an API to save/unsave the course
   };
+
+  const handleEnroll = async () => {
+    if (!isAuthenticated) {
+      alert('Please login to enroll in this course')
+      window.location.href = '/login'
+      return
+    }
+
+    if (isEnrolled) {
+      // Already enrolled, redirect to course player
+      window.location.href = `/courses/${courseId}/learn`
+      return
+    }
+
+    setIsEnrolling(true)
+    
+    try {
+      const response = await api.post('/api/enrollments', { 
+        course_id: parseInt(courseId)
+      })
+      
+      if (response && response.data) {
+        const newEnrollmentId = response.data.id || response.data.enrollment_id
+        setEnrollmentId(newEnrollmentId)
+        setIsEnrolled(true)
+        
+        // Show success message and redirect to course player
+        alert('🎉 Successfully enrolled! Redirecting to course player...')
+        
+        setTimeout(() => {
+          window.location.href = `/courses/${courseId}/learn`
+        }, 1000)
+      }
+    } catch (err: any) {
+      console.error('Enroll error', err)
+      
+      // Check if already enrolled error
+      if (err.response?.status === 400 && err.response?.data?.detail?.includes('already enrolled')) {
+        setIsEnrolled(true)
+        alert('You are already enrolled! Redirecting to course player...')
+        setTimeout(() => {
+          window.location.href = `/courses/${courseId}/learn`
+        }, 1000)
+      } else {
+        alert(err.response?.data?.detail || 'Failed to enroll. Please try again.')
+      }
+    } finally {
+      setIsEnrolling(false)
+    }
+  }
 
   const renderStars = (rating: number) => {
     const stars = [];
@@ -244,7 +232,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
             {/* Course Info */}
             <div className="md:w-2/3">
               <div className="flex flex-wrap gap-2 mb-3">
-                {course.tags.map((tag, index) => (
+                {course.tags && course.tags.map((tag: string, index: number) => (
                   <Badge key={index} className="bg-white/20 text-white hover:bg-white/30">
                     {tag}
                   </Badge>
@@ -325,21 +313,38 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                   <span className="text-2xl font-bold text-green-600 mr-3">FREE COURSE</span>
                 ) : (
                   <span className="text-2xl font-bold text-purple-600 mr-3">
-                    {course.freeLessons} Free Lessons + Premium Access
+                    {course.freeLessons || 1} Free Lessons + Premium Access
                   </span>
                 )}
               </div>
               {!course.isFree && (
                 <p className="text-sm text-orange-600">
-                  <span className="font-medium">First {course.freeLessons} lesson{course.freeLessons > 1 ? 's' : ''} FREE</span> - No subscription required!
+                  <span className="font-medium">First {course.freeLessons || 1} lesson{(course.freeLessons || 1) > 1 ? 's' : ''} FREE</span> - No subscription required!
                 </p>
               )}
             </div>
             <div className="flex gap-3">
               <button 
-                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-md font-semibold shadow-md hover:shadow-lg transition-all hover:scale-105"
+                onClick={handleEnroll}
+                disabled={isEnrolling}
+                className={`px-8 py-3 rounded-md font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2 ${
+                  isEnrolled 
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white' 
+                    : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-105 text-white'
+                } ${isEnrolling ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                {course.isFree ? 'Start Learning Free' : 'Start Free Trial'}
+                {isEnrolling ? (
+                  'Enrolling...'
+                ) : isEnrolled ? (
+                  <>
+                    <PlayCircle className="h-5 w-5" />
+                    Go to Course Player
+                  </>
+                ) : course.isFree ? (
+                  'Enroll Free'
+                ) : (
+                  'Enroll Now'
+                )}
               </button>
               <button 
                 className={`p-2.5 rounded-md border ${isBookmarked ? 'bg-blue-50 border-blue-200 text-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'} transition-colors`}
@@ -349,6 +354,10 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
               </button>
               <button 
                 className="p-2.5 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href)
+                  alert('Link copied to clipboard!')
+                }}
               >
                 <Share2 className="h-5 w-5" />
               </button>
@@ -358,7 +367,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
       </div>
 
       {/* Course Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div id="course-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content */}
           <div className="lg:w-2/3">
@@ -375,12 +384,15 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                   </Badge>
                 </div>
               </div>
-              <VideoPlayer
-                src="/AWS.mp4"
-                title="Introduction to Architectural Principles"
-                className="aspect-video"
-                controls={true}
-              />
+              {/* If user enrolled, show CoursePlayer to save progress. For preview show CoursePlayer with no enrollmentId */}
+              <div className="aspect-video">
+                <CoursePlayer
+                  lessonId={course.lessons?.[0]?.id ?? 0}
+                  lessonTitle={course.lessons?.[0]?.title ?? 'Preview'}
+                  videoStreamUrl={(course.lessons && course.lessons[0] && course.lessons[0].videoUrl) || '/AWS.mp4'}
+                  enrollmentId={enrollmentId ?? undefined}
+                />
+              </div>
               <div className="p-6">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   Lesson 1: Introduction to Architectural Principles
@@ -408,30 +420,33 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
             </div>
 
             {/* What You'll Learn */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">What You'll Learn</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {course.features.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <div className="mt-1 text-green-500">
-                      <Check className="h-4 w-4" />
+            {course.features && course.features.length > 0 && (
+              <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">What You'll Learn</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {course.features.map((feature: string, index: number) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <div className="mt-1 text-green-500">
+                        <Check className="h-4 w-4" />
+                      </div>
+                      <span className="text-gray-700">{feature}</span>
                     </div>
-                    <span className="text-gray-700">{feature}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Course Content/Syllabus */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Course Content</h2>
-              <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                <span>{course.syllabus.length} modules • {course.syllabus.reduce((total, module) => total + module.lessons.length, 0)} lessons</span>
-                <button className="text-blue-600 hover:text-blue-700 font-medium">Expand All</button>
-              </div>
+            {course.syllabus && course.syllabus.length > 0 && (
+              <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Course Content</h2>
+                <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                  <span>{course.syllabus.length} modules • {course.syllabus.reduce((total: number, module: any) => total + (module.lessons?.length || 0), 0)} lessons</span>
+                  <button className="text-blue-600 hover:text-blue-700 font-medium">Expand All</button>
+                </div>
 
-              <div className="space-y-3">
-                {course.syllabus.map((module, index) => (
+                <div className="space-y-3">
+                  {course.syllabus.map((module: any, index: number) => (
                   <div key={index} className="border border-gray-200 rounded-md overflow-hidden">
                     <button
                       className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
@@ -439,7 +454,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                     >
                       <span className="font-medium text-gray-900">{module.title}</span>
                       <div className="flex items-center text-gray-600">
-                        <span className="mr-2">{module.lessons.length} lessons</span>
+                        <span className="mr-2">{(module.lessons && module.lessons.length) || 0} lessons</span>
                         <svg
                           className={`h-5 w-5 transform transition-transform ${expandedModule === index ? 'rotate-180' : ''}`}
                           fill="none"
@@ -453,7 +468,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                     {expandedModule === index && (
                       <div className="p-4 border-t border-gray-200">
                         <ul className="space-y-3">
-                          {module.lessons.map((lesson, lessonIndex) => (
+                          {module.lessons && module.lessons.length > 0 && module.lessons.map((lesson: any, lessonIndex: number) => (
                             <li key={lessonIndex} className="flex items-center gap-3 text-gray-700">
                               <Play className="h-4 w-4 text-blue-600" />
                               <div className="flex-1">
@@ -481,12 +496,14 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                 ))}
               </div>
             </div>
+            )}
 
             {/* Requirements */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Requirements</h2>
-              <ul className="space-y-2">
-                {course.requirements.map((req, index) => (
+            {course.requirements && course.requirements.length > 0 && (
+              <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Requirements</h2>
+                <ul className="space-y-2">
+                  {course.requirements.map((req: string, index: number) => (
                   <li key={index} className="flex items-start gap-2 text-gray-700">
                     <div className="mt-1 text-blue-500">
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
@@ -496,6 +513,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                 ))}
               </ul>
             </div>
+            )}
 
             {/* Description */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -540,16 +558,17 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
             </div>
 
             {/* Student Reviews */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Student Reviews</h2>
-                <span className="text-sm text-gray-600">
-                  {course.reviews.length} of {course.reviewCount} reviews
-                </span>
-              </div>
+            {course.reviews && course.reviews.length > 0 && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">Student Reviews</h2>
+                  <span className="text-sm text-gray-600">
+                    {course.reviews.length} of {course.reviewCount || course.reviews.length} reviews
+                  </span>
+                </div>
 
-              <div className="space-y-6">
-                {course.reviews.map(review => (
+                <div className="space-y-6">
+                  {course.reviews.map((review: any) => (
                   <div key={review.id} className="pb-6 border-b border-gray-200 last:border-0">
                     <div className="flex items-start gap-4">
                       <Image
@@ -565,7 +584,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                           <span className="text-sm text-gray-600">{review.date}</span>
                         </div>
                         <div className="flex mb-3">
-                          {Array.from({ length: 5 }).map((_, i) => (
+                          {Array.from({ length: 5 }).map((_: any, i: number) => (
                             <Star 
                               key={i} 
                               className={`h-4 w-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
@@ -585,6 +604,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                 </button>
               </div>
             </div>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -620,11 +640,19 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                   </li>
                 </ul>
                 <div className="mt-6">
-                  <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-md font-semibold shadow-md hover:shadow-lg transition-shadow">
-                    Enroll Now
+                  <button 
+                    onClick={handleEnroll}
+                    disabled={isEnrolling}
+                    className={`w-full py-3 rounded-md font-semibold shadow-md hover:shadow-lg transition-shadow ${
+                      isEnrolled 
+                        ? 'bg-green-600 hover:bg-green-700 text-white' 
+                        : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                    } ${isEnrolling ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isEnrolling ? 'Enrolling...' : isEnrolled ? '✓ Enrolled - Continue' : 'Enroll Now'}
                   </button>
                   <p className="text-center text-sm text-gray-600 mt-3">
-                    30-Day Money-Back Guarantee
+                    {isEnrolled ? 'Access your course anytime' : 'Free enrollment for all students'}
                   </p>
                 </div>
               </div>
@@ -636,7 +664,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                   <div className="flex gap-3">
                     <div className="w-20 h-14 bg-gray-200 rounded-md flex-shrink-0 relative overflow-hidden">
                       <Image
-                        src="/placeholder.jpg"
+                        src="https://placehold.co/600x400/png?text=Lesson+Preview"
                         alt="Course thumbnail"
                         fill
                         className="object-cover"
@@ -658,7 +686,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                   <div className="flex gap-3">
                     <div className="w-20 h-14 bg-gray-200 rounded-md flex-shrink-0 relative overflow-hidden">
                       <Image
-                        src="/placeholder.jpg"
+                        src="https://placehold.co/600x400/png?text=Lesson+Preview"
                         alt="Course thumbnail"
                         fill
                         className="object-cover"
@@ -680,7 +708,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                   <div className="flex gap-3">
                     <div className="w-20 h-14 bg-gray-200 rounded-md flex-shrink-0 relative overflow-hidden">
                       <Image
-                        src="/placeholder.jpg"
+                        src="https://placehold.co/600x400/png?text=Lesson+Preview"
                         alt="Course thumbnail"
                         fill
                         className="object-cover"

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2, Plus, BookOpen, Users, Clock, Eye, Video, FileText, Upload, PlayCircle, Download } from 'lucide-react';
-// import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 interface CourseLesson {
   id: number;
@@ -46,6 +47,7 @@ interface Course {
   duration: string;
   max_students: number;
   is_trial: boolean;
+  price: number;
   start_date?: string;
   end_date?: string;
   image_url?: string;
@@ -75,7 +77,7 @@ export default function EnhancedAdminCoursesPage() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [materialFile, setMaterialFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  // const { toast } = useToast();
+  const { toast } = useToast();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -85,6 +87,7 @@ export default function EnhancedAdminCoursesPage() {
     duration: '',
     max_students: 50,
     is_trial: true,
+  price: '',
     start_date: '',
     end_date: '',
     syllabus: '',
@@ -109,8 +112,68 @@ export default function EnhancedAdminCoursesPage() {
     is_downloadable: true
   });
 
-  // Mock data initialization
+  // Fetch courses from API
   useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('http://localhost:8000/api/admin/courses', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCourses(data);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch courses",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      toast({
+        title: "Error",
+        description: "Network error. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch one course with full details (lessons, materials, totals)
+  const fetchCourseDetail = async (courseId: number) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`http://localhost:8000/api/admin/courses/${courseId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!res.ok) {
+        throw new Error(`Failed to load course ${courseId} (${res.status})`);
+      }
+      const data: Course = await res.json();
+      // Update the selected course and also refresh the summary row in the table
+      setSelectedCourse(data);
+      setCourses(prev => prev.map(c => (c.id === data.id ? { ...c, ...data } : c)));
+      return data;
+    } catch (err) {
+      console.error('Error fetching course detail:', err);
+      toast({ title: 'Error', description: 'Could not load course details', variant: 'destructive' });
+      return null;
+    }
+  };
+
+  // Old mock data (keeping for reference, will be replaced by API data)
+  const oldMockData = () => {
     const mockCourses: Course[] = [
       {
         id: 1,
@@ -210,26 +273,65 @@ export default function EnhancedAdminCoursesPage() {
         materials: []
       }
     ];
-    
-    setCourses(mockCourses);
-    setLoading(false);
-  }, []);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      // Mock API call
-      console.log('Course saved successfully');
-      alert(editingCourse ? "Course updated successfully" : "Course created successfully");
-      setIsDialogOpen(false);
-      setEditingCourse(null);
-      resetForm();
+      const token = localStorage.getItem('access_token');
+      const url = editingCourse 
+        ? `http://localhost:8000/api/admin/courses/${editingCourse.id}`
+        : 'http://localhost:8000/api/admin/courses';
+      
+      const method = editingCourse ? 'PUT' : 'POST';
+      
+      // Only send fields that backend expects
+      const courseData = {
+        title: formData.title,
+        description: formData.description,
+        short_description: formData.short_description || undefined,
+        level: formData.level,
+        duration: formData.duration,
+        max_students: formData.max_students,
+        start_date: formData.start_date || undefined,
+        end_date: formData.end_date || undefined,
+        syllabus: formData.syllabus || undefined,
+        prerequisites: formData.prerequisites || undefined,
+        ...(editingCourse && { status: formData.status }) // Only send status on update
+      };
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(courseData)
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: editingCourse ? "Course updated successfully" : "Course created successfully"
+        });
+        setIsDialogOpen(false);
+        setEditingCourse(null);
+        resetForm();
+        fetchCourses(); // Reload courses
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.detail || "Failed to save course",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error('Error saving course:', error);
       toast({
         title: "Error",
-        description: "Failed to save course",
+        description: "Network error. Please try again.",
         variant: "destructive"
       });
     }
@@ -241,33 +343,39 @@ export default function EnhancedAdminCoursesPage() {
     if (!selectedCourse) return;
 
     try {
-      setUploadProgress(0);
-      
-      // Simulate file upload progress
-      if (videoFile) {
-        const interval = setInterval(() => {
-          setUploadProgress(prev => {
-            if (prev >= 100) {
-              clearInterval(interval);
-              return 100;
-            }
-            return prev + 10;
-          });
-        }, 200);
-      }
+      setUploadProgress(10);
+      const token = localStorage.getItem('access_token');
+      const form = new FormData();
+      form.append('title', lessonFormData.title);
+      if (lessonFormData.description) form.append('description', lessonFormData.description);
+      if (lessonFormData.video_duration) form.append('video_duration', String(lessonFormData.video_duration));
+      form.append('order_index', String(lessonFormData.order_index || 0));
+      form.append('is_free', String(lessonFormData.is_free));
+      if (lessonFormData.transcript) form.append('transcript', lessonFormData.transcript);
+      if (videoFile) form.append('video_file', videoFile);
 
-      // Mock API call
-      setTimeout(() => {
-        alert(editingLesson ? "Lesson updated successfully" : "Lesson created successfully");
-        setIsLessonDialogOpen(false);
-        setEditingLesson(null);
-        resetLessonForm();
-        setUploadProgress(0);
-      }, 2000);
+      const url = `http://localhost:8000/api/admin/courses/${selectedCourse.id}/lessons`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } as any : undefined,
+        body: form,
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(`Lesson upload failed (${res.status}): ${msg}`);
+      }
+      setUploadProgress(100);
+      alert(editingLesson ? 'Lesson updated successfully' : 'Lesson created successfully');
+      setIsLessonDialogOpen(false);
+      setEditingLesson(null);
+      resetLessonForm();
+      setUploadProgress(0);
+      // Refresh the detailed view so the new lesson appears immediately
+      await fetchCourseDetail(selectedCourse.id);
 
     } catch (error) {
       console.error('Error saving lesson:', error);
-      alert("Failed to save lesson");
+      alert(`Failed to save lesson: ${error}`);
     }
   };
 
@@ -277,33 +385,38 @@ export default function EnhancedAdminCoursesPage() {
     if (!selectedCourse) return;
 
     try {
-      setUploadProgress(0);
-      
-      // Simulate file upload progress
-      if (materialFile) {
-        const interval = setInterval(() => {
-          setUploadProgress(prev => {
-            if (prev >= 100) {
-              clearInterval(interval);
-              return 100;
-            }
-            return prev + 20;
-          });
-        }, 100);
-      }
+      setUploadProgress(10);
+      const token = localStorage.getItem('access_token');
+      const form = new FormData();
+      form.append('title', materialFormData.title);
+      if (materialFormData.description) form.append('description', materialFormData.description);
+      form.append('file_type', materialFormData.file_type || (materialFile?.type || 'file'));
+      form.append('order_index', String(materialFormData.order_index || 0));
+      form.append('is_downloadable', String(materialFormData.is_downloadable));
+      if (materialFile) form.append('material_file', materialFile);
 
-      // Mock API call
-      setTimeout(() => {
-        alert(editingMaterial ? "Material updated successfully" : "Material added successfully");
-        setIsMaterialDialogOpen(false);
-        setEditingMaterial(null);
-        resetMaterialForm();
-        setUploadProgress(0);
-      }, 1000);
+      const url = `http://localhost:8000/api/admin/courses/${selectedCourse.id}/materials`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } as any : undefined,
+        body: form,
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(`Material upload failed (${res.status}): ${msg}`);
+      }
+      setUploadProgress(100);
+      alert(editingMaterial ? 'Material updated successfully' : 'Material added successfully');
+      setIsMaterialDialogOpen(false);
+      setEditingMaterial(null);
+      resetMaterialForm();
+      setUploadProgress(0);
+      // Refresh the detailed view so the new material appears immediately
+      await fetchCourseDetail(selectedCourse.id);
 
     } catch (error) {
       console.error('Error saving material:', error);
-      alert("Failed to save material");
+      alert(`Failed to save material: ${error}`);
     }
   };
 
@@ -316,6 +429,7 @@ export default function EnhancedAdminCoursesPage() {
       duration: '',
       max_students: 50,
       is_trial: true,
+      price: '',
       start_date: '',
       end_date: '',
       syllabus: '',
@@ -357,6 +471,7 @@ export default function EnhancedAdminCoursesPage() {
       duration: course.duration,
       max_students: course.max_students,
       is_trial: course.is_trial,
+      price: course.price !== undefined && course.price !== null ? course.price.toString() : '',
       start_date: course.start_date ? course.start_date.split('T')[0] : '',
       end_date: course.end_date ? course.end_date.split('T')[0] : '',
       syllabus: course.syllabus || '',
@@ -366,8 +481,9 @@ export default function EnhancedAdminCoursesPage() {
     setIsDialogOpen(true);
   };
 
-  const handleViewDetails = (course: Course) => {
-    setSelectedCourse(course);
+  const handleViewDetails = async (course: Course) => {
+    // Always load a fresh, detailed copy from the backend
+    await fetchCourseDetail(course.id);
   };
 
   const formatDuration = (seconds: number) => {
@@ -494,6 +610,8 @@ export default function EnhancedAdminCoursesPage() {
                     This is where you upload course videos! Each course should have 10-12 videos (5-10 minutes each).
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-purple-600">
+                        const parsedPrice = parseFloat(formData.price);
+                        const price = Number.isFinite(parsedPrice) ? parsedPrice : 0;
                     <div>✅ First video automatically free (trial)</div>
                     <div>✅ MP4, AVI, MOV, WebM supported</div>
                     <div>✅ Max 500MB per video</div>
@@ -501,6 +619,7 @@ export default function EnhancedAdminCoursesPage() {
                   </div>
                 </div>
               </div>
+                          price,
             </div>
             <Table>
               <TableHeader>
@@ -701,23 +820,20 @@ export default function EnhancedAdminCoursesPage() {
 
         {/* Lesson Dialog */}
         <Dialog open={isLessonDialogOpen} onOpenChange={setIsLessonDialogOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingLesson ? 'Edit Lesson' : 'Add New Lesson'}</DialogTitle>
               <DialogDescription>
                 Create or edit a lesson with video content
               </DialogDescription>
-              
-              {/* Video Upload Notice */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
-                <h4 className="font-semibold text-green-800 mb-2">🎬 Video Upload Instructions</h4>
-                <p className="text-sm text-green-700 mb-2">
-                  <strong>This is where you upload course videos!</strong> Upload 10-12 videos per course (5-10 minutes each).
-                </p>
-                <p className="text-sm text-green-700">
-                  Supported formats: MP4, AVI, MOV, WMV, FLV, WebM (Max: 500MB per video)
-                </p>
-              </div>
+              {/* Video Upload Tips (collapsed by default to save space) */}
+              <details className="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
+                <summary className="cursor-pointer text-green-800 font-medium">🎬 Video Upload Tips</summary>
+                <div className="text-sm text-green-700 mt-2">
+                  <p><strong>Recommended:</strong> 10–12 videos per course (5–10 minutes each).</p>
+                  <p>Supported: MP4, AVI, MOV, WMV, FLV, WebM (Max: 500MB/video)</p>
+                </div>
+              </details>
             </DialogHeader>
             
             <form onSubmit={handleLessonSubmit} className="space-y-4">
@@ -832,7 +948,7 @@ export default function EnhancedAdminCoursesPage() {
 
         {/* Material Dialog */}
         <Dialog open={isMaterialDialogOpen} onOpenChange={setIsMaterialDialogOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingMaterial ? 'Edit Material' : 'Add New Material'}</DialogTitle>
               <DialogDescription>
@@ -1012,6 +1128,42 @@ export default function EnhancedAdminCoursesPage() {
                     <option value="intermediate">Intermediate</option>
                     <option value="advanced">Advanced</option>
                   </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duration</Label>
+                  <Input
+                    id="duration"
+                    value={formData.duration}
+                    onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                    placeholder="e.g., 8 weeks"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="max_students">Max Students</Label>
+                  <Input
+                    id="max_students"
+                    type="number"
+                    min={1}
+                    value={formData.max_students}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      setFormData({ ...formData, max_students: Number.isNaN(value) ? 0 : value });
+                    }}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price (INR)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    placeholder="0 for free course"
+                  />
                 </div>
               </div>
               

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { use, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { api } from "@/lib/api"
@@ -56,8 +56,9 @@ interface Reply {
   replies: Reply[]
 }
 
-export default function DiscussionDetailPage({ params }: { params: { id: string } }) {
+export default function DiscussionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
+  const { id } = use(params)
   const [discussion, setDiscussion] = useState<Discussion | null>(null)
   const [replies, setReplies] = useState<Reply[]>([])
   const [loading, setLoading] = useState(true)
@@ -76,15 +77,15 @@ export default function DiscussionDetailPage({ params }: { params: { id: string 
     }
     fetchDiscussion()
     fetchReplies()
-  }, [params.id])
+  }, [id])
 
   const fetchDiscussion = async () => {
     try {
       setLoading(true)
-      const response = await api.get(`/discussions/${params.id}`)
+      const response = await api.get(`/discussions/${id}`)
       setDiscussion(response.data)
       if (isAuthenticated) {
-        const likeStatus = await api.get(`/discussions/${params.id}/like/status`)
+        const likeStatus = await api.get(`/discussions/${id}/like/status`)
         setLiked(likeStatus.data.liked)
       }
     } catch (error) {
@@ -96,7 +97,7 @@ export default function DiscussionDetailPage({ params }: { params: { id: string 
 
   const fetchReplies = async () => {
     try {
-      const response = await api.get(`/discussions/${params.id}/replies`)
+      const response = await api.get(`/discussions/${id}/replies`)
       setReplies(response.data)
     } catch (error) {
       console.error("Error fetching replies:", error)

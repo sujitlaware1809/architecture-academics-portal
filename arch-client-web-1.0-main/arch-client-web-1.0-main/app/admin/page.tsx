@@ -2,24 +2,40 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { api } from "@/lib/api"
 import { 
   Calendar, 
   BookOpen, 
   Briefcase, 
   Wrench, 
   Users, 
-  TrendingUp, 
   BarChart2, 
   PlusCircle,
-  Check,
-  Clock,
-  AlertTriangle,
-  ArrowRight,
-  X
+  Settings,
+  Activity,
+  AlertCircle
 } from "lucide-react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+
+interface AdminStats {
+  total_users: number
+  total_courses: number
+  total_workshops: number
+  total_events: number
+  total_jobs: number
+  active_users: number
+  published_courses: number
+  upcoming_workshops: number
+  upcoming_events: number
+  published_jobs: number
+}
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState<AdminStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
   const currentDate = new Date()
   const formattedDate = currentDate.toLocaleDateString('en-US', { 
     weekday: 'long', 
@@ -28,168 +44,300 @@ export default function AdminDashboard() {
     day: 'numeric' 
   })
 
-  // Mock stats data for dashboard
-  const stats = [
-    { name: "Total Users", value: 1245, change: "+12%", color: "bg-blue-500" },
-    { name: "Active Courses", value: 47, change: "+5%", color: "bg-green-500" },
-    { name: "Published Events", value: 23, change: "+8%", color: "bg-purple-500" },
-    { name: "Job Listings", value: 89, change: "+15%", color: "bg-yellow-500" },
-  ]
+  useEffect(() => {
+    fetchStats()
+  }, [])
 
-  // Mock recent activity for dashboard
-  const recentActivity = [
-    { action: "New user registered", user: "Rajesh Kumar", time: "10 minutes ago" },
-    { action: "New job posted", user: "Archimedes Architects", time: "2 hours ago" },
-    { action: "Course updated", user: "Admin", time: "3 hours ago" },
-    { action: "Event published", user: "Admin", time: "Yesterday" },
-    { action: "Workshop canceled", user: "Admin", time: "Yesterday" },
-  ]
+  const fetchStats = async () => {
+    try {
+      setLoading(true)
+      const response = await api.get('/admin/stats')
+      setStats(response.data)
+    } catch (err: any) {
+      console.error("Error fetching stats:", err)
+      setError(err.response?.data?.detail || "Failed to load dashboard statistics")
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  // Mock pending approvals
-  const pendingApprovals = [
-    { type: "Job Listing", title: "Senior Architect at XYZ Firm", status: "pending" },
-    { type: "Workshop", title: "Sustainable Design Principles", status: "pending" },
-    { type: "Course", title: "Advanced AutoCAD Techniques", status: "pending" }
-  ]
+  const statCards = stats ? [
+    { 
+      name: "Total Users", 
+      value: stats.total_users, 
+      subtitle: `${stats.active_users} active`,
+      icon: Users,
+      color: "from-blue-500 to-blue-600",
+      href: "/admin/users"
+    },
+    { 
+      name: "Courses", 
+      value: stats.total_courses, 
+      subtitle: `${stats.published_courses} published`,
+      icon: BookOpen,
+      color: "from-green-500 to-green-600",
+      href: "/admin/courses"
+    },
+    { 
+      name: "Events", 
+      value: stats.total_events, 
+      subtitle: `${stats.upcoming_events} upcoming`,
+      icon: Calendar,
+      color: "from-purple-500 to-purple-600",
+      href: "/admin/events"
+    },
+    { 
+      name: "Workshops", 
+      value: stats.total_workshops, 
+      subtitle: `${stats.upcoming_workshops} upcoming`,
+      icon: Wrench,
+      color: "from-indigo-500 to-indigo-600",
+      href: "/admin/workshops"
+    },
+    { 
+      name: "Job Listings", 
+      value: stats.total_jobs, 
+      subtitle: `${stats.published_jobs} published`,
+      icon: Briefcase,
+      color: "from-yellow-500 to-yellow-600",
+      href: "/admin/jobs"
+    },
+  ] : []
 
-  // Mock quick actions
   const quickActions = [
-    { name: "Add New Event", href: "/admin/events/new", icon: Calendar, color: "bg-purple-100 text-purple-600" },
-    { name: "Add Workshop", href: "/admin/workshops/new", icon: Wrench, color: "bg-blue-100 text-blue-600" },
-    { name: "Add Course", href: "/admin/courses/new", icon: BookOpen, color: "bg-green-100 text-green-600" },
-    { name: "Add Job", href: "/admin/jobs/new", icon: Briefcase, color: "bg-yellow-100 text-yellow-600" },
-    { name: "Add User", href: "/admin/users/new", icon: Users, color: "bg-red-100 text-red-600" },
+    { name: "Manage Events", href: "/admin/events", icon: Calendar, color: "bg-purple-100 text-purple-600 hover:bg-purple-200" },
+    { name: "Manage Workshops", href: "/admin/workshops", icon: Wrench, color: "bg-blue-100 text-blue-600 hover:bg-blue-200" },
+    { name: "Manage Courses", href: "/admin/courses", icon: BookOpen, color: "bg-green-100 text-green-600 hover:bg-green-200" },
+    { name: "Manage Jobs", href: "/admin/jobs", icon: Briefcase, color: "bg-yellow-100 text-yellow-600 hover:bg-yellow-200" },
+    { name: "Manage Users", href: "/admin/users", icon: Users, color: "bg-red-100 text-red-600 hover:bg-red-200" },
+    { name: "Settings", href: "/admin/settings", icon: Settings, color: "bg-gray-100 text-gray-600 hover:bg-gray-200" },
   ]
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto mt-12">
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              <CardTitle className="text-red-600">Error Loading Dashboard</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-600">{error}</p>
+            <Button onClick={fetchStats} className="mt-4">Retry</Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div>
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
-          <p className="text-gray-500">{formattedDate}</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            Admin Dashboard
+          </h1>
+          <p className="text-gray-500 mt-1">{formattedDate}</p>
         </div>
         <div className="mt-4 md:mt-0 flex space-x-3">
-          <Link 
-            href="/"
-            className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            View Site
+          <Link href="/">
+            <Button variant="outline">View Site</Button>
           </Link>
-          <button className="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-purple-700">
-            Generate Report
-          </button>
+          <Button onClick={fetchStats} variant="outline">
+            <Activity className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
         </div>
       </div>
 
       {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat) => (
-          <Card key={stat.name}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">{stat.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-baseline">
-                <p className="text-2xl font-semibold">{stat.value}</p>
-                <p className="ml-2 text-xs font-medium text-green-500">{stat.change}</p>
-              </div>
-            </CardContent>
-            <div className={`h-1 w-full ${stat.color} rounded-b-lg`} />
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+        {statCards.map((stat) => {
+          const Icon = stat.icon
+          return (
+            <Link key={stat.name} href={stat.href}>
+              <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer border-0 overflow-hidden group">
+                <div className={`h-2 bg-gradient-to-r ${stat.color}`} />
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-medium text-gray-600">{stat.name}</CardTitle>
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.color}`}>
+                      <Icon className="h-4 w-4 text-white" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1">
+                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                    <p className="text-xs text-gray-500">{stat.subtitle}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          )
+        })}
       </div>
 
       {/* Quick Actions */}
-      <h2 className="text-lg font-medium text-gray-800 mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-        {quickActions.map((action) => (
-          <Link
-            key={action.name}
-            href={action.href}
-            className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center"
-          >
-            <div className={`p-3 rounded-full ${action.color} mb-3`}>
-              {<action.icon size={20} />}
-            </div>
-            <p className="font-medium text-sm text-gray-700">{action.name}</p>
-          </Link>
-        ))}
-      </div>
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <PlusCircle className="h-5 w-5 text-purple-600" />
+            <span>Quick Actions</span>
+          </CardTitle>
+          <CardDescription>Manage your platform content</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {quickActions.map((action) => {
+              const Icon = action.icon
+              return (
+                <Link key={action.name} href={action.href}>
+                  <div className={`${action.color} rounded-xl p-4 transition-all duration-200 text-center group`}>
+                    <Icon className="h-6 w-6 mx-auto mb-2" />
+                    <p className="text-sm font-medium">{action.name}</p>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Pending Approvals */}
-        <Card className="lg:col-span-1">
+      {/* Overview Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Platform Activity */}
+        <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-medium">Pending Approvals</CardTitle>
-            <CardDescription>Items that need your review</CardDescription>
+            <CardTitle className="flex items-center space-x-2">
+              <Activity className="h-5 w-5 text-purple-600" />
+              <span>Platform Overview</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {pendingApprovals.map((item, index) => (
-                <div key={index} className="bg-white p-3 rounded-lg border border-gray-200">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full mb-2">
-                        {item.type}
-                      </span>
-                      <h3 className="font-medium text-sm">{item.title}</h3>
-                    </div>
-                    <div className="flex space-x-1">
-                      <button className="p-1 rounded-full bg-green-100 text-green-600 hover:bg-green-200">
-                        <Check size={14} />
-                      </button>
-                      <button className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200">
-                        <X size={14} />
-                      </button>
-                    </div>
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Users className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">User Accounts</p>
+                    <p className="text-xs text-gray-500">{stats?.active_users} active of {stats?.total_users} total</p>
                   </div>
                 </div>
-              ))}
+                <Link href="/admin/users">
+                  <Button size="sm" variant="ghost">Manage</Button>
+                </Link>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <BookOpen className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Course Catalog</p>
+                    <p className="text-xs text-gray-500">{stats?.published_courses} published courses</p>
+                  </div>
+                </div>
+                <Link href="/admin/courses">
+                  <Button size="sm" variant="ghost">Manage</Button>
+                </Link>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Calendar className="h-5 w-5 text-purple-600" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Upcoming Events</p>
+                    <p className="text-xs text-gray-500">{stats?.upcoming_events} events scheduled</p>
+                  </div>
+                </div>
+                <Link href="/admin/events">
+                  <Button size="sm" variant="ghost">Manage</Button>
+                </Link>
+              </div>
             </div>
           </CardContent>
-          <CardFooter className="border-t pt-4">
-            <Link 
-              href="/admin/approvals"
-              className="text-sm text-purple-600 hover:text-purple-800 font-medium flex items-center"
-            >
-              View all pending approvals
-              <ArrowRight size={16} className="ml-1" />
-            </Link>
-          </CardFooter>
         </Card>
 
-        {/* Recent Activity */}
-        <Card className="lg:col-span-2">
+        {/* System Health */}
+        <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-medium">Recent Activity</CardTitle>
-            <CardDescription>Latest actions on the platform</CardDescription>
+            <CardTitle className="flex items-center space-x-2">
+              <BarChart2 className="h-5 w-5 text-purple-600" />
+              <span>Content Status</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start">
-                  <div className="flex-shrink-0 mr-3">
-                    <div className="bg-purple-100 p-2 rounded-full">
-                      <Clock size={16} className="text-purple-600" />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">{activity.action}</p>
-                    <p className="text-xs text-gray-500">by {activity.user} • {activity.time}</p>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">Published Courses</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {stats?.published_courses}/{stats?.total_courses}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${stats?.total_courses ? (stats.published_courses / stats.total_courses * 100) : 0}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">Published Jobs</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {stats?.published_jobs}/{stats?.total_jobs}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-yellow-500 to-yellow-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${stats?.total_jobs ? (stats.published_jobs / stats.total_jobs * 100) : 0}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">Active Users</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {stats?.active_users}/{stats?.total_users}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${stats?.total_users ? (stats.active_users / stats.total_users * 100) : 0}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">System Status</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-green-600 font-medium">Operational</span>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
           </CardContent>
-          <CardFooter className="border-t pt-4">
-            <Link 
-              href="/admin/activity"
-              className="text-sm text-purple-600 hover:text-purple-800 font-medium flex items-center"
-            >
-              View all activity
-              <ArrowRight size={16} className="ml-1" />
-            </Link>
-          </CardFooter>
         </Card>
       </div>
     </div>

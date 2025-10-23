@@ -1,18 +1,20 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Query, UploadFile, File, Form
+from fastapi import FastAPI, Depends, HTTPException, status, Query, UploadFile, File, Form, Response, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import StreamingResponse, FileResponse
 from sqlalchemy.orm import Session
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import Optional, List
 import crud
 import schemas
-from database import get_db, User, Job
+from database import get_db, User, Job, Event, Workshop, Course, SystemSettings, EventRegistration, WorkshopRegistration, CourseLesson, CourseEnrollment
 from auth import create_access_token, verify_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from aws_s3 import s3_manager
 import os
 import shutil
 from pathlib import Path
+from uuid import uuid4
 
 app = FastAPI(
     title="Architecture Academics API",
@@ -24,7 +26,12 @@ app = FastAPI(
 UPLOAD_DIR = Path("uploads")
 VIDEO_DIR = UPLOAD_DIR / "videos"
 MATERIAL_DIR = UPLOAD_DIR / "materials"
+RESUME_DIR = UPLOAD_DIR / "resumes"
 UPLOAD_DIR.mkdir(exist_ok=True)
+RESUME_DIR.mkdir(exist_ok=True)
+
+# Lightweight in-memory events buffer for admin polling of new job applications
+APPLICATION_EVENTS: list[dict] = []
 VIDEO_DIR.mkdir(exist_ok=True)
 MATERIAL_DIR.mkdir(exist_ok=True)
 
@@ -35,14 +42,17 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 security = HTTPBearer()
 
 # CORS middleware
+# CORS configuration: allow localhost and common private network ranges in dev
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000", 
+        "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "http://localhost:3001", 
-        "http://127.0.0.1:3001"
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
     ],
+    # Additionally allow local network origins like http://192.168.x.x:3000, 10.x.x.x, 172.16-31.x.x
+    allow_origin_regex=r"^https?://((localhost|127\.0\.0\.1)|(192\.168\.[0-9]{1,3}\.[0-9]{1,3})|(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})|(172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}))(\:[0-9]{2,5})?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -304,6 +314,91 @@ async def create_job(
     print(f"Creating job for user: {current_user.email} (ID: {current_user.id})")
     return crud.create_job(db=db, job=job, recruiter_id=current_user.id)
 
+# Admin - Jobs Management (create)
+@app.post("/api/admin/jobs", response_model=schemas.JobResponse)
+async def admin_create_job(
+    job: dict,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    """Create a new job posting (admin). Accepts UI payload and maps to schema; force currency INR."""
+    # Frontend currently sends: title, company, description, location, salary_range (string),
+    # job_type ('full-time'|'part-time'|'contract'|'internship'), experience_level ('entry'|'mid'|'senior'|'executive'),
+    # requirements, benefits, status ('active'|'closed'|'draft'), closing_date (YYYY-MM-DD)
+    try:
+        payload = dict(job)
+        # Map enums
+        jt_map = {
+            'full-time': schemas.JobType.FULL_TIME,
+            'part-time': schemas.JobType.PART_TIME,
+            'contract': schemas.JobType.CONTRACT,
+            'internship': schemas.JobType.INTERNSHIP,
+            'freelance': schemas.JobType.FREELANCE,
+        }
+        el_map = {
+            'entry': schemas.ExperienceLevel.ENTRY_LEVEL,
+            'mid': schemas.ExperienceLevel.MID_LEVEL,
+            'senior': schemas.ExperienceLevel.SENIOR_LEVEL,
+            'executive': schemas.ExperienceLevel.EXECUTIVE,
+        }
+        wm = schemas.WorkMode.ON_SITE  # default
+        # Admin UI currently lacks work_mode; default to On-site
+        jt = jt_map.get(str(payload.get('job_type', '')).lower(), schemas.JobType.FULL_TIME)
+        el = el_map.get(str(payload.get('experience_level', '')).lower(), schemas.ExperienceLevel.MID_LEVEL)
+        # Salary parsing: try to extract min/max numbers from string
+        import re
+        salary_range = str(payload.get('salary_range') or '')
+        nums = [float(x.replace(',', '')) for x in re.findall(r"[0-9][0-9,]*", salary_range)]
+        salary_min = nums[0] if len(nums) >= 1 else None
+        salary_max = nums[1] if len(nums) >= 2 else None
+        # Status mapping: admin UI uses active/closed/draft => map to JobStatus
+        st_map = {
+            'active': schemas.JobStatus.PUBLISHED,
+            'closed': schemas.JobStatus.CLOSED,
+            'draft': schemas.JobStatus.DRAFT,
+        }
+        status = st_map.get(str(payload.get('status', '')).lower(), schemas.JobStatus.PUBLISHED)
+        # Deadline mapping
+        from datetime import datetime as dt
+        application_deadline = None
+        cd = payload.get('closing_date')
+        if cd:
+            try:
+                application_deadline = dt.fromisoformat(cd)
+            except Exception:
+                try:
+                    application_deadline = dt.strptime(cd, '%Y-%m-%d')
+                except Exception:
+                    application_deadline = None
+        job_schema = schemas.JobCreate(
+            title=payload.get('title', ''),
+            company=payload.get('company', ''),
+            location=payload.get('location', ''),
+            work_mode=wm,
+            job_type=jt,
+            experience_level=el,
+            salary_min=salary_min,
+            salary_max=salary_max,
+            currency='INR',
+            description=payload.get('description', ''),
+            requirements=payload.get('requirements', ''),
+            benefits=payload.get('benefits'),
+            tags=payload.get('tags'),
+            application_deadline=application_deadline,
+            contact_email=payload.get('contact_email') or 'hr@example.com',
+            company_website=payload.get('company_website'),
+            company_description=payload.get('company_description')
+        )
+        created = crud.create_job(db=db, job=job_schema, recruiter_id=current_admin.id)
+        # Apply status if not default published
+        if status != schemas.JobStatus.PUBLISHED:
+            created.status = status
+            db.commit()
+            db.refresh(created)
+        return created
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Invalid job payload: {e}")
+
 @app.get("/jobs/my/posted", response_model=List[schemas.JobResponse])
 async def get_my_posted_jobs(
     skip: int = Query(0),
@@ -363,7 +458,7 @@ async def apply_for_job(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Apply for a job"""
+    """Apply for a job with JSON body (cover_letter, optional resume_url)."""
     if current_user.role == schemas.UserRole.RECRUITER.value:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -389,7 +484,76 @@ async def apply_for_job(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="You have already applied for this job"
         )
+    # Record event for admin polling
+    try:
+        APPLICATION_EVENTS.append({
+            "id": str(uuid4()),
+            "type": "job_application",
+            "job_id": job_id,
+            "applicant_id": current_user.id,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+    except Exception:
+        pass
     
+    return db_application
+
+@app.post("/jobs/{job_id}/apply/upload", response_model=schemas.JobApplicationResponse)
+async def apply_for_job_with_upload(
+    job_id: int,
+    cover_letter: Optional[str] = Form(None),
+    resume_file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Apply for a job with a resume file upload (PDF/DOCX)."""
+    if current_user.role == schemas.UserRole.RECRUITER.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Recruiters cannot apply for jobs"
+        )
+
+    # Check if job exists
+    job = crud.get_job(db, job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found"
+        )
+
+    # Validate resume file
+    allowed_ext = {".pdf", ".doc", ".docx"}
+    ext = Path(resume_file.filename).suffix.lower()
+    if ext not in allowed_ext:
+        raise HTTPException(status_code=400, detail=f"Unsupported resume format. Allowed: {', '.join(sorted(allowed_ext))}")
+    # Limit to ~10MB
+    if getattr(resume_file, 'size', None) and resume_file.size > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Resume too large. Max size: 10MB")
+
+    # Save file
+    resume_url = save_uploaded_file(resume_file, RESUME_DIR)
+
+    application_data = schemas.JobApplicationCreate(
+        job_id=job_id,
+        cover_letter=cover_letter,
+        resume_url=resume_url
+    )
+    db_application = crud.create_job_application(db, application_data, current_user.id)
+    if not db_application:
+        raise HTTPException(status_code=400, detail="You have already applied for this job")
+
+    # Record event for admin polling
+    try:
+        APPLICATION_EVENTS.append({
+            "id": str(uuid4()),
+            "type": "job_application",
+            "job_id": job_id,
+            "applicant_id": current_user.id,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+    except Exception:
+        pass
+
     return db_application
 
 @app.get("/applications/my", response_model=List[schemas.JobApplicationResponse])
@@ -528,6 +692,25 @@ async def get_saved_jobs(
 ):
     """Get current user's saved jobs"""
     return crud.get_user_saved_jobs(db, current_user.id, skip, limit)
+
+# Admin polling endpoint for new job application events
+@app.get("/api/admin/jobs/applications/events")
+async def get_application_events(
+    since: Optional[str] = Query(None, description="ISO timestamp to fetch events after"),
+    limit: int = Query(50, ge=1, le=200),
+    current_admin: User = Depends(get_current_admin)
+):
+    """Return recent job application events since the provided ISO timestamp (for polling)."""
+    try:
+        since_dt = datetime.fromisoformat(since) if since else None
+    except Exception:
+        since_dt = None
+    events = APPLICATION_EVENTS[-1000:]
+    if since_dt:
+        filtered = [e for e in events if datetime.fromisoformat(e["timestamp"]) > since_dt]
+    else:
+        filtered = events
+    return filtered[-limit:]
 
 # Admin Routes
 
@@ -920,12 +1103,61 @@ async def get_admin_jobs(
 @app.put("/api/admin/jobs/{job_id}", response_model=schemas.JobResponse)
 async def update_admin_job(
     job_id: int,
-    job_update: schemas.JobUpdate,
+    job_update: dict,
     db: Session = Depends(get_db),
     current_admin: User = Depends(get_current_admin)
 ):
     """Update job by admin"""
-    job = crud.update_job(db, job_id, job_update)
+    # Map UI payload to JobUpdate
+    try:
+        payload = dict(job_update)
+        jt_map = {
+            'full-time': schemas.JobType.FULL_TIME,
+            'part-time': schemas.JobType.PART_TIME,
+            'contract': schemas.JobType.CONTRACT,
+            'internship': schemas.JobType.INTERNSHIP,
+            'freelance': schemas.JobType.FREELANCE,
+        }
+        el_map = {
+            'entry': schemas.ExperienceLevel.ENTRY_LEVEL,
+            'mid': schemas.ExperienceLevel.MID_LEVEL,
+            'senior': schemas.ExperienceLevel.SENIOR_LEVEL,
+            'executive': schemas.ExperienceLevel.EXECUTIVE,
+        }
+        st_map = {
+            'active': schemas.JobStatus.PUBLISHED,
+            'closed': schemas.JobStatus.CLOSED,
+            'draft': schemas.JobStatus.DRAFT,
+        }
+        update_kwargs = {}
+        if 'title' in payload: update_kwargs['title'] = payload['title']
+        if 'company' in payload: update_kwargs['company'] = payload['company']
+        if 'location' in payload: update_kwargs['location'] = payload['location']
+        if 'job_type' in payload: update_kwargs['job_type'] = jt_map.get(str(payload['job_type']).lower())
+        if 'experience_level' in payload: update_kwargs['experience_level'] = el_map.get(str(payload['experience_level']).lower())
+        if 'description' in payload: update_kwargs['description'] = payload['description']
+        if 'requirements' in payload: update_kwargs['requirements'] = payload['requirements']
+        if 'benefits' in payload: update_kwargs['benefits'] = payload['benefits']
+        if 'tags' in payload: update_kwargs['tags'] = payload['tags']
+        if 'status' in payload: update_kwargs['status'] = st_map.get(str(payload['status']).lower())
+        if 'closing_date' in payload and payload['closing_date']:
+            from datetime import datetime as dt
+            try:
+                update_kwargs['application_deadline'] = dt.fromisoformat(payload['closing_date'])
+            except Exception:
+                try:
+                    update_kwargs['application_deadline'] = dt.strptime(payload['closing_date'], '%Y-%m-%d')
+                except Exception:
+                    pass
+        # salary_range parsing if provided
+        if 'salary_range' in payload:
+            import re
+            nums = [float(x.replace(',', '')) for x in re.findall(r"[0-9][0-9,]*", str(payload['salary_range']))]
+            if len(nums) >= 1: update_kwargs['salary_min'] = nums[0]
+            if len(nums) >= 2: update_kwargs['salary_max'] = nums[1]
+        job = crud.update_job_admin(db, job_id, schemas.JobUpdate(**{k:v for k,v in update_kwargs.items() if v is not None}))
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Invalid job update payload: {e}")
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
@@ -937,10 +1169,31 @@ async def delete_admin_job(
     current_admin: User = Depends(get_current_admin)
 ):
     """Delete job by admin"""
-    success = crud.delete_job(db, job_id)
+    success = crud.delete_job_admin(db, job_id)
     if not success:
         raise HTTPException(status_code=404, detail="Job not found")
     return {"message": "Job deleted successfully"}
+
+@app.get("/api/admin/jobs/{job_id}/applications", response_model=List[schemas.JobApplicationResponse])
+async def admin_get_job_applications(
+    job_id: int,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    """Admin: List applications for a specific job"""
+    return crud.get_job_applications_admin(db, job_id, skip, limit)
+
+@app.get("/api/admin/jobs/applications", response_model=List[schemas.JobApplicationResponse])
+async def admin_get_all_applications(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    """Admin: List all job applications across all jobs"""
+    return crud.get_all_applications_admin(db, skip, limit)
 
 # Admin - Users Management
 @app.get("/api/admin/users", response_model=List[schemas.UserResponse])
@@ -1195,8 +1448,11 @@ async def get_public_course_detail(
     lessons = crud.get_course_lessons(db, course_id)
     materials = crud.get_course_materials(db, course_id)
     
+    # Create response dict excluding relationships to avoid duplication
+    course_dict = {k: v for k, v in course.__dict__.items() if k not in ['lessons', 'materials', '_sa_instance_state']}
+    
     return schemas.CourseDetailResponse(
-        **course.__dict__,
+        **course_dict,
         lessons=[schemas.CourseLessonResponse(**lesson.__dict__) for lesson in lessons],
         materials=[schemas.CourseMaterialResponse(**material.__dict__) for material in materials]
     )
@@ -1886,10 +2142,16 @@ async def get_my_discussions(
 
 @app.on_event("startup")
 async def startup_event():
-    """Create predefined recruiter and sample jobs on startup"""
+    """Create predefined admin, recruiter and sample data on startup"""
     from database import SessionLocal
     db = SessionLocal()
     try:
+        # Create predefined admin
+        admin = crud.create_predefined_admin(db)
+        print("✅ Predefined admin account created/verified")
+        print("📧 Email: admin@architectureacademics.com")
+        print("🔑 Password: Admin@123")
+        
         # Create predefined recruiter
         recruiter = crud.create_predefined_recruiter(db)
         print("✅ Predefined recruiter account created/verified")
@@ -2732,6 +2994,936 @@ Any success stories or cautionary tales?""",
         print(f"❌ Error during startup: {e}")
     finally:
         db.close()
+
+# ==================== PUBLIC ROUTES ====================
+
+# Public Events Endpoint
+@app.get("/events", response_model=List[schemas.EventResponse])
+async def get_public_events(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """Get all events for public view"""
+    # Return all events without status filtering for now
+    return crud.get_events(db, skip=skip, limit=limit)
+
+# Public Workshops Endpoint
+@app.get("/workshops", response_model=List[schemas.WorkshopResponse])
+async def get_public_workshops(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """Get all workshops for public view"""
+    # Return all workshops without status filtering for now
+    return crud.get_workshops(db, skip=skip, limit=limit)
+
+# Public Courses Endpoint
+@app.get("/courses", response_model=List[schemas.CourseResponse])
+async def get_public_courses(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """Get all published courses for public view"""
+    return crud.get_courses(db, skip=skip, limit=limit, status="published")
+
+# ==================== ADMIN ROUTES ====================
+
+@app.get("/admin/stats")
+async def get_admin_dashboard_stats(
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get admin dashboard statistics"""
+    return crud.get_admin_stats(db)
+
+# Admin - Events Management
+@app.get("/admin/events", response_model=List[schemas.EventResponse])
+async def admin_get_all_events(
+    skip: int = 0,
+    limit: int = 100,
+    status: Optional[str] = None,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all events for admin"""
+    return crud.get_events(db, skip=skip, limit=limit, status=status)
+
+@app.post("/admin/events", response_model=schemas.EventResponse)
+async def admin_create_event(
+    event: schemas.EventCreate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Create new event"""
+    return crud.create_event(db, event, organizer_id=current_user.id)
+
+@app.get("/admin/events/{event_id}", response_model=schemas.EventResponse)
+async def admin_get_event(
+    event_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get event by ID"""
+    event = crud.get_event(db, event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return event
+
+@app.put("/admin/events/{event_id}", response_model=schemas.EventResponse)
+async def admin_update_event(
+    event_id: int,
+    event_update: schemas.EventUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Update event"""
+    updated_event = crud.update_event(db, event_id, event_update)
+    if not updated_event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return updated_event
+
+@app.delete("/admin/events/{event_id}")
+async def admin_delete_event(
+    event_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Delete event"""
+    success = crud.delete_event(db, event_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return {"message": "Event deleted successfully"}
+
+@app.get("/admin/events/{event_id}/registrations")
+async def admin_get_event_registrations(
+    event_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all registrations for an event with user details"""
+    # Check if event exists
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    # Get all registrations with user details
+    registrations = db.query(EventRegistration).filter(
+        EventRegistration.event_id == event_id
+    ).all()
+    
+    result = []
+    for reg in registrations:
+        user = db.query(User).filter(User.id == reg.participant_id).first()
+        if user:
+            result.append({
+                "registration_id": reg.id,
+                "registered_at": reg.registered_at,
+                "attended": reg.attended,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "full_name": f"{user.first_name} {user.last_name}"
+                }
+            })
+    
+    return {
+        "event_id": event_id,
+        "event_title": event.title,
+        "total_registrations": len(result),
+        "registrations": result
+    }
+
+# Event Registration (Public)
+@app.post("/events/{event_id}/register")
+async def register_for_event(
+    event_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Register current user for an event (free registration)"""
+    from database import EventRegistration
+    
+    # Check if event exists
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    # Check if event is full (count registrations directly)
+    if event.max_participants:
+        current_count = db.query(EventRegistration).filter(EventRegistration.event_id == event_id).count()
+        if current_count >= event.max_participants:
+            raise HTTPException(status_code=400, detail="Event is full")
+    
+    # Register user
+    registration = crud.register_for_event(db, event_id, current_user.id)
+    if not registration:
+        raise HTTPException(status_code=400, detail="You are already registered for this event")
+    
+    return {
+        "message": "Successfully registered for event",
+        "event_id": event_id,
+        "registration_id": registration.id,
+        "registered_at": registration.registered_at
+    }
+
+@app.get("/events/{event_id}/registration-status")
+async def check_event_registration_status(
+    event_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Check if current user is registered for an event"""
+    from database import EventRegistration
+    from sqlalchemy import and_
+    
+    registration = db.query(EventRegistration).filter(
+        and_(
+            EventRegistration.event_id == event_id,
+            EventRegistration.participant_id == current_user.id
+        )
+    ).first()
+    
+    return {
+        "is_registered": registration is not None,
+        "registration": {
+            "id": registration.id,
+            "registered_at": registration.registered_at,
+            "attended": registration.attended
+        } if registration else None
+    }
+
+@app.get("/api/event-registrations/my-events")
+async def get_my_events(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all registered events for current user"""
+    from database import EventRegistration
+    
+    registrations = db.query(EventRegistration).filter(
+        EventRegistration.participant_id == current_user.id
+    ).all()
+    
+    result = []
+    for registration in registrations:
+        event = db.query(Event).filter(Event.id == registration.event_id).first()
+        if event:
+            registered_count = db.query(EventRegistration).filter(
+                EventRegistration.event_id == event.id
+            ).count()
+            
+            result.append({
+                "id": registration.id,
+                "event_id": registration.event_id,
+                "registered_at": registration.registered_at.isoformat() if registration.registered_at else None,
+                "status": "confirmed",  # You can add status field to EventRegistration model if needed
+                "event": {
+                    "id": event.id,
+                    "title": event.title,
+                    "description": event.description,
+                    "image_url": event.image_url,
+                    "event_date": event.event_date.isoformat() if event.event_date else None,
+                    "event_time": event.event_time,
+                    "location": event.location,
+                    "capacity": event.capacity,
+                    "registered_count": registered_count,
+                    "event_type": event.event_type or "Conference"
+                }
+            })
+    
+    return result
+
+# Admin - Workshops Management
+@app.get("/admin/workshops", response_model=List[schemas.WorkshopResponse])
+async def admin_get_all_workshops(
+    skip: int = 0,
+    limit: int = 100,
+    status: Optional[str] = None,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all workshops for admin"""
+    query = db.query(Workshop)
+    if status:
+        query = query.filter(Workshop.status == status)
+    return query.order_by(Workshop.date.desc()).offset(skip).limit(limit).all()
+
+@app.post("/admin/workshops", response_model=schemas.WorkshopResponse)
+async def admin_create_workshop(
+    workshop: schemas.WorkshopCreate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Create new workshop"""
+    return crud.create_workshop(db, workshop, instructor_id=current_user.id)
+
+@app.get("/admin/workshops/{workshop_id}", response_model=schemas.WorkshopResponse)
+async def admin_get_workshop(
+    workshop_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get workshop by ID"""
+    workshop = crud.get_workshop(db, workshop_id)
+    if not workshop:
+        raise HTTPException(status_code=404, detail="Workshop not found")
+    return workshop
+
+@app.put("/admin/workshops/{workshop_id}", response_model=schemas.WorkshopResponse)
+async def admin_update_workshop(
+    workshop_id: int,
+    workshop_update: schemas.WorkshopUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Update workshop"""
+    updated_workshop = crud.update_workshop(db, workshop_id, workshop_update)
+    if not updated_workshop:
+        raise HTTPException(status_code=404, detail="Workshop not found")
+    return updated_workshop
+
+@app.delete("/admin/workshops/{workshop_id}")
+async def admin_delete_workshop(
+    workshop_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Delete workshop"""
+    success = crud.delete_workshop(db, workshop_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Workshop not found")
+    return {"message": "Workshop deleted successfully"}
+
+@app.get("/admin/workshops/{workshop_id}/registrations")
+async def admin_get_workshop_registrations(
+    workshop_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all registrations for a workshop with user details"""
+    # Check if workshop exists
+    workshop = db.query(Workshop).filter(Workshop.id == workshop_id).first()
+    if not workshop:
+        raise HTTPException(status_code=404, detail="Workshop not found")
+    
+    # Get all registrations with user details
+    registrations = db.query(WorkshopRegistration).filter(
+        WorkshopRegistration.workshop_id == workshop_id
+    ).all()
+    
+    result = []
+    for reg in registrations:
+        user = db.query(User).filter(User.id == reg.participant_id).first()
+        if user:
+            result.append({
+                "registration_id": reg.id,
+                "registered_at": reg.registered_at,
+                "attended": reg.attended,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "full_name": f"{user.first_name} {user.last_name}"
+                }
+            })
+    
+    return {
+        "workshop_id": workshop_id,
+        "workshop_title": workshop.title,
+        "total_registrations": len(result),
+        "registrations": result
+    }
+
+# Workshop Registration (Public)
+@app.post("/workshops/{workshop_id}/register")
+async def register_for_workshop(
+    workshop_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Register current user for a workshop (free registration)"""
+    # Check if workshop exists
+    workshop = db.query(Workshop).filter(Workshop.id == workshop_id).first()
+    if not workshop:
+        raise HTTPException(status_code=404, detail="Workshop not found")
+    
+    # Check if workshop is full (count registrations directly)
+    if workshop.max_participants:
+        current_count = db.query(WorkshopRegistration).filter(WorkshopRegistration.workshop_id == workshop_id).count()
+        if current_count >= workshop.max_participants:
+            raise HTTPException(status_code=400, detail="Workshop is full")
+    
+    # Register user
+    registration = crud.register_for_workshop(db, workshop_id, current_user.id)
+    if not registration:
+        raise HTTPException(status_code=400, detail="You are already registered for this workshop")
+    
+    return {
+        "message": "Successfully registered for workshop",
+        "workshop_id": workshop_id,
+        "registration_id": registration.id,
+        "registered_at": registration.registered_at
+    }
+
+@app.get("/workshops/{workshop_id}/registration-status")
+async def check_workshop_registration_status(
+    workshop_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Check if current user is registered for a workshop"""
+    from database import WorkshopRegistration
+    from sqlalchemy import and_
+    
+    registration = db.query(WorkshopRegistration).filter(
+        and_(
+            WorkshopRegistration.workshop_id == workshop_id,
+            WorkshopRegistration.participant_id == current_user.id
+        )
+    ).first()
+    
+    return {
+        "is_registered": registration is not None,
+        "registration": {
+            "id": registration.id,
+            "registered_at": registration.registered_at,
+            "attended": registration.attended
+        } if registration else None
+    }
+
+@app.get("/api/workshop-registrations/my-workshops")
+async def get_my_workshops(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all registered workshops for current user"""
+    from database import WorkshopRegistration
+    
+    registrations = db.query(WorkshopRegistration).filter(
+        WorkshopRegistration.participant_id == current_user.id
+    ).all()
+    
+    result = []
+    for registration in registrations:
+        workshop = db.query(Workshop).filter(Workshop.id == registration.workshop_id).first()
+        if workshop:
+            registered_count = db.query(WorkshopRegistration).filter(
+                WorkshopRegistration.workshop_id == workshop.id
+            ).count()
+            
+            result.append({
+                "id": registration.id,
+                "workshop_id": registration.workshop_id,
+                "registered_at": registration.registered_at.isoformat() if registration.registered_at else None,
+                "status": "confirmed",  # You can add status field to WorkshopRegistration model if needed
+                "workshop": {
+                    "id": workshop.id,
+                    "title": workshop.title,
+                    "description": workshop.description,
+                    "image_url": workshop.image_url,
+                    "date": workshop.date.isoformat() if workshop.date else None,
+                    "time": workshop.time,
+                    "location": workshop.location,
+                    "capacity": workshop.capacity,
+                    "registered_count": registered_count,
+                    "category": workshop.category,
+                    "skill_level": workshop.skill_level
+                }
+            })
+    
+    return result
+
+# Admin - Courses Management
+@app.get("/admin/courses", response_model=List[schemas.CourseResponse])
+async def admin_get_all_courses(
+    skip: int = 0,
+    limit: int = 100,
+    status: Optional[str] = None,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all courses for admin"""
+    query = db.query(Course)
+    if status:
+        query = query.filter(Course.status == status)
+    return query.order_by(Course.created_at.desc()).offset(skip).limit(limit).all()
+
+@app.post("/admin/courses", response_model=schemas.CourseResponse)
+async def admin_create_course(
+    course: schemas.CourseCreate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Create new course"""
+    return crud.create_course(db, course, instructor_id=current_user.id)
+
+@app.get("/admin/courses/{course_id}", response_model=schemas.CourseResponse)
+async def admin_get_course(
+    course_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get course by ID"""
+    course = crud.get_course(db, course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    return course
+
+@app.put("/admin/courses/{course_id}", response_model=schemas.CourseResponse)
+async def admin_update_course(
+    course_id: int,
+    course_update: schemas.CourseUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Update course"""
+    updated_course = crud.update_course(db, course_id, course_update)
+    if not updated_course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    return updated_course
+
+@app.delete("/admin/courses/{course_id}")
+async def admin_delete_course(
+    course_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Delete course"""
+    success = crud.delete_course(db, course_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Course not found")
+    return {"message": "Course deleted successfully"}
+
+# Admin - Jobs Management
+@app.get("/admin/jobs", response_model=List[schemas.JobResponse])
+async def admin_get_all_jobs(
+    skip: int = 0,
+    limit: int = 100,
+    status: Optional[str] = None,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all jobs for admin"""
+    query = db.query(Job)
+    if status:
+        query = query.filter(Job.status == status)
+    return query.order_by(Job.created_at.desc()).offset(skip).limit(limit).all()
+
+@app.put("/admin/jobs/{job_id}", response_model=schemas.JobResponse)
+async def admin_update_job(
+    job_id: int,
+    job_update: schemas.JobUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Update job"""
+    updated_job = crud.update_job(db, job_id, job_update)
+    if not updated_job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return updated_job
+
+@app.delete("/admin/jobs/{job_id}")
+async def admin_delete_job(
+    job_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Delete job"""
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    db.delete(job)
+    db.commit()
+    return {"message": "Job deleted successfully"}
+
+# Admin - Users Management
+@app.get("/admin/users", response_model=List[schemas.UserResponse])
+async def admin_get_all_users(
+    skip: int = 0,
+    limit: int = 100,
+    search: Optional[str] = None,
+    role: Optional[str] = None,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all users for admin"""
+    return crud.get_all_users_admin(db, skip=skip, limit=limit, search=search, role=role)
+
+@app.put("/admin/users/{user_id}/role")
+async def admin_update_user_role(
+    user_id: int,
+    role: schemas.UserRole,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Update user role"""
+    updated_user = crud.update_user_role(db, user_id, role)
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return updated_user
+
+@app.put("/admin/users/{user_id}/toggle-status")
+async def admin_toggle_user_status(
+    user_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Toggle user active status"""
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot deactivate your own account")
+    
+    updated_user = crud.toggle_user_status(db, user_id)
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return updated_user
+
+@app.delete("/admin/users/{user_id}")
+async def admin_delete_user(
+    user_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Delete user"""
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    
+    success = crud.delete_user(db, user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "User deleted successfully"}
+
+# Admin - Settings Management
+@app.get("/admin/settings")
+async def admin_get_all_settings(
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all system settings"""
+    settings = db.query(SystemSettings).all()
+    return settings
+
+@app.post("/admin/settings")
+async def admin_create_setting(
+    key: str = Form(...),
+    value: str = Form(...),
+    description: Optional[str] = Form(None),
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Create new setting"""
+    existing = db.query(SystemSettings).filter(SystemSettings.key == key).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Setting with this key already exists")
+    
+    setting = SystemSettings(
+        key=key,
+        value=value,
+        description=description,
+        updated_by=current_user.id
+    )
+    db.add(setting)
+    db.commit()
+    db.refresh(setting)
+    return setting
+
+@app.put("/admin/settings/{setting_id}")
+async def admin_update_setting(
+    setting_id: int,
+    value: str = Form(...),
+    description: Optional[str] = Form(None),
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Update setting"""
+    setting = db.query(SystemSettings).filter(SystemSettings.id == setting_id).first()
+    if not setting:
+        raise HTTPException(status_code=404, detail="Setting not found")
+    
+    setting.value = value
+    if description is not None:
+        setting.description = description
+    setting.updated_by = current_user.id
+    setting.updated_at = datetime.utcnow()
+    
+    db.commit()
+    db.refresh(setting)
+    return setting
+
+@app.delete("/admin/settings/{setting_id}")
+async def admin_delete_setting(
+    setting_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Delete setting"""
+    setting = db.query(SystemSettings).filter(SystemSettings.id == setting_id).first()
+    if not setting:
+        raise HTTPException(status_code=404, detail="Setting not found")
+    
+    db.delete(setting)
+    db.commit()
+    return {"message": "Setting deleted successfully"}
+
+# ===============================
+# COURSE ENROLLMENT ENDPOINTS
+# ===============================
+
+@app.post("/api/enrollments", response_model=schemas.CourseEnrollmentResponse)
+async def enroll_in_course(
+    enrollment: schemas.CourseEnrollmentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Enroll user in a course"""
+    course = crud.get_course_by_id(db, enrollment.course_id)
+    if not course or course.status != schemas.CourseStatus.PUBLISHED:
+        raise HTTPException(status_code=404, detail="Course not found or not available")
+    
+    try:
+        db_enrollment = crud.create_enrollment(db, enrollment.course_id, current_user.id)
+        return db_enrollment
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/enrollments", response_model=List[schemas.CourseEnrollmentResponse])
+async def get_user_enrollments(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all enrollments for current user"""
+    return crud.get_user_enrollments(db, current_user.id)
+
+@app.get("/api/courses/{course_id}/check-enrollment")
+async def check_enrollment(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Check if user is enrolled in course"""
+    enrollment = crud.get_enrollment(db, course_id, current_user.id)
+    return {
+        "enrolled": enrollment is not None,
+        "enrollment": enrollment if enrollment else None
+    }
+
+@app.get("/api/enrollments/course/{course_id}")
+async def get_enrollment_by_course(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get enrollment for a specific course"""
+    enrollment = crud.get_enrollment(db, course_id, current_user.id)
+    if not enrollment:
+        raise HTTPException(status_code=404, detail="Not enrolled in this course")
+    return enrollment
+
+@app.get("/api/enrollments/my-courses")
+async def get_my_courses(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all enrolled courses with details for current user"""
+    enrollments = db.query(CourseEnrollment).filter(
+        CourseEnrollment.student_id == current_user.id
+    ).all()
+    
+    result = []
+    for enrollment in enrollments:
+        course = crud.get_course_by_id(db, enrollment.course_id)
+        if course:
+            # Safely derive instructor name (Course has instructor_id and relationship 'instructor')
+            instructor_name = None
+            try:
+                if getattr(course, "instructor", None):
+                    first = getattr(course.instructor, "first_name", "") or ""
+                    last = getattr(course.instructor, "last_name", "") or ""
+                    full = f"{first} {last}".strip()
+                    instructor_name = full if full else None
+            except Exception:
+                instructor_name = None
+
+            result.append({
+                "id": enrollment.id,
+                "course_id": enrollment.course_id,
+                "enrolled_at": enrollment.enrolled_at.isoformat() if enrollment.enrolled_at else None,
+                "progress": enrollment.progress_percentage or 0,
+                "last_accessed": enrollment.last_accessed_at.isoformat() if enrollment.last_accessed_at else None,
+                "completed": enrollment.completed or False,
+                "course": {
+                    "id": course.id,
+                    "title": course.title,
+                    "description": course.description,
+                    "image_url": course.image_url,
+                    "level": course.level,
+                    "duration": course.duration,
+                    "instructor_name": instructor_name,
+                    "lessons": [{"id": l.id, "title": l.title, "is_free": l.is_free} for l in course.lessons] if course.lessons else []
+                }
+            })
+    
+    return result
+
+# ===============================
+# LESSON PROGRESS ENDPOINTS
+# ===============================
+
+@app.post("/api/progress", response_model=schemas.LessonProgressResponse)
+async def update_lesson_progress(
+    lesson_id: int = Form(...),
+    enrollment_id: int = Form(...),
+    current_time: int = Form(0),
+    completed: bool = Form(False),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Update or create lesson progress"""
+    enrollment = db.query(CourseEnrollment).filter(
+        CourseEnrollment.id == enrollment_id,
+        CourseEnrollment.student_id == current_user.id
+    ).first()
+    
+    if not enrollment:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    progress = crud.create_or_update_lesson_progress(
+        db, lesson_id, enrollment_id, current_time, completed
+    )
+    
+    all_progress = crud.get_enrollment_progress(db, enrollment_id)
+    if all_progress:
+        completed_lessons = sum(1 for p in all_progress if p.completed)
+        total_lessons = len(enrollment.course.lessons)
+        if total_lessons > 0:
+            progress_percentage = (completed_lessons / total_lessons) * 100
+            crud.update_enrollment_progress(db, enrollment_id, progress_percentage)
+    
+    return progress
+
+@app.get("/api/lessons/{lesson_id}/progress")
+async def get_lesson_progress_api(
+    lesson_id: int,
+    enrollment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get progress for a specific lesson"""
+    enrollment = db.query(CourseEnrollment).filter(
+        CourseEnrollment.id == enrollment_id,
+        CourseEnrollment.student_id == current_user.id
+    ).first()
+    
+    if not enrollment:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    progress = crud.get_lesson_progress(db, lesson_id, enrollment_id)
+    return progress if progress else {"current_time": 0, "completed": False}
+
+# ===============================
+# COURSE QUESTION/DOUBT ENDPOINTS
+# ===============================
+
+@app.post("/api/questions", response_model=schemas.CourseQuestionResponse)
+async def create_question(
+    question: schemas.CourseQuestionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new question for a lesson"""
+    lesson = db.query(CourseLesson).filter(CourseLesson.id == question.lesson_id).first()
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    enrollment = crud.get_enrollment(db, lesson.course_id, current_user.id)
+    if not enrollment:
+        raise HTTPException(status_code=403, detail="You must be enrolled to ask questions")
+    
+    return crud.create_course_question(db, question, current_user.id)
+
+@app.get("/api/lessons/{lesson_id}/questions", response_model=List[schemas.CourseQuestionResponse])
+async def get_lesson_questions_api(
+    lesson_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all questions for a lesson"""
+    questions = crud.get_lesson_questions(db, lesson_id)
+    result = []
+    for question in questions:
+        replies = crud.get_question_replies(db, question.id)
+        result.append(schemas.CourseQuestionResponse(
+            **question.__dict__,
+            replies_count=len(replies),
+            replies=[schemas.QuestionReplyResponse(**reply.__dict__) for reply in replies]
+        ))
+    return result
+
+@app.post("/api/questions/{question_id}/replies", response_model=schemas.QuestionReplyResponse)
+async def create_reply_api(
+    question_id: int,
+    content: str = Form(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Reply to a question"""
+    question = crud.get_question_by_id(db, question_id)
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    lesson = db.query(CourseLesson).filter(CourseLesson.id == question.lesson_id).first()
+    is_instructor = (lesson and lesson.course.instructor_id == current_user.id) or current_user.role == schemas.UserRole.ADMIN
+    
+    reply = schemas.QuestionReplyCreate(question_id=question_id, content=content)
+    return crud.create_question_reply(db, reply, current_user.id, is_instructor)
+
+@app.get("/api/lessons/{lesson_id}/video-stream")
+async def stream_lesson_video(
+    lesson_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Stream lesson video with range support"""
+    lesson = db.query(CourseLesson).filter(CourseLesson.id == lesson_id).first()
+    if not lesson or not lesson.video_url:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    if not lesson.is_free:
+        enrollment = crud.get_enrollment(db, lesson.course_id, current_user.id)
+        if not enrollment:
+            raise HTTPException(status_code=403, detail="You must be enrolled to access this video")
+    
+    video_path = Path(lesson.video_url)
+    if not video_path.exists():
+        raise HTTPException(status_code=404, detail="Video file not found")
+    
+    file_size = video_path.stat().st_size
+    range_header = request.headers.get("range")
+    
+    if range_header:
+        range_match = range_header.replace("bytes=", "").split("-")
+        start = int(range_match[0]) if range_match[0] else 0
+        end = int(range_match[1]) if range_match[1] else file_size - 1
+        
+        with open(video_path, "rb") as video:
+            video.seek(start)
+            data = video.read(end - start + 1)
+        
+        headers = {
+            "Content-Range": f"bytes {start}-{end}/{file_size}",
+            "Accept-Ranges": "bytes",
+            "Content-Length": str(len(data)),
+            "Content-Type": "video/mp4",
+        }
+        return Response(content=data, status_code=206, headers=headers)
+    
+    return FileResponse(video_path, media_type="video/mp4")
 
 if __name__ == "__main__":
     import uvicorn

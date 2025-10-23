@@ -284,3 +284,74 @@ html {
   animation: shimmer 2s infinite;
 }
 
+/* Modern Typography Styles */
+.font-display {
+  font-family: var(--font-syne), var(--font-poppins), system-ui, -apple-system, sans-serif;
+}
+
+/* Smooth gradient animation for hero text */
+@keyframes gradient-xy {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.text-gradient-animate {
+  background-size: 200% auto;
+  animation: gradient-xy 3s ease infinite;
+}
+
+/* Modern button hover effects */
+.btn-modern {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-modern::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-modern:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Glass morphism effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, textarea, select {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Modern card shadows */
+.shadow-modern {
+  box-shadow: 
+    0 1px 3px 0 rgba(147, 51, 234, 0.1),
+    0 1px 2px -1px rgba(147, 51, 234, 0.1);
+}
+
+.shadow-modern-lg {
+  box-shadow: 
+    0 10px 15px -3px rgba(147, 51, 234, 0.1),
+    0 4px 6px -4px rgba(147, 51, 234, 0.1);
+}
+

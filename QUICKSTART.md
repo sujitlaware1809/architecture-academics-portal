@@ -5,9 +5,9 @@ Get the Architecture Academics platform up and running in 5 minutes!
 ## Prerequisites Check
 
 Before starting, make sure you have:
-- ✅ Python 3.12 or higher
-- ✅ Node.js 18 or higher
-- ✅ npm or pnpm package manager
+-  Python 3.12 or higher
+-  Node.js 18 or higher
+-  npm or pnpm package manager
 
 ## 🎯 Quick Setup (Windows)
 

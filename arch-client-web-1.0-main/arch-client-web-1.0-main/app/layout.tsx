@@ -1,18 +1,28 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Space_Grotesk, DM_Sans } from "next/font/google"
+import { Inter, Poppins, Syne } from "next/font/google"
 import "./globals.css"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import { AuthMiddleware } from "@/components/auth-middleware"
 
-const spaceGrotesk = Space_Grotesk({
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-space-grotesk",
+  variable: "--font-inter",
 })
 
-const dmSans = DM_Sans({
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-poppins",
+})
+
+const syne = Syne({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-dm-sans",
+  variable: "--font-syne",
 })
 
 export const metadata: Metadata = {
@@ -27,8 +37,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${dmSans.variable} antialiased`}>
-      <body className="font-sans">{children}</body>
+    <html lang="en" className={`${inter.variable} ${poppins.variable} ${syne.variable} antialiased`}>
+      <body className="font-inter flex flex-col min-h-screen">
+        <AuthMiddleware>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </AuthMiddleware>
+      </body>
     </html>
   )
 }

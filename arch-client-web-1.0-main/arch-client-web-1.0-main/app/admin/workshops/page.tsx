@@ -9,88 +9,65 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Trash2, Plus, Calendar, MapPin, Users, DollarSign } from 'lucide-react';
+import { Edit, Trash2, Plus, Calendar, MapPin, Users, DollarSign, Eye, Mail, User, X } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { api } from '@/lib/api';
 
 interface Workshop {
   id: number;
   title: string;
   description: string;
-  instructor: string;
+  short_description?: string;
   date: string;
-  time: string;
-  location: string;
-  capacity: number;
+  duration: number;  // Hours
+  max_participants: number;
   price: number;
+  currency: string;
+  location?: string;
+  image_url?: string;
+  requirements?: string;
   status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
-  registered_users: number;
+  registered_count: number;
+  instructor_id?: number;
   created_at: string;
+  updated_at: string;
 }
 
 export default function AdminWorkshopsPage() {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
+  const [showRegistrations, setShowRegistrations] = useState(false);
+  const [selectedWorkshopRegistrations, setSelectedWorkshopRegistrations] = useState<any>(null);
+  const [loadingRegistrations, setLoadingRegistrations] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    instructor: '',
+    short_description: '',
     date: '',
-    time: '',
+    duration: 2,
     location: '',
-    capacity: 0,
+    max_participants: 30,
     price: 0,
+    currency: 'INR',
+    requirements: '',
     status: 'upcoming' as Workshop['status']
   });
 
   // Fetch workshops from backend
   const fetchWorkshops = async () => {
     try {
-      const response = await fetch('/api/admin/workshops');
-      if (response.ok) {
-        const data = await response.json();
-        setWorkshops(data);
-      } else {
-        // Fallback mock data if backend is not available
-        setWorkshops([
-          {
-            id: 1,
-            title: "Sustainable Architecture Design",
-            description: "Learn about eco-friendly building practices and sustainable design principles.",
-            instructor: "Dr. Sarah Wilson",
-            date: "2025-10-15",
-            time: "10:00",
-            location: "Virtual",
-            capacity: 50,
-            price: 299,
-            status: "upcoming",
-            registered_users: 23,
-            created_at: "2025-09-01T10:00:00Z"
-          },
-          {
-            id: 2,
-            title: "3D Modeling with Revit",
-            description: "Master advanced 3D modeling techniques using Autodesk Revit.",
-            instructor: "Prof. Michael Chen",
-            date: "2025-10-22",
-            time: "14:00",
-            location: "Room 101, Architecture Building",
-            capacity: 30,
-            price: 399,
-            status: "upcoming",
-            registered_users: 18,
-            created_at: "2025-09-05T14:00:00Z"
-          }
-        ]);
+      setLoading(true);
+      const response = await api.get('/admin/workshops');
+      if (response.data) {
+        setWorkshops(response.data);
       }
     } catch (error) {
       console.error('Error fetching workshops:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch workshops",
-        variant: "destructive"
-      });
+      setError('Failed to fetch workshops');
     } finally {
       setLoading(false);
     }
@@ -102,51 +79,54 @@ export default function AdminWorkshopsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError('');
     
     try {
-      const url = editingWorkshop 
-        ? `/api/admin/workshops/${editingWorkshop.id}`
-        : '/api/admin/workshops';
-      
-      const method = editingWorkshop ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const payload = {
+        ...formData,
+        date: new Date(formData.date).toISOString(),
+        duration: Number(formData.duration),
+        max_participants: Number(formData.max_participants),
+        price: Number(formData.price)
+      };
 
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: editingWorkshop ? "Workshop updated successfully" : "Workshop created successfully"
-        });
-        setIsDialogOpen(false);
-        setEditingWorkshop(null);
-        setFormData({
-          title: '',
-          description: '',
-          instructor: '',
-          date: '',
-          time: '',
-          location: '',
-          capacity: 0,
-          price: 0,
-          status: 'upcoming'
-        });
-        fetchWorkshops();
+      if (editingWorkshop) {
+        await api.put(`/admin/workshops/${editingWorkshop.id}`, payload);
       } else {
-        throw new Error('Failed to save workshop');
+        await api.post('/admin/workshops', payload);
       }
-    } catch (error) {
-      console.error('Error saving workshop:', error);
+
+      toast({
+        title: "Success",
+        description: editingWorkshop ? "Workshop updated successfully" : "Workshop created successfully"
+      });
+      setIsDialogOpen(false);
+      setEditingWorkshop(null);
+      setFormData({
+        title: '',
+        description: '',
+        short_description: '',
+        date: '',
+        duration: 2,
+        location: '',
+        max_participants: 30,
+        price: 0,
+        currency: 'INR',
+        requirements: '',
+        status: 'upcoming'
+      });
+      fetchWorkshops();
+    } catch (err: any) {
+      console.error('Error saving workshop:', err);
+      setError(err.response?.data?.detail || 'Failed to save workshop');
       toast({
         title: "Error",
-        description: "Failed to save workshop",
+        description: err.response?.data?.detail || "Failed to save workshop",
         variant: "destructive"
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -155,12 +135,14 @@ export default function AdminWorkshopsPage() {
     setFormData({
       title: workshop.title,
       description: workshop.description,
-      instructor: workshop.instructor,
-      date: workshop.date,
-      time: workshop.time,
-      location: workshop.location,
-      capacity: workshop.capacity,
+      short_description: workshop.short_description || '',
+      date: new Date(workshop.date).toISOString().slice(0, 16),
+      duration: workshop.duration,
+      location: workshop.location || '',
+      max_participants: workshop.max_participants,
       price: workshop.price,
+      currency: workshop.currency || 'INR',
+      requirements: workshop.requirements || '',
       status: workshop.status
     });
     setIsDialogOpen(true);
@@ -170,26 +152,33 @@ export default function AdminWorkshopsPage() {
     if (!confirm('Are you sure you want to delete this workshop?')) return;
 
     try {
-      const response = await fetch(`/api/admin/workshops/${id}`, {
-        method: 'DELETE',
+      await api.delete(`/admin/workshops/${id}`);
+      toast({
+        title: "Success",
+        description: "Workshop deleted successfully"
       });
-
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: "Workshop deleted successfully"
-        });
-        fetchWorkshops();
-      } else {
-        throw new Error('Failed to delete workshop');
-      }
-    } catch (error) {
-      console.error('Error deleting workshop:', error);
+      fetchWorkshops();
+    } catch (err: any) {
+      console.error('Error deleting workshop:', err);
       toast({
         title: "Error",
-        description: "Failed to delete workshop",
+        description: err.response?.data?.detail || "Failed to delete workshop",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleViewRegistrations = async (workshop: Workshop) => {
+    setLoadingRegistrations(true);
+    setShowRegistrations(true);
+    try {
+      const response = await api.get(`/admin/workshops/${workshop.id}/registrations`);
+      setSelectedWorkshopRegistrations(response.data);
+    } catch (err: any) {
+      console.error("Error fetching registrations:", err);
+      setError(err.response?.data?.detail || "Failed to load registrations");
+    } finally {
+      setLoadingRegistrations(false);
     }
   };
 
@@ -226,12 +215,14 @@ export default function AdminWorkshopsPage() {
               setFormData({
                 title: '',
                 description: '',
-                instructor: '',
+                short_description: '',
                 date: '',
-                time: '',
+                duration: 2,
                 location: '',
-                capacity: 0,
+                max_participants: 30,
                 price: 0,
+                currency: 'INR',
+                requirements: '',
                 status: 'upcoming'
               });
             }}>
@@ -261,12 +252,12 @@ export default function AdminWorkshopsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="instructor">Instructor</Label>
+                  <Label htmlFor="short_description">Short Description</Label>
                   <Input
-                    id="instructor"
-                    value={formData.instructor}
-                    onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
-                    required
+                    id="short_description"
+                    value={formData.short_description}
+                    onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
+                    placeholder="Brief summary for cards"
                   />
                 </div>
               </div>
@@ -283,10 +274,10 @@ export default function AdminWorkshopsPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
+                  <Label htmlFor="date">Date & Time</Label>
                   <Input
                     id="date"
-                    type="date"
+                    type="datetime-local"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     required
@@ -294,12 +285,13 @@ export default function AdminWorkshopsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="time">Time</Label>
+                  <Label htmlFor="duration">Duration (hours)</Label>
                   <Input
-                    id="time"
-                    type="time"
-                    value={formData.time}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                    id="duration"
+                    type="number"
+                    min="1"
+                    value={formData.duration}
+                    onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 1 })}
                     required
                   />
                 </div>
@@ -318,44 +310,71 @@ export default function AdminWorkshopsPage() {
               
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="capacity">Capacity</Label>
+                  <Label htmlFor="max_participants">Max Participants</Label>
                   <Input
-                    id="capacity"
+                    id="max_participants"
                     type="number"
-                    value={formData.capacity}
-                    onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) })}
+                    value={formData.max_participants}
+                    onChange={(e) => setFormData({ ...formData, max_participants: parseInt(e.target.value) || 1 })}
                     min="1"
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price ($)</Label>
+                  <Label htmlFor="price">Price</Label>
                   <Input
                     id="price"
                     type="number"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) })}
+                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
                     min="0"
+                    step="0.01"
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
+                  <Label htmlFor="currency">Currency</Label>
                   <select
-                    id="status"
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as Workshop['status'] })}
+                    id="currency"
+                    value={formData.currency}
+                    onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                     required
                   >
-                    <option value="upcoming">Upcoming</option>
-                    <option value="ongoing">Ongoing</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="requirements">Requirements (optional)</Label>
+                <Textarea
+                  id="requirements"
+                  value={formData.requirements}
+                  onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                  placeholder="Prerequisites or requirements for participants"
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <select
+                  id="status"
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as Workshop['status'] })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                  required
+                >
+                  <option value="upcoming">Upcoming</option>
+                  <option value="ongoing">Ongoing</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
               </div>
               
               <DialogFooter>
@@ -402,7 +421,7 @@ export default function AdminWorkshopsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {workshops.reduce((sum, w) => sum + w.registered_users, 0)}
+              {workshops.reduce((sum, w) => sum + (w.registered_count || 0), 0)}
             </div>
           </CardContent>
         </Card>
@@ -414,7 +433,7 @@ export default function AdminWorkshopsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${workshops.reduce((sum, w) => sum + (w.price * w.registered_users), 0).toLocaleString()}
+              ₹{workshops.reduce((sum, w) => sum + (w.price * (w.registered_count || 0)), 0).toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -433,10 +452,10 @@ export default function AdminWorkshopsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
-                <TableHead>Instructor</TableHead>
                 <TableHead>Date & Time</TableHead>
+                <TableHead>Duration</TableHead>
                 <TableHead>Location</TableHead>
-                <TableHead>Capacity</TableHead>
+                <TableHead>Registrations</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
@@ -449,33 +468,42 @@ export default function AdminWorkshopsPage() {
                     <div>
                       <div className="font-medium">{workshop.title}</div>
                       <div className="text-sm text-muted-foreground truncate max-w-xs">
-                        {workshop.description}
+                        {workshop.short_description || workshop.description}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{workshop.instructor}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
                       <div>
                         <div>{new Date(workshop.date).toLocaleDateString()}</div>
-                        <div className="text-sm text-muted-foreground">{workshop.time}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(workshop.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </div>
                       </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {workshop.duration}h
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-                      <span className="truncate max-w-xs">{workshop.location}</span>
+                      <span className="truncate max-w-xs">{workshop.location || 'TBD'}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <Users className="h-4 w-4 mr-1 text-muted-foreground" />
-                      <span>{workshop.registered_users}/{workshop.capacity}</span>
+                      <span>{workshop.registered_count || 0}/{workshop.max_participants}</span>
                     </div>
                   </TableCell>
-                  <TableCell>${workshop.price}</TableCell>
+                  <TableCell>
+                    {workshop.currency === 'INR' ? '₹' : workshop.currency === 'EUR' ? '€' : '$'}
+                    {workshop.price.toLocaleString()}
+                  </TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(workshop.status)}>
                       {workshop.status}
@@ -483,6 +511,14 @@ export default function AdminWorkshopsPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewRegistrations(workshop)}
+                        title="View Registrations"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -505,6 +541,143 @@ export default function AdminWorkshopsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Registrations Modal */}
+      {showRegistrations && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Workshop Registrations
+                  </h2>
+                  {selectedWorkshopRegistrations && (
+                    <p className="text-gray-600 mt-1">
+                      {selectedWorkshopRegistrations.workshop_title}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    setShowRegistrations(false);
+                    setSelectedWorkshopRegistrations(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+              {loadingRegistrations ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                </div>
+              ) : selectedWorkshopRegistrations?.registrations?.length > 0 ? (
+                <div>
+                  <div className="mb-4 p-4 bg-purple-50 rounded-lg">
+                    <p className="text-sm text-purple-900">
+                      <span className="font-semibold">Total Registrations:</span>{" "}
+                      {selectedWorkshopRegistrations.total_registrations}
+                    </p>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200 bg-gray-50">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                            Name
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                            Email
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                            Registered At
+                          </th>
+                          <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                            Attended
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedWorkshopRegistrations.registrations.map((reg: any) => (
+                          <tr
+                            key={reg.registration_id}
+                            className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex items-center">
+                                <User className="h-4 w-4 text-gray-400 mr-2" />
+                                <span className="text-sm text-gray-900">
+                                  {reg.user.full_name || `${reg.user.first_name} ${reg.user.last_name}`}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center">
+                                <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                                <span className="text-sm text-gray-600">
+                                  {reg.user.email}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="text-sm text-gray-600">
+                                {new Date(reg.registered_at).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              {reg.attended ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  Yes
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                  No
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <User className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg">No registrations yet</p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Users who register for this workshop will appear here
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 bg-gray-50">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowRegistrations(false);
+                  setSelectedWorkshopRegistrations(null);
+                }}
+                className="w-full"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

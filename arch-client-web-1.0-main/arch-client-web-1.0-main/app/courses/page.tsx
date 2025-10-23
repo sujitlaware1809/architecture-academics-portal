@@ -27,393 +27,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
-// Mock course data with FREE trial system
-const mockCourses = [
-  {
-    id: 1,
-    title: "Fundamentals of Architectural Design",
-    description: "Learn the fundamental principles of architectural design including composition, form, space, and structure. This course covers both theoretical concepts and practical applications.",
-    thumbnail: "/placeholder.jpg",
-    tags: ["Beginner", "Design", "Theory"],
-    rating: 4.5,
-    students: 1243,
-    duration: "12 weeks",
-    lastUpdated: "August 2025",
-    isFree: true,
-    hasFreePreview: true,
-    totalLessons: 12,
-    freeLessons: 1,
-    isNew: true,
-    isTrending: true,
-    syllabus: [
-      "Introduction to Architectural Principles (FREE PREVIEW)",
-      "Form and Space Analysis",
-      "Structural Concepts",
-      "Design Process Methodology",
-      "Case Studies of Influential Buildings"
-    ],
-    lessons: [
-      {
-        id: 1,
-        title: "Introduction to Architectural Principles",
-        duration: "15:30",
-        isFree: true,
-        videoUrl: "/AWS.mp4",
-        description: "FREE PREVIEW - Learn the fundamental principles that guide architectural design"
-      },
-      {
-        id: 2,
-        title: "Form and Space Analysis",
-        duration: "12:45",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Understanding how form and space interact in architectural design"
-      },
-      {
-        id: 3,
-        title: "Structural Concepts",
-        duration: "18:20",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Basic structural principles for architects"
-      },
-      {
-        id: 4,
-        title: "Design Process Methodology",
-        duration: "14:10",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Step-by-step approach to architectural design"
-      },
-      {
-        id: 5,
-        title: "Case Studies of Influential Buildings",
-        duration: "20:15",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Analysis of iconic architectural works"
-      }
-    ]
-  },
-  {
-    id: 2,
-    title: "Sustainable Architecture: Green Building Design",
-    description: "Explore sustainable design principles and green building practices. Learn how to integrate environmentally responsible approaches into architectural projects.",
-    thumbnail: "/placeholder.jpg",
-    tags: ["Intermediate", "Sustainability", "Green Design"],
-    rating: 4.8,
-    students: 856,
-    duration: "8 weeks",
-    lastUpdated: "September 2025",
-    isFree: true,
-    hasFreePreview: true,
-    totalLessons: 10,
-    freeLessons: 1,
-    isNew: false,
-    isTrending: true,
-    syllabus: [
-      "Principles of Sustainable Design (FREE PREVIEW)",
-      "Energy Efficiency in Buildings",
-      "Sustainable Materials and Resources",
-      "Water Conservation Strategies",
-      "LEED Certification Process"
-    ],
-    lessons: [
-      {
-        id: 1,
-        title: "Principles of Sustainable Design",
-        duration: "16:45",
-        isFree: true,
-        videoUrl: "/AWS.mp4",
-        description: "FREE PREVIEW - Introduction to sustainable architecture principles"
-      },
-      {
-        id: 2,
-        title: "Energy Efficiency in Buildings",
-        duration: "19:30",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Strategies for creating energy-efficient buildings"
-      },
-      {
-        id: 3,
-        title: "Sustainable Materials and Resources",
-        duration: "14:20",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Choosing eco-friendly building materials"
-      },
-      {
-        id: 4,
-        title: "Water Conservation Strategies",
-        duration: "13:15",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Implementing water-saving systems in buildings"
-      },
-      {
-        id: 5,
-        title: "LEED Certification Process",
-        duration: "22:10",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Understanding and achieving LEED certification"
-      }
-    ]
-  },
-  {
-    id: 3,
-    title: "Digital Modeling for Architects",
-    description: "Master digital modeling tools essential for modern architectural practice. Covers 3D modeling, rendering, and digital presentation techniques.",
-    thumbnail: "/placeholder.jpg",
-    tags: ["Advanced", "Digital Tools", "3D Modeling"],
-    rating: 4.2,
-    students: 721,
-    duration: "10 weeks",
-    lastUpdated: "July 2025",
-    isFree: true,
-    hasFreePreview: true,
-    totalLessons: 15,
-    freeLessons: 1,
-    isNew: false,
-    isTrending: false,
-    syllabus: [
-      "Introduction to 3D Modeling Software (FREE PREVIEW)",
-      "Advanced Modeling Techniques",
-      "Material Application and Texturing",
-      "Lighting and Rendering",
-      "Portfolio-Ready Presentation Methods"
-    ],
-    lessons: [
-      {
-        id: 1,
-        title: "Introduction to 3D Modeling Software",
-        duration: "18:40",
-        isFree: true,
-        videoUrl: "/AWS.mp4",
-        description: "FREE PREVIEW - Getting started with 3D modeling tools"
-      },
-      {
-        id: 2,
-        title: "Advanced Modeling Techniques",
-        duration: "25:15",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Master complex modeling workflows"
-      },
-      {
-        id: 3,
-        title: "Material Application and Texturing",
-        duration: "20:30",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Creating realistic materials and textures"
-      },
-      {
-        id: 4,
-        title: "Lighting and Rendering",
-        duration: "22:45",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Professional lighting and rendering techniques"
-      },
-      {
-        id: 5,
-        title: "Portfolio-Ready Presentation Methods",
-        duration: "17:20",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Creating stunning architectural presentations"
-      }
-    ]
-  },
-  {
-    id: 4,
-    title: "Introduction to Urban Planning",
-    description: "Explore the fundamentals of urban planning and design. Learn about city development patterns, zoning, public spaces, and sustainable urban strategies.",
-    thumbnail: "/placeholder.jpg",
-    tags: ["Beginner", "Urban Design", "Planning"],
-    rating: 4.6,
-    students: 932,
-    duration: "9 weeks",
-    lastUpdated: "August 2025",
-    isFree: true,
-    hasFreePreview: true,
-    totalLessons: 8,
-    freeLessons: 2,
-    isNew: true,
-    isTrending: false,
-    syllabus: [
-      "History of Urban Development (FREE)",
-      "City Planning Principles (FREE)",
-      "Zoning and Land Use",
-      "Transportation Systems",
-      "Community Development Strategies"
-    ],
-    lessons: [
-      {
-        id: 1,
-        title: "History of Urban Development",
-        duration: "14:25",
-        isFree: true,
-        videoUrl: "/AWS.mp4",
-        description: "FREE - Evolution of urban planning through history"
-      },
-      {
-        id: 2,
-        title: "City Planning Principles",
-        duration: "16:50",
-        isFree: true,
-        videoUrl: "/AWS.mp4",
-        description: "FREE - Core principles of effective city planning"
-      },
-      {
-        id: 3,
-        title: "Zoning and Land Use",
-        duration: "19:30",
-        isFree: false,
-        videoUrl: "/AWS.mp4",
-        description: "Understanding zoning laws and land use planning"
-      }
-    ]
-  },
-  {
-    id: 5,
-    title: "Architectural History: Ancient to Modern",
-    description: "A comprehensive journey through architectural history, from ancient civilizations to contemporary movements. Analyze key buildings and understand their cultural context.",
-    thumbnail: "/placeholder.jpg",
-    tags: ["Intermediate", "History", "Theory"],
-    rating: 4.9,
-    students: 1587,
-    duration: "14 weeks",
-    lastUpdated: "June 2025",
-    isFree: false,
-    hasFreePreview: true,
-    totalLessons: 16,
-    freeLessons: 1,
-    isNew: false,
-    isTrending: true,
-    syllabus: [
-      "Ancient Architectural Traditions (FREE)",
-      "Classical and Renaissance Architecture",
-      "Industrial Revolution and Modern Movement",
-      "Postmodernism and Contemporary Trends",
-      "Critical Analysis of Historical Buildings"
-    ],
-    lessons: [
-      {
-        id: 1,
-        title: "Ancient Architectural Traditions",
-        duration: "21:15",
-        isFree: true,
-        videoUrl: "/AWS.mp4",
-        description: "FREE - Exploring ancient architectural styles and techniques"
-      }
-    ]
-  },
-  {
-    id: 6,
-    title: "Architectural Drawing and Visualization",
-    description: "Develop essential drawing and visualization skills for architectural representation. Covers both traditional hand drawing and digital visualization techniques.",
-    thumbnail: "/placeholder.jpg",
-    tags: ["Beginner", "Drawing", "Visualization"],
-    rating: 4.3,
-    students: 645,
-    duration: "8 weeks",
-    lastUpdated: "September 2025",
-    isFree: false,
-    hasFreePreview: true,
-    totalLessons: 10,
-    freeLessons: 1,
-    isNew: false,
-    isTrending: false,
-    syllabus: [
-      "Fundamentals of Architectural Drawing (FREE)",
-      "Perspective and Spatial Representation",
-      "Technical Drawing and Standards",
-      "Digital Visualization Techniques",
-      "Presentation Methods for Clients"
-    ],
-    lessons: [
-      {
-        id: 1,
-        title: "Fundamentals of Architectural Drawing",
-        duration: "17:30",
-        isFree: true,
-        videoUrl: "/AWS.mp4",
-        description: "FREE - Basic drawing techniques for architects"
-      }
-    ]
-  },
-  {
-    id: 7,
-    title: "Construction Management for Architects",
-    description: "Learn the principles of construction management from an architectural perspective. Covers project planning, scheduling, budgeting, and site management.",
-    thumbnail: "/placeholder.jpg",
-    tags: ["Advanced", "Construction", "Management"],
-    rating: 4.7,
-    students: 512,
-    duration: "10 weeks",
-    lastUpdated: "July 2025",
-    isFree: false,
-    hasFreePreview: true,
-    totalLessons: 12,
-    freeLessons: 1,
-    isNew: true,
-    isTrending: false,
-    syllabus: [
-      "Project Planning and Organization (FREE)",
-      "Cost Estimation and Budgeting",
-      "Construction Scheduling",
-      "Contract Administration",
-      "Site Management and Safety"
-    ],
-    lessons: [
-      {
-        id: 1,
-        title: "Project Planning and Organization",
-        duration: "19:45",
-        isFree: true,
-        videoUrl: "/AWS.mp4",
-        description: "FREE - Essential project planning for construction management"
-      }
-    ]
-  },
-  {
-    id: 8,
-    title: "Architectural Acoustics",
-    description: "Understand the principles of architectural acoustics and their application in building design. Learn to create spaces with optimal sound performance.",
-    thumbnail: "/placeholder.jpg",
-    tags: ["Intermediate", "Acoustics", "Specialized"],
-    rating: 4.4,
-    students: 387,
-    duration: "6 weeks",
-    lastUpdated: "August 2025",
-    isFree: false,
-    hasFreePreview: true,
-    totalLessons: 8,
-    freeLessons: 1,
-    isNew: false,
-    isTrending: false,
-    syllabus: [
-      "Fundamentals of Sound and Acoustics (FREE)",
-      "Room Acoustics and Design",
-      "Sound Isolation Techniques",
-      "Mechanical System Noise Control",
-      "Acoustic Modeling and Testing"
-    ],
-    lessons: [
-      {
-        id: 1,
-        title: "Fundamentals of Sound and Acoustics",
-        duration: "16:20",
-        isFree: true,
-        videoUrl: "/AWS.mp4",
-        description: "FREE - Basic principles of sound and acoustic design"
-      }
-    ]
-  }
-];
+// mockCourses removed: page now fetches courses from backend via api.get('/courses')
 
 // Types
 interface Lesson {
@@ -453,17 +67,59 @@ interface FilterOptions {
 
 export default function CoursesPortal() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [courses, setCourses] = useState<Course[]>(mockCourses);
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>(mockCourses);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<Set<number>>(new Set());
   const [filters, setFilters] = useState<FilterOptions>({
     category: "",
     difficulty: "",
     price: ""
   });
+
+  // Fetch courses from API
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setIsLoading(true)
+      try {
+        const response = await api.get('/api/courses')
+        if (response.data) {
+          // Transform backend data to match frontend interface
+          const transformedCourses = response.data.map((course: any) => ({
+            id: course.id,
+            title: course.title,
+            description: course.description || '',
+            // Use a reliable online placeholder to avoid 404s when image_url is missing
+            thumbnail: course.image_url || 'https://placehold.co/800x450/png?text=Course+Image',
+            tags: [course.level || 'beginner'], // Use level as primary tag
+            rating: 4.5, // Default rating
+            students: course.enrolled_count || 0,
+            duration: course.duration || '8 weeks',
+            lastUpdated: course.updated_at || course.created_at,
+            isFree: !course.price || course.price === 0,
+            hasFreePreview: course.has_free_preview || false,
+            totalLessons: course.total_lessons || 0,
+            freeLessons: course.has_free_preview ? 1 : 0,
+            isNew: false, // Can be calculated based on created_at
+            isTrending: false,
+            syllabus: course.syllabus ? [course.syllabus] : [],
+            lessons: []
+          }))
+          setCourses(transformedCourses)
+          setFilteredCourses(transformedCourses)
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchCourses()
+  }, [])
 
   useEffect(() => {
     // Check authentication status
@@ -479,6 +135,41 @@ export default function CoursesPortal() {
     checkAuth();
   }, []);
 
+  // Fetch enrolled courses
+  useEffect(() => {
+    const fetchEnrolledCourses = async () => {
+      if (!api.isAuthenticated()) {
+        setEnrolledCourseIds(new Set());
+        return;
+      }
+      
+      try {
+        const response = await api.get('/api/enrollments/my-courses');
+        if (response && response.data) {
+          const enrolledIds = new Set<number>(response.data.map((enrollment: any) => Number(enrollment.course_id)));
+          setEnrolledCourseIds(enrolledIds);
+          console.log('✅ Enrolled courses loaded:', enrolledIds.size, 'courses');
+        } else {
+          setEnrolledCourseIds(new Set());
+        }
+      } catch (error: any) {
+        // Don't spam console with errors if backend is down
+        if (error?.message?.includes('fetch') || error?.message?.includes('Failed to fetch')) {
+          console.warn('⚠️ Could not connect to backend. Make sure backend server is running on port 8000');
+        } else if (error?.response?.status !== 404) {
+          console.error('Error fetching enrolled courses:', error);
+        }
+        // Set empty set so page still works
+        setEnrolledCourseIds(new Set());
+      }
+    };
+
+    // Only fetch if authenticated
+    if (isAuthenticated) {
+      fetchEnrolledCourses();
+    }
+  }, [isAuthenticated]);
+
   useEffect(() => {
     // Apply filters and search
     let result = [...courses];
@@ -489,21 +180,21 @@ export default function CoursesPortal() {
         course => 
           course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          course.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+          (course.tags || []).some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
     // Apply category filter
     if (filters.category) {
       result = result.filter(course => 
-        course.tags.some(tag => tag.toLowerCase() === filters.category.toLowerCase())
+        (course.tags || []).some(tag => tag.toLowerCase() === filters.category.toLowerCase())
       );
     }
 
     // Apply difficulty filter
     if (filters.difficulty) {
       result = result.filter(course => 
-        course.tags.some(tag => tag.toLowerCase() === filters.difficulty.toLowerCase())
+        (course.tags || []).some(tag => tag.toLowerCase() === filters.difficulty.toLowerCase())
       );
     }
 
@@ -589,6 +280,13 @@ export default function CoursesPortal() {
               >
                 <Play className="h-4 w-4 mr-2" />
                 Watch Demo Video
+              </Link>
+              <Link
+                href="/profile/my-courses"
+                className="inline-flex items-center px-6 py-3 rounded-full bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                My Courses
               </Link>
             </div>
           </div>
@@ -716,89 +414,107 @@ export default function CoursesPortal() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCourses.map((course) => (
-              <Card 
-                key={course.id} 
-                className="flex flex-col overflow-hidden hover:shadow-xl transition-shadow duration-300 group border-gray-200"
-              >
-                <div className="relative h-48 overflow-hidden">
-                  <Image
-                    src={course.thumbnail}
-                    alt={course.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-0 left-0 p-2 flex flex-col gap-1">
-                    {course.isNew && (
-                      <Badge className="bg-blue-500 hover:bg-blue-600">New</Badge>
-                    )}
-                    {course.isTrending && (
-                      <Badge className="bg-purple-500 hover:bg-purple-600">Trending</Badge>
-                    )}
-                    {course.isFree && (
-                      <Badge className="bg-green-500 hover:bg-green-600">Free</Badge>
-                    )}
-                    {!course.isFree && course.hasFreePreview && (
-                      <Badge className="bg-orange-500 hover:bg-orange-600">
-                        {course.freeLessons} Free Lesson{course.freeLessons > 1 ? 's' : ''}
-                      </Badge>
-                    )}
+              <article key={course.id} className="group cursor-pointer h-full">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 h-full flex flex-col">
+                  {/* Course Image */}
+                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-purple-100 via-indigo-100 to-pink-100">
+                    <Image
+                      src={course.thumbnail}
+                      alt={course.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0"></div>
+                    
+                    {/* Status Badges */}
+                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                      {enrolledCourseIds.has(course.id) && (
+                        <Badge className="bg-green-500 text-white hover:bg-green-600">✓ Enrolled</Badge>
+                      )}
+                      {course.isNew && (
+                        <Badge className="bg-blue-500 text-white hover:bg-blue-600">✨ New</Badge>
+                      )}
+                      {course.isTrending && (
+                        <Badge className="bg-purple-500 text-white hover:bg-purple-600">🔥 Trending</Badge>
+                      )}
+                    </div>
+
+                    {/* Rating Badge */}
+                    <div className="absolute bottom-4 left-4 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
+                      {renderStars(course.rating)}
+                      <span className="text-xs font-medium text-gray-700 ml-1">{course.rating}</span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 flex-1 flex flex-col">
+                    {/* Title */}
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 leading-tight group-hover:text-purple-600 transition-colors line-clamp-2">
+                      {course.title}
+                    </h3>
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {(course.tags || []).slice(0, 3).map((tag, index) => (
+                        <span key={index} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-medium">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-2 flex-1">
+                      {course.description}
+                    </p>
+
+                    {/* Metadata */}
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4 pb-4 border-b border-gray-100">
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3.5 w-3.5" />
+                        {course.students.toLocaleString()}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        {course.duration}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <PlayCircle className="h-3.5 w-3.5" />
+                        {course.totalLessons} lessons
+                      </span>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      {enrolledCourseIds.has(course.id) ? (
+                        <Link 
+                          href={`/courses/${course.id}/learn`}
+                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-2.5 rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-colors text-center text-sm flex items-center justify-center gap-2"
+                        >
+                          <PlayCircle className="h-4 w-4" />
+                          View Course
+                        </Link>
+                      ) : (
+                        <>
+                          <button 
+                            onClick={() => openCourseModal(course)}
+                            className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                          >
+                            Preview
+                          </button>
+                          <Link 
+                            href={`/courses/${course.id}`}
+                            className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-colors text-center text-sm"
+                          >
+                            Enroll Now
+                          </Link>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <CardHeader className="pb-2">
-                  <div className="flex gap-1.5 mb-2">
-                    {renderStars(course.rating)}
-                    <span className="text-sm text-gray-600 ml-1">({course.rating})</span>
-                  </div>
-                  <CardTitle className="text-lg font-bold leading-tight hover:text-blue-600 transition-colors cursor-pointer" onClick={() => openCourseModal(course)}>
-                    {course.title}
-                  </CardTitle>
-                  <CardDescription className="text-sm text-gray-600">
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pb-4 flex-grow">
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    {course.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs bg-gray-50">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-700 line-clamp-3">
-                    {course.description}
-                  </p>
-                </CardContent>
-                <CardFooter className="flex justify-between pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-1 text-sm text-gray-600">
-                    <Users className="h-4 w-4" />
-                    <span>{course.students.toLocaleString()} students</span>
-                  </div>
-                  <div className="font-semibold text-purple-700">
-                    {course.isFree ? (
-                      <span className="text-green-600">FREE COURSE</span>
-                    ) : (
-                      <span>{course.freeLessons} Free + Premium</span>
-                    )}
-                  </div>
-                </CardFooter>
-                <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-3">
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => openCourseModal(course)}
-                      className="flex-grow bg-white text-purple-600 py-2 rounded-md font-medium hover:bg-purple-50 transition-colors"
-                    >
-                      Preview
-                    </button>
-                    <Link 
-                      href={`/courses/${course.id}`}
-                      className="flex-grow bg-white text-purple-600 py-2 rounded-md font-medium hover:bg-purple-50 transition-colors text-center"
-                    >
-                      Enroll Now
-                    </Link>
-                  </div>
-                </div>
-              </Card>
+              </article>
             ))}
           </div>
         )}
@@ -863,12 +579,8 @@ export default function CoursesPortal() {
                   <span>Last updated: {selectedCourse.lastUpdated}</span>
                 </div>
                 <div className="flex-grow"></div>
-                <div className="font-bold text-lg text-purple-700">
-                  {selectedCourse.isFree ? (
-                    <span className="text-green-600">FREE COURSE</span>
-                  ) : (
-                    <span>{selectedCourse.freeLessons} Free Lessons + Premium Access</span>
-                  )}
+                <div className="font-bold text-lg">
+                  <span className="text-purple-600">{selectedCourse.totalLessons} Total Lessons</span>
                 </div>
               </div>
 
@@ -908,7 +620,7 @@ export default function CoursesPortal() {
 
               <div className="flex flex-wrap gap-2 mt-8">
                 <button className="flex-grow bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-md font-bold hover:from-purple-700 hover:to-blue-700 transition-colors">
-                  {selectedCourse.isFree ? 'Start Free Course' : `Start with ${selectedCourse.freeLessons} Free Lesson${selectedCourse.freeLessons > 1 ? 's' : ''}`}
+                  Enroll in Course
                 </button>
                 <button className="bg-white border border-gray-300 px-4 py-3 rounded-md hover:bg-gray-50 transition-colors">
                   <Bookmark className="h-5 w-5 text-gray-600" />

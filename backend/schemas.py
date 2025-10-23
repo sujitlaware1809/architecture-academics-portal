@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
@@ -45,6 +47,12 @@ class CourseStatus(str, Enum):
     ARCHIVED = "archived"
 
 class WorkshopStatus(str, Enum):
+    UPCOMING = "upcoming"
+    ONGOING = "ongoing"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+class EventStatus(str, Enum):
     UPCOMING = "upcoming"
     ONGOING = "ongoing"
     COMPLETED = "completed"
@@ -122,12 +130,12 @@ class CourseBase(BaseModel):
     level: CourseLevel
     duration: str
     max_students: int = 50
+    price: float = 0.0
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     image_url: Optional[str] = None
     syllabus: Optional[str] = None
     prerequisites: Optional[str] = None
-    is_trial: bool = True
 
 class CourseCreate(CourseBase):
     instructor_id: Optional[int] = None
@@ -139,12 +147,12 @@ class CourseUpdate(BaseModel):
     level: Optional[CourseLevel] = None
     duration: Optional[str] = None
     max_students: Optional[int] = None
+    price: Optional[float] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     image_url: Optional[str] = None
     syllabus: Optional[str] = None
     prerequisites: Optional[str] = None
-    is_trial: Optional[bool] = None
     status: Optional[CourseStatus] = None
     instructor_id: Optional[int] = None
 
@@ -370,6 +378,10 @@ class JobResponse(JobBase):
     updated_at: datetime
     recruiter_id: int
     recruiter: Optional[UserResponse] = None
+    # Admin/UI convenience fields
+    applications_count: Optional[int] = 0
+    salary_range: Optional[str] = None
+    closing_date: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -625,6 +637,159 @@ class DiscussionLikeResponse(BaseModel):
         from_attributes = True
 
 # Discussion Search/Filter Schemas
+class DiscussionSearchParams(BaseModel):
+    search: Optional[str] = None
+    category: Optional[str] = None
+    author_id: Optional[int] = None
+
+# Event Schemas
+class EventBase(BaseModel):
+    title: str
+    description: str
+    short_description: Optional[str] = None
+    date: datetime
+    duration: int  # Duration in hours
+    location: Optional[str] = None
+    image_url: Optional[str] = None
+    max_participants: Optional[int] = 50
+    is_online: bool = False
+    meeting_link: Optional[str] = None
+    requirements: Optional[str] = None
+
+class EventCreate(EventBase):
+    pass
+
+class EventUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    short_description: Optional[str] = None
+    date: Optional[datetime] = None
+    duration: Optional[int] = None
+    location: Optional[str] = None
+    image_url: Optional[str] = None
+    max_participants: Optional[int] = None
+    is_online: Optional[bool] = None
+    meeting_link: Optional[str] = None
+    requirements: Optional[str] = None
+    status: Optional[EventStatus] = None
+
+class EventResponse(EventBase):
+    id: int
+    status: EventStatus
+    participants_count: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Event Registration Schema
+class EventRegistrationCreate(BaseModel):
+    event_id: int
+
+class EventRegistrationResponse(BaseModel):
+    id: int
+    event_id: int
+    participant_id: int
+    registered_at: datetime
+    attended: bool
+
+    class Config:
+        from_attributes = True
+
+# Course Enrollment Schemas
+class CourseEnrollmentCreate(BaseModel):
+    course_id: int
+
+class CourseEnrollmentResponse(BaseModel):
+    id: int
+    course_id: int
+    student_id: int
+    enrolled_at: datetime
+    completed: bool
+    progress_percentage: Optional[float] = 0.0
+    last_accessed_at: Optional[datetime] = None
+    course: Optional[CourseResponse] = None
+    student: Optional[UserResponse] = None
+
+    class Config:
+        from_attributes = True
+
+# Lesson Progress Schemas
+class LessonProgressCreate(BaseModel):
+    lesson_id: int
+    enrollment_id: int
+
+class LessonProgressUpdate(BaseModel):
+    current_time: Optional[int] = None
+    completed: Optional[bool] = None
+
+class LessonProgressResponse(BaseModel):
+    id: int
+    lesson_id: int
+    enrollment_id: int
+    current_time: int  # Current playback position in seconds
+    completed: bool
+    last_watched_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+# Course Question/Doubt Schemas
+class CourseQuestionCreate(BaseModel):
+    lesson_id: int
+    title: str
+    content: str
+    timestamp: Optional[int] = None  # Video timestamp in seconds
+
+class CourseQuestionUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    is_resolved: Optional[bool] = None
+
+# Question Reply Schemas (define before CourseQuestionResponse to resolve forward refs)
+class QuestionReplyCreate(BaseModel):
+    question_id: int
+    content: str
+
+
+class QuestionReplyUpdate(BaseModel):
+    content: str
+
+
+class QuestionReplyResponse(BaseModel):
+    id: int
+    question_id: int
+    author_id: int
+    content: str
+    is_instructor: bool
+    created_at: datetime
+    updated_at: datetime
+    author: Optional[UserResponse] = None
+
+    class Config:
+        from_attributes = True
+
+
+# Now define the CourseQuestionResponse which references QuestionReplyResponse directly
+class CourseQuestionResponse(BaseModel):
+    id: int
+    lesson_id: int
+    student_id: int
+    title: str
+    content: str
+    timestamp: Optional[int] = None
+    is_resolved: bool
+    created_at: datetime
+    updated_at: datetime
+    student: Optional[UserResponse] = None
+    replies_count: int = 0
+    replies: List['QuestionReplyResponse'] = []
+
+    class Config:
+        from_attributes = True
+
+# Discussion Search/Filter Schemas (fixing the broken one)
 class DiscussionSearchParams(BaseModel):
     search: Optional[str] = None
     category: Optional[str] = None

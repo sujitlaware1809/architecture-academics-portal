@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 // API Response types
 interface ApiResponse<T> {
@@ -77,6 +77,7 @@ export const api = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(credentials),
+        credentials: 'include', // Important for cookies
       });
 
       const data = await response.json();
@@ -99,7 +100,11 @@ export const api = {
       return { data };
     } catch (error) {
       console.error('Login error:', error);
-      return { error: 'Network error. Please try again.' };
+      // More descriptive error message
+      if (!navigator.onLine) {
+        return { error: 'No internet connection. Please check your network.' };
+      }
+      return { error: 'Unable to connect to the server. Please make sure the backend server is running at http://127.0.0.1:8000' };
     }
   },
 
@@ -345,15 +350,36 @@ export const api = {
         headers,
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        data = { detail: 'Invalid response from server' };
+      }
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Request failed');
+        const error: any = new Error(data.detail || 'Request failed');
+        error.response = {
+          status: response.status,
+          data: data
+        };
+        throw error;
       }
 
       return { data };
-    } catch (error) {
-      console.error('GET request error:', error);
+    } catch (error: any) {
+      // Handle network errors (backend not accessible)
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        console.warn('⚠️ Backend connection failed. Is the server running on port 8000?');
+        const networkError: any = new Error('Backend server not accessible');
+        networkError.response = { status: 0, data: { detail: 'Network error' } };
+        throw networkError;
+      }
+      
+      // Don't log 404 errors as they're expected for "not enrolled" checks
+      if (error?.response?.status !== 404) {
+        console.error('GET request error:', error);
+      }
       throw error;
     }
   },
@@ -378,7 +404,9 @@ export const api = {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Request failed');
+        const error: any = new Error(data.detail || 'Request failed');
+        error.response = { status: response.status, data };
+        throw error;
       }
 
       return { data };

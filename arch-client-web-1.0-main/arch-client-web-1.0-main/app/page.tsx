@@ -1,10 +1,9 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { api } from "@/lib/api"
 import {
-  Search,
   Calendar,
   Users,
   BookOpen,
@@ -13,32 +12,23 @@ import {
   FileText,
   MessageSquare,
   Building,
-  MapPin,
   Wrench,
-  Menu,
-  X,
   Plus,
   ArrowRight,
   Star,
   TrendingUp,
   Award,
   GraduationCap,
-  Sparkles
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
-export default function ArchitecturePlatform() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState<string[]>([])
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    // Check authentication status
     const checkAuth = () => {
       const authenticated = api.isAuthenticated()
       setIsAuthenticated(authenticated)
@@ -47,25 +37,8 @@ export default function ArchitecturePlatform() {
         setUser(userData)
       }
     }
-
     checkAuth()
   }, [])
-
-  const navigationItems = [
-    { name: "Home", href: "/", active: true },
-    { name: "Courses", href: "/courses", active: false },
-    ...(isAuthenticated ? [
-      { name: "Jobs Portal", href: "/jobs-portal" },
-      { name: "Profile", href: "/profile" },
-      ...(user && user.role === 'ADMIN' ? [{ name: "Admin Dashboard", href: "/admin" }] : []),
-      { name: "Logout", href: "#", onClick: () => { api.logout(); setIsAuthenticated(false); setUser(null); } }
-    ] : [
-      { name: "Login", href: "/login" },
-      { name: "Register", href: "/register" }
-    ]),
-    { name: "Contact Us", href: "/contact-us", active: false },
-    { name: "Advertise With Us", href: "/advertise-with-us", active: false },
-  ]
 
   const mainSections = [
     { title: "COURSES", icon: BookOpen, description: "Explore architecture courses", color: "bg-slate-800", href: "/courses" },
@@ -76,7 +49,6 @@ export default function ArchitecturePlatform() {
     { title: "WORKSHOPS & FDPs", icon: Wrench, description: "Professional development", color: "bg-purple-500", href: "/workshops" },
   ]
 
-  // Add Post Job section for recruiters
   const recruiterSections = isAuthenticated && user && user.role === 'RECRUITER' ? [
     { title: "POST JOB", icon: Plus, description: "Post a new job opportunity", color: "bg-green-500", href: "/jobs-portal/post-job" },
   ] : []
@@ -89,280 +61,276 @@ export default function ArchitecturePlatform() {
     { title: "PUBLICATIONS", icon: FileText, description: "Research & publications", color: "bg-green-500", href: "#" },
   ]
 
-  const allContent = [
-    ...mainSections.map((s) => s.title),
-    ...secondarySections.map((s) => s.title),
-    "Architecture Tours",
-    "NATA Courses",
-    "Networking",
-    "Sustainable Design",
-    "BIM Software",
-    "CAD Training",
-    "Portfolio Development",
-    "Internships",
+  // Hardcoded Featured Articles
+  const featuredArticles = [
+    {
+      id: 1,
+      title: "Sustainable Architecture: Building for Tomorrow",
+      excerpt: "Explore how modern architects are integrating eco-friendly practices and green technologies into contemporary building design. Learn about passive solar design, green roofs, and sustainable materials.",
+      author: "Dr. Rajesh Kumar",
+      date: "2 days ago",
+      category: "Sustainability",
+      readTime: "8 min read",
+      image: "sustainable",
+      slug: "sustainable-architecture-building-tomorrow"
+    },
+    {
+      id: 2,
+      title: "The Rise of Parametric Design in Modern Architecture",
+      excerpt: "Discover how computational design tools are revolutionizing the way architects approach complex geometries and structural systems. From Grasshopper to algorithmic modeling.",
+      author: "Priya Sharma",
+      date: "5 days ago",
+      category: "Technology",
+      readTime: "10 min read",
+      image: "parametric",
+      slug: "rise-parametric-design-modern-architecture"
+    },
+    {
+      id: 3,
+      title: "Indian Vernacular Architecture: Lessons for Today",
+      excerpt: "Understanding traditional building techniques from across India and their relevance in contemporary sustainable design. Climate-responsive architecture from our heritage.",
+      author: "Arjun Mehta",
+      date: "1 week ago",
+      category: "Heritage",
+      readTime: "12 min read",
+      image: "vernacular",
+      slug: "indian-vernacular-architecture-lessons"
+    },
+    {
+      id: 4,
+      title: "BIM Revolution: Complete Guide for Architects",
+      excerpt: "Building Information Modeling is transforming the construction industry. Learn how to leverage Revit, ArchiCAD, and other BIM tools to enhance your workflow and collaboration.",
+      author: "Sneha Patel",
+      date: "1 week ago",
+      category: "Technology",
+      readTime: "15 min read",
+      image: "bim",
+      slug: "bim-revolution-complete-guide-architects"
+    }
   ]
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query)
-    if (query.trim()) {
-      const filtered = allContent.filter((item) => item.toLowerCase().includes(query.toLowerCase()))
-      setSearchResults(filtered.slice(0, 5)) // Show max 5 results
-    } else {
-      setSearchResults([])
+  // Hardcoded Popular Discussions
+  const popularDiscussions = [
+    {
+      id: 1,
+      title: "Best software for rendering architectural designs?",
+      excerpt: "Looking for recommendations on rendering software. Currently using V-Ray but wondering if there are better alternatives for photorealistic renders...",
+      author: "Amit Singh",
+      replies: 24,
+      views: 1250,
+      lastActivity: "2 hours ago",
+      category: "Software",
+      tags: ["Rendering", "3D", "Software"],
+      solved: false
+    },
+    {
+      id: 2,
+      title: "How to prepare portfolio for architectural firms?",
+      excerpt: "I'm a fresh graduate and want to create an impressive portfolio. What should I include? How many projects? Any specific layout recommendations?",
+      author: "Neha Reddy",
+      replies: 18,
+      views: 890,
+      lastActivity: "5 hours ago",
+      category: "Career",
+      tags: ["Portfolio", "Jobs", "Career"],
+      solved: true
+    },
+    {
+      id: 3,
+      title: "NATA 2025 preparation strategy - Need advice",
+      excerpt: "Appearing for NATA next year. What are the best resources for preparation? Should I join coaching or is self-study sufficient?",
+      author: "Rohan Gupta",
+      replies: 32,
+      views: 2100,
+      lastActivity: "1 day ago",
+      category: "Education",
+      tags: ["NATA", "Exam", "Preparation"],
+      solved: false
+    },
+    {
+      id: 4,
+      title: "Sustainable materials for low-cost housing projects",
+      excerpt: "Working on a low-cost housing project and want to incorporate sustainable materials. What are some cost-effective eco-friendly alternatives?",
+      author: "Kavya Iyer",
+      replies: 15,
+      views: 670,
+      lastActivity: "1 day ago",
+      category: "Design",
+      tags: ["Sustainable", "Materials", "Housing"],
+      solved: true
+    },
+    {
+      id: 5,
+      title: "Freelancing as an architect - Tips and experiences?",
+      excerpt: "Thinking of starting freelance architectural practice. Would love to hear from experienced freelancers about challenges, client acquisition, pricing strategies...",
+      author: "Vikram Joshi",
+      replies: 41,
+      views: 1580,
+      lastActivity: "3 hours ago",
+      category: "Career",
+      tags: ["Freelancing", "Business", "Career"],
+      solved: false
     }
-  }
-
-  const footerLinks = [
-    "Architecture Tours",
-    "Architecture Stationaries",
-    "NATA Courses",
-    "Networking & Collaboration",
-    "Tests Schedule",
-    "Feedback",
-    "CoA Portal",
-    "IIA Portal",
-    "Interview with Architects",
-    "Advertise with us",
-    "Terms & Conditions",
   ]
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/30 via-white to-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm border-b border-purple-100/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo Section */}
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl blur-sm opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                <div className="relative bg-gradient-to-br from-purple-600 to-indigo-600 p-2.5 rounded-xl">
-                  <Building className="h-7 w-7 text-white" />
-                </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
+        {/* Hero Section - Ultra Modern Design */}
+        <div className="mb-12 md:mb-16 relative overflow-hidden">
+          <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
+            {/* Left Content */}
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/50 rounded-full shadow-sm hover:shadow-md transition-shadow backdrop-blur-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50"></div>
+                <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">India's Leading Architecture Platform</span>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  Architecture
-                </h1>
-                <span className="text-sm text-gray-600 font-medium">Academics Platform</span>
-              </div>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-2">
-              {navigationItems.map((item) => (
-                item.onClick ? (
-                  <button
-                    key={item.name}
-                    onClick={item.onClick}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
-                  >
-                    {item.name}
-                  </button>
-                ) : (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${
-                      item.active 
-                        ? "text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-md" 
-                        : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
-                )
-              ))}
               
-              {/* Desktop Search */}
-              <div className="relative ml-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search courses, jobs..."
-                  className="pl-10 w-64 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:bg-white focus:border-purple-300 focus:ring-2 focus:ring-purple-100"
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                />
-                {searchResults.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden">
-                    {searchResults.map((result, index) => (
-                      <div
-                        key={index}
-                        className="px-4 py-3 hover:bg-purple-50 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-b-0 transition-colors flex items-center justify-between group"
-                        onClick={() => {
-                          setSearchQuery(result)
-                          setSearchResults([])
-                        }}
-                      >
-                        <span>{result}</span>
-                        <ArrowRight className="h-4 w-4 text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <div className="space-y-4">
+                <h1 className="font-poppins text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-[1.1] tracking-tight">
+                  Build Your
+                  <br />
+                  <span className="relative inline-block">
+                    <span className="relative z-10 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 bg-clip-text text-transparent animate-gradient">
+                      Future Today
+                    </span>
+                    <div className="absolute -bottom-2 left-0 w-full h-4 bg-gradient-to-r from-purple-400/30 via-indigo-400/30 to-purple-400/30 blur-xl"></div>
+                  </span>
+                </h1>
+                <div className="w-24 h-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full"></div>
               </div>
-            </nav>
+              
+              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed max-w-xl font-medium">
+                Join <span className="font-bold text-purple-600">10,000+</span> architects shaping the world. 
+                Access elite courses, connect with masters, and unlock opportunities.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Link href="/courses">
+                  <Button size="lg" className="group bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-700 hover:via-indigo-700 hover:to-purple-700 text-white px-10 h-14 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 w-full sm:w-auto text-lg font-bold hover:scale-105 bg-[length:200%_100%] hover:bg-right">
+                    <BookOpen className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+                    Start Learning
+                  </Button>
+                </Link>
+                <Link href="/blogs">
+                  <Button size="lg" variant="outline" className="group border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white px-10 h-14 rounded-2xl transition-all duration-300 w-full sm:w-auto text-lg font-bold hover:scale-105">
+                    <FileText className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+                    Explore Content
+                  </Button>
+                </Link>
+              </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-            >
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-
-          {/* Mobile Menu */}
-          {isMobileMenuOpen && (
-            <div className="lg:hidden bg-white rounded-xl mt-2 mb-4 border border-gray-200 shadow-lg">
-              <div className="px-4 py-3 space-y-3">
-                {/* Mobile Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search..."
-                    className="pl-10 w-full bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500"
-                    value={searchQuery}
-                    onChange={(e) => handleSearch(e.target.value)}
-                  />
+              {/* Stats - Modern Cards */}
+              <div className="grid grid-cols-3 gap-4 pt-8">
+                <div className="bg-gradient-to-br from-purple-50 to-white p-4 rounded-2xl border border-purple-100 hover:shadow-lg transition-all hover:-translate-y-1">
+                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">10K+</div>
+                  <div className="text-xs md:text-sm text-gray-600 font-semibold mt-1">Students</div>
                 </div>
-                
-                {/* Mobile Navigation Links */}
-                <div className="space-y-2 pt-2">
-                  {navigationItems.map((item) => (
-                    item.onClick ? (
-                      <button
-                        key={item.name}
-                        onClick={() => { item.onClick!(); setIsMobileMenuOpen(false); }}
-                        className="block w-full text-left px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-                      >
-                        {item.name}
-                      </button>
-                    ) : (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className={`block px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
-                          item.active 
-                            ? "text-white bg-gradient-to-r from-purple-600 to-indigo-600" 
-                            : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-                        }`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {item.name}
-                      </Link>
-                    )
-                  ))}
+                <div className="bg-gradient-to-br from-indigo-50 to-white p-4 rounded-2xl border border-indigo-100 hover:shadow-lg transition-all hover:-translate-y-1">
+                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">500+</div>
+                  <div className="text-xs md:text-sm text-gray-600 font-semibold mt-1">Courses</div>
+                </div>
+                <div className="bg-gradient-to-br from-pink-50 to-white p-4 rounded-2xl border border-pink-100 hover:shadow-lg transition-all hover:-translate-y-1">
+                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">1K+</div>
+                  <div className="text-xs md:text-sm text-gray-600 font-semibold mt-1">Jobs</div>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-      </header>
 
-      {searchQuery && (
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <p className="text-sm text-gray-700 flex items-center gap-2">
-              <Search className="h-4 w-4 text-purple-600" />
-              Search results for: <span className="font-semibold text-purple-700">"{searchQuery}"</span>
+            {/* Right Content - Feature Highlights */}
+            <div className="relative">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Feature Card 1 */}
+                <Card className="border-2 border-purple-100 bg-gradient-to-br from-purple-50 to-white p-6 hover:shadow-lg transition-shadow">
+                  <div className="bg-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+                    <GraduationCap className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-2">Expert-Led Courses</h3>
+                  <p className="text-sm text-gray-600">Learn from industry professionals with years of experience</p>
+                </Card>
+
+                {/* Feature Card 2 */}
+                <Card className="border-2 border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-6 hover:shadow-lg transition-shadow mt-8">
+                  <div className="bg-indigo-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+                    <Briefcase className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-2">Career Opportunities</h3>
+                  <p className="text-sm text-gray-600">Connect with top firms and find your dream job</p>
+                </Card>
+
+                {/* Feature Card 3 */}
+                <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white p-6 hover:shadow-lg transition-shadow">
+                  <div className="bg-blue-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-2">Active Community</h3>
+                  <p className="text-sm text-gray-600">Engage with peers and expand your network</p>
+                </Card>
+
+                {/* Feature Card 4 */}
+                <Card className="border-2 border-pink-100 bg-gradient-to-br from-pink-50 to-white p-6 hover:shadow-lg transition-shadow mt-8">
+                  <div className="bg-pink-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+                    <Award className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-2">Certifications</h3>
+                  <p className="text-sm text-gray-600">Earn recognized certificates to boost your profile</p>
+                </Card>
+              </div>
+
+              {/* Decorative Elements */}
+              <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-200/20 to-indigo-200/20 rounded-full blur-3xl"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Core Features Section */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Comprehensive Platform for Architects
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Access all the tools and resources you need to thrive in your architecture career
             </p>
           </div>
-        </div>
-      )}
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
-        {/* Hero Section */}
-        <div className="text-center mb-12 md:mb-20 relative">
-          <div className="absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-purple-200/30 to-indigo-200/30 rounded-full blur-3xl"></div>
-          </div>
           
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 border border-purple-200 rounded-full mb-6">
-            <Sparkles className="h-4 w-4 text-purple-600" />
-            <span className="text-sm font-medium text-purple-700">Welcome to Architecture Academics</span>
-          </div>
-          
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Shape Your{" "}
-            <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Architecture Career
-            </span>
-          </h2>
-          
-          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Discover world-class courses, connect with industry professionals, explore exciting job opportunities, 
-            and advance your architecture career on India's premier platform
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/courses">
-              <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                <BookOpen className="mr-2 h-5 w-5" />
-                Explore Courses
-              </Button>
-            </Link>
-            <Link href={isAuthenticated ? "/jobs-portal" : "/login"}>
-              <Button variant="outline" className="border-2 border-purple-600 text-purple-600 hover:bg-purple-50 px-8 py-6 text-lg rounded-xl transition-all duration-300">
-                <Briefcase className="mr-2 h-5 w-5" />
-                Browse Jobs
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Primary Sections */}
-        <div className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                Explore Our Platform
-              </h3>
-              <p className="text-gray-600">Everything you need to succeed in architecture</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {mainSections.map((section, index) => {
               const IconComponent = section.icon
+              const colorClasses = {
+                'bg-slate-800': { bg: 'bg-slate-800', hover: 'hover:bg-slate-700', text: 'text-slate-600', border: 'border-slate-200' },
+                'bg-purple-500': { bg: 'bg-purple-600', hover: 'hover:bg-purple-700', text: 'text-purple-600', border: 'border-purple-200' },
+                'bg-blue-500': { bg: 'bg-blue-600', hover: 'hover:bg-blue-700', text: 'text-blue-600', border: 'border-blue-200' },
+                'bg-red-500': { bg: 'bg-red-600', hover: 'hover:bg-red-700', text: 'text-red-600', border: 'border-red-200' },
+              }
+              const colors = colorClasses[section.color as keyof typeof colorClasses] || colorClasses['bg-purple-500']
+              
               return (
                 <Link 
                   key={section.title}
                   href={section.href === "#" ? (isAuthenticated ? "#" : "/login") : section.href}
                   className="group"
                 >
-                  <Card className="h-full border-2 border-gray-100 hover:border-purple-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50/50">
-                    <CardHeader className="text-center pb-4 space-y-4">
-                      <div className="relative mx-auto w-fit">
-                        <div className={`absolute inset-0 ${section.color} rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity`}></div>
-                        <div
-                          className={`relative w-20 h-20 rounded-2xl ${section.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}
-                        >
-                          <IconComponent className="h-10 w-10 text-white" />
+                  <Card className={`h-full border-2 ${colors.border} hover:border-current hover:${colors.text} transition-all duration-300 hover:shadow-2xl bg-white overflow-hidden`}>
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-4 mb-3">
+                        <div className={`${colors.bg} ${colors.hover} w-14 h-14 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-md`}>
+                          <IconComponent className="h-7 w-7 text-white" />
                         </div>
+                        <div className="flex-1">
+                          <CardTitle className="text-lg font-bold text-gray-900 group-hover:${colors.text} transition-colors">
+                            {section.title}
+                          </CardTitle>
+                        </div>
+                        <ArrowRight className={`h-5 w-5 ${colors.text} opacity-0 group-hover:opacity-100 transition-opacity`} />
                       </div>
-                      <CardTitle className="text-base font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
-                        {section.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0 pb-4">
-                      <CardDescription className="text-sm text-center text-gray-600">
+                      <CardDescription className="text-sm text-gray-600 leading-relaxed">
                         {section.description}
                       </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className={`h-1 w-full ${colors.bg} rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`}></div>
                     </CardContent>
-                    <CardFooter className="justify-center pt-0">
-                      <Button 
-                        variant="ghost" 
-                        className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 font-medium group-hover:gap-2 transition-all"
-                      >
-                        {section.title === "COURSES" ? "Explore" : 
-                         section.title === "JOBS" ? (isAuthenticated ? "View Jobs" : "Login to Access") : 
-                         section.href === "#" ? (isAuthenticated ? "Coming Soon" : "Login") : 
-                         (isAuthenticated ? "Explore" : "Login")}
-                        <ArrowRight className="h-4 w-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                      </Button>
-                    </CardFooter>
                   </Card>
                 </Link>
               )
@@ -596,6 +564,219 @@ export default function ArchitecturePlatform() {
           </Card>
         </div>
 
+        {/* Featured Articles Section */}
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                Featured Articles
+              </h2>
+              <p className="text-lg text-gray-600">Latest insights from architecture experts</p>
+            </div>
+            <Link href="/blogs">
+              <Button variant="outline" className="border-2 border-purple-600 text-purple-600 hover:bg-purple-50">
+                View All Articles
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {featuredArticles.map((article) => (
+              <Link key={article.id} href={`/blogs/${article.slug}`}>
+                <Card className="h-full border-2 border-gray-100 hover:border-purple-300 hover:shadow-xl transition-all duration-300 group overflow-hidden">
+                  <div className="relative h-48 bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100 overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <FileText className="h-20 w-20 text-purple-300 group-hover:scale-110 transition-transform duration-300" />
+                    </div>
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-white text-purple-700 border border-purple-200">
+                        {article.category}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-2">
+                      {article.title}
+                    </CardTitle>
+                  </CardHeader>
+
+                  <CardContent className="pb-4">
+                    <CardDescription className="text-sm text-gray-600 line-clamp-3 mb-4">
+                      {article.excerpt}
+                    </CardDescription>
+                    
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">
+                            {article.author.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-gray-900">{article.author}</p>
+                          <p className="text-xs text-gray-500">{article.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <BookOpen className="h-3 w-3" />
+                        {article.readTime}
+                      </div>
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="pt-0">
+                    <Button variant="ghost" size="sm" className="w-full group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
+                      Read More
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Popular Discussions Section */}
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                Popular Discussions
+              </h2>
+              <p className="text-lg text-gray-600">Join the conversation with fellow architects</p>
+            </div>
+            <Link href="/discussions">
+              <Button variant="outline" className="border-2 border-purple-600 text-purple-600 hover:bg-purple-50">
+                View All Discussions
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            {popularDiscussions.map((discussion) => (
+              <Link key={discussion.id} href={`/discussions/${discussion.id}`}>
+                <Card className="border-2 border-gray-100 hover:border-purple-300 hover:shadow-lg transition-all duration-300 group">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      {/* Discussion Icon */}
+                      <div className="flex-shrink-0">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          discussion.solved 
+                            ? 'bg-green-100 text-green-600' 
+                            : 'bg-purple-100 text-purple-600'
+                        }`}>
+                          <MessageSquare className="h-6 w-6" />
+                        </div>
+                      </div>
+
+                      {/* Discussion Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <h3 className="font-bold text-lg text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">
+                            {discussion.title}
+                          </h3>
+                          {discussion.solved && (
+                            <Badge className="bg-green-100 text-green-700 border border-green-200 flex-shrink-0">
+                              ✓ Solved
+                            </Badge>
+                          )}
+                        </div>
+
+                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                          {discussion.excerpt}
+                        </p>
+
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {discussion.tags.map((tag, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+
+                        {/* Meta Information */}
+                        <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-[10px] font-bold">
+                                {discussion.author.split(' ').map(n => n[0]).join('')}
+                              </span>
+                            </div>
+                            <span className="font-medium text-gray-700">{discussion.author}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-1">
+                            <MessageSquare className="h-3 w-3" />
+                            <span>{discussion.replies} replies</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            <span>{discussion.views.toLocaleString()} views</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            <span>{discussion.lastActivity}</span>
+                          </div>
+
+                          <Badge variant="outline" className="text-xs border-purple-200 text-purple-700">
+                            {discussion.category}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Arrow Icon */}
+                      <div className="flex-shrink-0">
+                        <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          {/* Community Stats */}
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="border-2 border-purple-100 bg-gradient-to-br from-purple-50 to-white">
+              <CardContent className="p-6 text-center">
+                <MessageSquare className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900">2,450+</div>
+                <div className="text-sm text-gray-600">Discussions</div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white">
+              <CardContent className="p-6 text-center">
+                <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900">10K+</div>
+                <div className="text-sm text-gray-600">Members</div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-2 border-green-100 bg-gradient-to-br from-green-50 to-white">
+              <CardContent className="p-6 text-center">
+                <FileText className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900">850+</div>
+                <div className="text-sm text-gray-600">Articles</div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-2 border-orange-100 bg-gradient-to-br from-orange-50 to-white">
+              <CardContent className="p-6 text-center">
+                <Star className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900">98%</div>
+                <div className="text-sm text-gray-600">Satisfaction</div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
         {/* Call to Action Section */}
         <div className="mb-16">
           <Card className="border-0 bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 text-white shadow-2xl overflow-hidden relative">
@@ -645,105 +826,6 @@ export default function ArchitecturePlatform() {
           </Card>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-gradient-to-b from-gray-50 to-gray-100 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Footer Top */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-1">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="bg-gradient-to-br from-purple-600 to-indigo-600 p-2 rounded-xl">
-                  <Building className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    Architecture
-                  </h3>
-                  <span className="text-xs text-gray-600 font-medium">Academics</span>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                India's premier platform for architecture education, career growth, and professional networking.
-              </p>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" className="rounded-lg">
-                  <MessageSquare className="h-4 w-4" />
-                </Button>
-                <Button size="sm" variant="outline" className="rounded-lg">
-                  <Users className="h-4 w-4" />
-                </Button>
-                <Button size="sm" variant="outline" className="rounded-lg">
-                  <Building className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-gray-900 mb-4">Quick Links</h4>
-              <div className="space-y-2">
-                <Link href="/courses" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                  Courses
-                </Link>
-                <Link href="/events" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                  Events
-                </Link>
-                <Link href="/workshops" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                  Workshops
-                </Link>
-                <Link href={isAuthenticated ? "/jobs-portal" : "/login"} className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                  Jobs Portal
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-gray-900 mb-4">Resources</h4>
-              <div className="space-y-2">
-                {["NATA Courses", "Architecture Tours", "CoA Portal", "IIA Portal"].map((link, index) => (
-                  <a key={index} href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                    {link}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-gray-900 mb-4">Company</h4>
-              <div className="space-y-2">
-                <Link href="/contact-us" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                  Contact Us
-                </Link>
-                <Link href="/advertise-with-us" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                  Advertise With Us
-                </Link>
-                <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                  Terms & Conditions
-                </a>
-                <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                  Privacy Policy
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer Bottom */}
-          <div className="pt-8 border-t border-gray-300">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm text-gray-600 text-center md:text-left">
-                © 2025 Architecture Academics. All rights reserved. Empowering the next generation of architects.
-              </p>
-              <div className="flex flex-wrap gap-4 justify-center">
-                {["Privacy", "Terms", "Cookies", "Accessibility"].map((item, index) => (
-                  <a key={index} href="#" className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                    {item}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }

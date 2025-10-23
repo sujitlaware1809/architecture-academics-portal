@@ -21,16 +21,17 @@ import { Input } from "@/components/ui/input"
 import { WorkshopCard, Workshop } from "@/components/workshops/workshop-card"
 import { WorkshopDetailModal } from "@/components/workshops/workshop-detail-modal"
 import { EmptyState } from "@/components/workshops/empty-state"
-import { mockWorkshops } from "@/lib/data/workshops-data"
+import { api } from "@/lib/api"
 
 export default function WorkshopsPortal() {
   // State management
-  const [workshops] = useState<Workshop[]>(mockWorkshops)
-  const [filteredWorkshops, setFilteredWorkshops] = useState<Workshop[]>(mockWorkshops.filter(w => !w.isFDP))
-  const [filteredFDPs, setFilteredFDPs] = useState<Workshop[]>(mockWorkshops.filter(w => w.isFDP))
+  const [workshops, setWorkshops] = useState<Workshop[]>([])
+  const [filteredWorkshops, setFilteredWorkshops] = useState<Workshop[]>([])
+  const [filteredFDPs, setFilteredFDPs] = useState<Workshop[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -39,6 +40,26 @@ export default function WorkshopsPortal() {
     price: "",
     trainer: ""
   })
+
+  // Fetch workshops from API
+  useEffect(() => {
+    const fetchWorkshops = async () => {
+      setIsLoading(true)
+      try {
+        const response = await api.get('/workshops')
+        if (response.data) {
+          setWorkshops(response.data)
+          setFilteredWorkshops(response.data.filter((w: Workshop) => !w.isFDP))
+          setFilteredFDPs(response.data.filter((w: Workshop) => w.isFDP))
+        }
+      } catch (error) {
+        console.error('Error fetching workshops:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchWorkshops()
+  }, [])
 
   // Handle search and filtering
   useEffect(() => {

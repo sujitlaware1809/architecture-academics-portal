@@ -1,21 +1,30 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Building, Eye, EyeOff, Mail, Lock, ArrowLeft, AlertCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Building, Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles, Shield } from "lucide-react"
 import Link from "next/link"
 import { api } from "@/lib/api"
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [redirectTo, setRedirectTo] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Get redirect parameter from URL
+    const redirect = searchParams.get('redirect')
+    if (redirect) {
+      setRedirectTo(redirect)
+    }
+  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,8 +41,16 @@ export default function LoginPage() {
           : 'Login failed. Please try again.'
         setError(errorMessage)
       } else if (result.data) {
-        // Login successful, redirect based on user role and special cases
+        // Login successful, dispatch custom event to notify other components
+        window.dispatchEvent(new Event('auth-change'))
+        
         const user = result.data.user
+        
+        // Check if there's a redirect URL
+        if (redirectTo) {
+          router.push(redirectTo)
+          return
+        }
         
         // Check if user is a recruiter (handle both string and enum object)
         let userRole = "";
@@ -64,66 +81,94 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-600 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                <Building className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col lg:flex-row min-h-screen">
+        {/* Left Side - Branding */}
+        <div className="lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16 text-white">
+          <Link href="/" className="absolute top-8 left-8 flex items-center space-x-3 hover:opacity-80 transition-opacity">
+            <div className="bg-white/10 p-3 rounded-xl backdrop-blur-sm border border-white/20">
+              <Building className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-serif font-bold">Architecture Academics</h1>
+            </div>
+          </Link>
+
+          <div className="max-w-md space-y-8 mt-16 lg:mt-0">
+            <div className="space-y-4">
+              <div className="inline-flex items-center space-x-2 bg-purple-500/20 px-4 py-2 rounded-full border border-purple-400/30">
+                <Sparkles className="h-4 w-4 text-purple-300" />
+                <span className="text-sm font-medium text-purple-200">Welcome Back!</span>
               </div>
-              <div>
-                <h1 className="text-2xl font-serif font-bold text-white">Architecture</h1>
-                <span className="text-sm text-purple-200 font-medium">Academics</span>
+              <h2 className="text-4xl lg:text-5xl font-bold leading-tight">
+                Continue Your
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                  Learning Journey
+                </span>
+              </h2>
+              <p className="text-lg text-gray-300">
+                Access your courses, connect with peers, and advance your architectural education.
+              </p>
+            </div>
+
+            <div className="space-y-4 pt-8">
+              <div className="flex items-start space-x-3">
+                <div className="bg-purple-500/20 p-2 rounded-lg border border-purple-400/30">
+                  <Shield className="h-5 w-5 text-purple-300" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">Secure & Private</h3>
+                  <p className="text-sm text-gray-400">Your data is protected with enterprise-grade security</p>
+                </div>
               </div>
-            </Link>
-            
-            <Link 
-              href="/"
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-purple-100 hover:text-white transition-colors rounded-full hover:bg-white/20"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Home</span>
-            </Link>
+              <div className="flex items-start space-x-3">
+                <div className="bg-indigo-500/20 p-2 rounded-lg border border-indigo-400/30">
+                  <Building className="h-5 w-5 text-indigo-300" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">Professional Platform</h3>
+                  <p className="text-sm text-gray-400">Built for architecture students and professionals</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-12">
-        <div className="w-full max-w-md">
-          <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="text-center pb-8">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mb-4">
-                <Building className="h-8 w-8 text-white" />
+        {/* Right Side - Login Form */}
+        <div className="lg:w-1/2 flex items-center justify-center p-8 lg:p-16">
+          <div className="w-full max-w-md">
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-white mb-2">Sign In</h3>
+                <p className="text-gray-300">Enter your credentials to access your account</p>
               </div>
-              <CardTitle className="text-2xl font-serif font-bold text-gray-900">Welcome Back</CardTitle>
-              <CardDescription className="text-gray-600">
-                Sign in to your Architecture Academics account
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
+
               {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2">
-                  <AlertCircle className="h-5 w-5 text-red-500" />
-                  <span className="text-sm text-red-700">{error}</span>
+                <div className="mb-6 p-4 bg-red-500/20 border border-red-400/30 rounded-lg">
+                  <p className="text-sm text-red-200">{error}</p>
                 </div>
               )}
-              
+
               <form onSubmit={handleLogin} className="space-y-6">
                 {/* Email Field */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Email Address</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <label className="text-sm font-medium text-gray-200">Email Address</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 group-focus-within:text-purple-400 transition-colors" />
                     <Input
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder="your.email@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 h-12 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                      className="pl-12 h-14 bg-white/5 border-white/20 text-white placeholder:text-gray-500 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 rounded-xl"
                       required
                     />
                   </div>
@@ -131,43 +176,46 @@ export default function LoginPage() {
 
                 {/* Password Field */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <label className="text-sm font-medium text-gray-200">Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 group-focus-within:text-purple-400 transition-colors" />
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 h-12 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                      className="pl-12 pr-12 h-14 bg-white/5 border-white/20 text-white placeholder:text-gray-500 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 rounded-xl"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-400 transition-colors"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                 </div>
 
                 {/* Remember Me & Forgot Password */}
                 <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-2 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                    <span className="text-gray-600">Remember me</span>
+                  <label className="flex items-center cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      className="mr-2 rounded border-white/30 bg-white/5 text-purple-500 focus:ring-purple-500 focus:ring-offset-0" 
+                    />
+                    <span className="text-gray-300 group-hover:text-white transition-colors">Remember me</span>
                   </label>
-                  <a href="#" className="text-purple-600 hover:text-purple-700 font-medium">
+                  <a href="#" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
                     Forgot password?
                   </a>
                 </div>
 
                 {/* Login Button */}
-                <button
+                <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium py-3 px-4 rounded-lg hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center">
@@ -175,24 +223,28 @@ export default function LoginPage() {
                       Signing In...
                     </div>
                   ) : (
-                    "Sign In"
+                    <div className="flex items-center justify-center">
+                      <span>Sign In</span>
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    </div>
                   )}
-                </button>
+                </Button>
 
-                {/* Social Login */}
-                <div className="relative">
+                {/* Divider */}
+                <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
+                    <div className="w-full border-t border-white/20" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                    <span className="px-4 bg-transparent text-gray-400">Or continue with</span>
                   </div>
                 </div>
 
+                {/* Social Login */}
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-center px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-sm font-medium text-white hover:bg-white/10 transition-all duration-200"
                   >
                     <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                       <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -204,7 +256,7 @@ export default function LoginPage() {
                   </button>
                   <button
                     type="button"
-                    className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-center px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-sm font-medium text-white hover:bg-white/10 transition-all duration-200"
                   >
                     <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
@@ -215,18 +267,36 @@ export default function LoginPage() {
               </form>
 
               {/* Sign Up Link */}
-              <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
+              <div className="mt-8 text-center">
+                <p className="text-sm text-gray-300">
                   Don't have an account?{" "}
-                  <Link href="/register" className="font-medium text-purple-600 hover:text-purple-700">
-                    Sign up for free
+                  <Link href="/register" className="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
+                    Create one now →
                   </Link>
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
+
+      {/* Add custom animations */}
+      <style jsx>{`
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   )
 }

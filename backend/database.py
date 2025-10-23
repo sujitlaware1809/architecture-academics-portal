@@ -20,6 +20,7 @@ from schemas import (
     ApplicationStatus,
     CourseStatus,
     WorkshopStatus,
+    EventStatus,
     CourseLevel,
     BlogStatus,
     BlogCategory,
@@ -146,12 +147,12 @@ class Course(Base):
     level = Column(Enum(CourseLevel, values_callable=lambda x: [e.value for e in x]), nullable=False)
     duration = Column(String, nullable=False)  # e.g., "8 weeks", "3 months"
     max_students = Column(Integer, default=50)
+    price = Column(Numeric(10, 2), nullable=False, default=0.0)
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
     image_url = Column(String, nullable=True)
     syllabus = Column(Text, nullable=True)  # JSON or text format
     prerequisites = Column(Text, nullable=True)
-    is_trial = Column(Boolean, default=True)  # All courses are trial by default (first video free)
     status = Column(Enum(CourseStatus, values_callable=lambda x: [e.value for e in x]), default=CourseStatus.DRAFT)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -209,29 +210,28 @@ class LessonProgress(Base):
     __tablename__ = "lesson_progress"
 
     id = Column(Integer, primary_key=True, index=True)
-    is_completed = Column(Boolean, default=False)
-    watch_time = Column(Integer, default=0)  # Watched time in seconds
-    last_position = Column(Integer, default=0)  # Last watched position in seconds
-    completed_at = Column(DateTime, nullable=True)
+    current_time = Column(Integer, default=0)  # Current playback position in seconds
+    completed = Column(Boolean, default=False)
+    last_watched_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Foreign keys
     lesson_id = Column(Integer, ForeignKey("course_lessons.id"), nullable=False)
-    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    enrollment_id = Column(Integer, ForeignKey("course_enrollments.id"), nullable=False)
     
     # Relationships
     lesson = relationship("CourseLesson", back_populates="progress")
-    student = relationship("User", foreign_keys=[student_id])
+    enrollment = relationship("CourseEnrollment", back_populates="lesson_progress")
 
 class CourseEnrollment(Base):
     __tablename__ = "course_enrollments"
 
     id = Column(Integer, primary_key=True, index=True)
     enrolled_at = Column(DateTime, default=datetime.utcnow)
-    completed_at = Column(DateTime, nullable=True)
-    progress = Column(Integer, default=0)  # Percentage 0-100
-    grade = Column(String, nullable=True)
+    completed = Column(Boolean, default=False)
+    progress_percentage = Column(Numeric(5, 2), default=0.0)  # Percentage 0.00-100.00
+    last_accessed_at = Column(DateTime, nullable=True)
     
     # Foreign keys
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
@@ -240,6 +240,44 @@ class CourseEnrollment(Base):
     # Relationships
     course = relationship("Course", back_populates="enrollments")
     student = relationship("User", foreign_keys=[student_id])
+    lesson_progress = relationship("LessonProgress", back_populates="enrollment", cascade="all, delete-orphan")
+
+class CourseQuestion(Base):
+    __tablename__ = "course_questions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    timestamp = Column(Integer, nullable=True)  # Video timestamp in seconds
+    is_resolved = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Foreign keys
+    lesson_id = Column(Integer, ForeignKey("course_lessons.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    # Relationships
+    lesson = relationship("CourseLesson")
+    student = relationship("User", foreign_keys=[student_id])
+    replies = relationship("QuestionReply", back_populates="question", cascade="all, delete-orphan")
+
+class QuestionReply(Base):
+    __tablename__ = "question_replies"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text, nullable=False)
+    is_instructor = Column(Boolean, default=False)  # Flag if replied by instructor
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Foreign keys
+    question_id = Column(Integer, ForeignKey("course_questions.id"), nullable=False)
+    author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    # Relationships
+    question = relationship("CourseQuestion", back_populates="replies")
+    author = relationship("User", foreign_keys=[author_id])
 
 class Workshop(Base):
     __tablename__ = "workshops"
@@ -282,6 +320,49 @@ class WorkshopRegistration(Base):
     
     # Relationships
     workshop = relationship("Workshop", back_populates="registrations")
+    participant = relationship("User", foreign_keys=[participant_id])
+
+class Event(Base):
+    __tablename__ = "events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True, nullable=False)
+    description = Column(Text, nullable=False)
+    short_description = Column(String, nullable=True)
+    date = Column(DateTime, nullable=False)
+    duration = Column(Integer, nullable=False)  # Duration in hours
+    location = Column(String, nullable=True)
+    image_url = Column(String, nullable=True)
+    max_participants = Column(Integer, default=50)
+    is_online = Column(Boolean, default=False)
+    meeting_link = Column(String, nullable=True)
+    requirements = Column(Text, nullable=True)
+    status = Column(Enum(EventStatus, values_callable=lambda x: [e.value for e in x]), default=EventStatus.UPCOMING)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Foreign key
+    organizer_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
+    # Relationships
+    organizer = relationship("User", foreign_keys=[organizer_id])
+    registrations = relationship("EventRegistration", back_populates="event", cascade="all, delete-orphan")
+
+class EventRegistration(Base):
+    __tablename__ = "event_registrations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    registered_at = Column(DateTime, default=datetime.utcnow)
+    attended = Column(Boolean, default=False)
+    feedback = Column(Text, nullable=True)
+    rating = Column(Integer, nullable=True)  # 1-5 stars
+    
+    # Foreign keys
+    event_id = Column(Integer, ForeignKey("events.id"), nullable=False)
+    participant_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    # Relationships
+    event = relationship("Event", back_populates="registrations")
     participant = relationship("User", foreign_keys=[participant_id])
 
 class SystemSettings(Base):
