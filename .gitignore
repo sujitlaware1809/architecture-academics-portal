@@ -19,16 +19,6 @@ arch-client-web-1.0-main/arch-client-web-1.0-main/node_modules/
 arch-client-web-1.0-main/arch-client-web-1.0-main/.next/
 arch-client-web-1.0-main/arch-client-web-1.0-main/out/
 arch-client-web-1.0-main/arch-client-web-1.0-main/.env.local
-arch-client-web-1.0-main/arch-client-web-1.0-main/package-lock.json
-
-# Root env and database files
-.env
-.env.local
-*.db
-*.sqlite
-
-# Local uploads at repo root (if any)
-/uploads/
 
 # IDE
 .vscode/
@@ -49,7 +39,6 @@ Desktop.ini
 *.bak
 *.backup
 *.old
-*.backup-*
 
 # Build outputs
 build/
