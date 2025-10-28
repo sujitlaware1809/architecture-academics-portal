@@ -1,5 +1,11 @@
 # Root .gitignore for Architecture Academics Portal
 
+# SSH Keys - NEVER COMMIT THESE!
+*.pem
+*.key
+deploy_*.pem
+*.ppk
+
 # Backend Python
 backend/__pycache__/
 backend/*.py[cod]

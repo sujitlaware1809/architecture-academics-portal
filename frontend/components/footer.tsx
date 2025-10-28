@@ -24,20 +24,22 @@ export default function Footer() {
             <div className="flex items-center space-x-3 mb-4">
               <Image 
                 src="/logo.jpg" 
-                alt="Architecture Academics Logo" 
+                alt="AAO - Architecture Academics Online Logo" 
                 width={40} 
                 height={40}
                 className="rounded-xl object-contain"
               />
-              <div>
+              <div className="flex flex-col leading-none">
                 <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  Architecture
+                  AAO
                 </h3>
-                <span className="text-xs text-gray-600 font-medium">Academics</span>
+                <span className="text-[10px] text-gray-600 font-medium -mt-1">
+                  Architecture Academics.online
+                </span>
               </div>
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              India's premier platform for architecture education, career growth, and professional networking.
+              India's premier online platform for architecture education, NATA preparation, career growth, and professional networking.
             </p>
             <div className="flex gap-2">
               <Button size="sm" variant="outline" className="rounded-lg">
@@ -71,7 +73,7 @@ export default function Footer() {
               <Link href="/workshops" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 Workshops
               </Link>
-              <Link href={isAuthenticated ? "/jobs-portal" : "/login"} className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/jobs-portal" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 Jobs Portal
               </Link>
             </div>

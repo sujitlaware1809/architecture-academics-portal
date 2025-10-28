@@ -1,0 +1,40 @@
+name: Deploy Frontend to EC2
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'frontend/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: 52.66.127.84
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          # Navigate to frontend directory
+          cd /home/ubuntu/architecture-academics-portal/frontend
+          
+          # Pull latest code
+          git pull origin main
+          
+          # Install dependencies
+          pnpm install
+          
+          # Build frontend
+          pnpm build
+          
+          # Restart frontend service
+          sudo systemctl restart frontend
+          
+          echo "Frontend deployment completed!"

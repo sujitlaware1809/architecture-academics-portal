@@ -26,6 +26,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { LoginRequiredButton } from "@/components/login-required"
 
 // mockCourses removed: page now fetches courses from backend via api.get('/courses')
 
@@ -529,12 +530,13 @@ export default function CoursesPortal() {
           <p className="text-lg text-gray-700 mb-8 max-w-3xl mx-auto">
             Share your knowledge and expertise with students around the world. Create engaging courses and help shape the next generation of architects.
           </p>
-          <Link
-            href={isAuthenticated ? "/create-course" : "/login?redirect=/create-course"}
+          <LoginRequiredButton
+            onClick={() => window.location.href = "/create-course"}
+            action="create courses"
             className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
           >
             Create a Course
-          </Link>
+          </LoginRequiredButton>
         </div>
       </section>
 

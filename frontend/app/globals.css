@@ -29,15 +29,36 @@
   --chart-5: oklch(0.65 0.2 220); /* Blue for charts */
   --radius: 0.5rem; /* Rounded corners */
   --sidebar: oklch(0.97 0 0); /* Light gray sidebar */
-  --sidebar-foreground: oklch(0.205 0 0); /* Dark text in sidebar */
-  --sidebar-primary: oklch(0.646 0.222 293.4); /* Purple sidebar accent */
-  --sidebar-primary-foreground: oklch(1 0 0); /* White text on sidebar primary */
-  --sidebar-accent: oklch(0.6 0.222 264.376); /* Indigo sidebar accent */
-  --sidebar-accent-foreground: oklch(1 0 0); /* White text on sidebar accent */
-  --sidebar-border: oklch(0.85 0 0); /* Light sidebar border */
-  --sidebar-ring: oklch(0.646 0.222 293.4 / 0.5); /* Purple sidebar ring */
-  --font-dm-sans: "DM Sans", sans-serif;
-  --font-space-grotesk: "Space Grotesk", serif;
+  --sidebar-foreground: oklch(0.269 0 0); /* Medium gray sidebar text */
+}
+
+.dark {
+  --background: oklch(0.09 0 0); /* Very dark background */
+  --foreground: oklch(0.95 0 0); /* Light gray for primary text */
+  --card: oklch(0.13 0 0); /* Dark gray for cards */
+  --card-foreground: oklch(0.9 0 0); /* Light gray for card text */
+  --popover: oklch(0.13 0 0); /* Dark gray for popovers */
+  --popover-foreground: oklch(0.95 0 0); /* Light gray for popover text */
+  --primary: oklch(0.95 0 0); /* Light gray for primary actions */
+  --primary-foreground: oklch(0.09 0 0); /* Dark text on primary */
+  --secondary: oklch(0.6 0.15 293.4); /* Muted purple accent */
+  --secondary-foreground: oklch(0.95 0 0); /* Light text on secondary */
+  --muted: oklch(0.4 0 0); /* Medium gray for muted text */
+  --muted-foreground: oklch(0.15 0 0); /* Dark gray for muted backgrounds */
+  --accent: oklch(0.65 0.2 293.4); /* Brighter purple accent for highlights */
+  --accent-foreground: oklch(0.95 0 0); /* Light text on accent */
+  --destructive: oklch(0.65 0.25 27.325); /* Brighter red for destructive actions */
+  --destructive-foreground: oklch(0.95 0 0); /* Light text on destructive */
+  --border: oklch(0.25 0 0); /* Dark border color */
+  --input: oklch(0.15 0 0); /* Dark gray for inputs */
+  --ring: oklch(0.65 0.2 293.4 / 0.6); /* Brighter purple ring for focus */
+  --chart-1: oklch(0.65 0.2 264.376); /* Brighter indigo for charts */
+  --chart-2: oklch(0.7 0.25 130); /* Brighter green for charts */
+  --chart-3: oklch(0.75 0.2 85); /* Brighter yellow for charts */
+  --chart-4: oklch(0.65 0.3 25); /* Brighter red for charts */
+  --chart-5: oklch(0.7 0.25 220); /* Brighter blue for charts */
+  --sidebar: oklch(0.13 0 0); /* Dark gray sidebar */
+  --sidebar-foreground: oklch(0.9 0 0); /* Light gray sidebar text */
 }
 
 .dark {
@@ -127,6 +148,84 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Toast Animations */
+@keyframes enter {
+  0% {
+    transform: translate3d(0, -200%, 0) scale(0.6);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes leave {
+  0% {
+    transform: translate3d(0, 0, -1px) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, -150%, -1px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+.animate-enter {
+  animation: enter 0.35s ease-out;
+}
+
+.animate-leave {
+  animation: leave 0.4s ease-in forwards;
+}
+
+/* Responsive Utilities */
+.mobile-only {
+  @apply block sm:hidden;
+}
+
+.tablet-up {
+  @apply hidden sm:block;
+}
+
+.desktop-only {
+  @apply hidden lg:block;
+}
+
+.mobile-container {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+.mobile-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+}
+
+.mobile-text {
+  @apply text-sm sm:text-base;
+}
+
+.mobile-heading {
+  @apply text-2xl sm:text-3xl lg:text-4xl font-bold;
+}
+
+.mobile-card {
+  @apply p-4 sm:p-6 rounded-lg bg-card border border-border;
+}
+
+.mobile-button {
+  @apply px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base rounded-lg font-medium transition-all duration-200;
+}
+
+/* Improved focus states for mobile */
+.mobile-focus {
+  @apply focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2;
+}
+
+/* Touch-friendly sizing */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
 }
 
 /* Custom Animations */

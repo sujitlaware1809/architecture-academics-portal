@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { LoginRequiredButton } from "@/components/login-required"
 import { api } from "@/lib/api"
 
 // Mock job data - Updated to Indian jobs
@@ -622,21 +623,20 @@ export default function JobsPortal() {
                         <Clock className="h-3 w-3" />
                         {job.postedDate}
                       </span>
-                      <button 
+                      <LoginRequiredButton 
                         onClick={() => openApplyModal(job.id)}
+                        action="apply to jobs"
                         disabled={applying === job.id}
                         className="px-4 py-2 bg-gradient-to-r from-purple-600 to-sky-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                       >
                         <span>
                           {applying === job.id 
                             ? 'Applying...' 
-                            : isAuthenticated 
-                              ? 'Apply' 
-                              : 'Login'
+                            : 'Apply'
                           }
                         </span>
                         <ExternalLink className="h-3.5 w-3.5" />
-                      </button>
+                      </LoginRequiredButton>
                     </div>
                   </div>
                 </div>

@@ -1,0 +1,56 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="256" fill="url(#gradient1)"/>
+  
+  <!-- Architecture Building Icon -->
+  <g transform="translate(128, 140)">
+    <!-- Main Building -->
+    <rect x="64" y="80" width="128" height="152" fill="white" opacity="0.95"/>
+    <rect x="64" y="80" width="128" height="152" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+    
+    <!-- Building Details -->
+    <rect x="84" y="100" width="24" height="24" fill="rgba(99, 102, 241, 0.8)"/>
+    <rect x="132" y="100" width="24" height="24" fill="rgba(99, 102, 241, 0.8)"/>
+    <rect x="84" y="140" width="24" height="24" fill="rgba(99, 102, 241, 0.8)"/>
+    <rect x="132" y="140" width="24" height="24" fill="rgba(99, 102, 241, 0.8)"/>
+    <rect x="108" y="180" width="24" height="52" fill="rgba(139, 92, 246, 0.9)"/>
+    
+    <!-- Left Tower -->
+    <rect x="20" y="60" width="40" height="172" fill="white" opacity="0.9"/>
+    <rect x="20" y="60" width="40" height="172" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+    <rect x="28" y="80" width="8" height="8" fill="rgba(99, 102, 241, 0.8)"/>
+    <rect x="44" y="80" width="8" height="8" fill="rgba(99, 102, 241, 0.8)"/>
+    <rect x="28" y="100" width="8" height="8" fill="rgba(99, 102, 241, 0.8)"/>
+    <rect x="44" y="100" width="8" height="8" fill="rgba(99, 102, 241, 0.8)"/>
+    
+    <!-- Right Tower -->
+    <rect x="196" y="40" width="40" height="192" fill="white" opacity="0.9"/>
+    <rect x="196" y="40" width="40" height="192" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+    <rect x="204" y="60" width="8" height="8" fill="rgba(99, 102, 241, 0.8)"/>
+    <rect x="220" y="60" width="8" height="8" fill="rgba(99, 102, 241, 0.8)"/>
+    <rect x="204" y="80" width="8" height="8" fill="rgba(99, 102, 241, 0.8)"/>
+    <rect x="220" y="80" width="8" height="8" fill="rgba(99, 102, 241, 0.8)"/>
+    
+    <!-- Foundation -->
+    <rect x="16" y="232" width="224" height="8" fill="rgba(255, 255, 255, 0.9)"/>
+  </g>
+  
+  <!-- Letter "A" overlay -->
+  <g transform="translate(216, 320)">
+    <path d="M40 80 L60 20 L80 80 M50 60 L70 60" stroke="white" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="400" r="8" fill="rgba(255, 255, 255, 0.6)"/>
+  <circle cx="412" cy="120" r="6" fill="rgba(255, 255, 255, 0.5)"/>
+  <circle cx="80" cy="150" r="4" fill="rgba(255, 255, 255, 0.4)"/>
+  
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#6366F1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

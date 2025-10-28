@@ -39,6 +39,13 @@ interface RegisterRequest {
   confirm_password: string;
   first_name: string;
   last_name: string;
+  userType?: string;
+  college?: string;
+  year?: string;
+  degree?: string;
+  experience?: string;
+  cao_number?: string;
+  company?: string;
 }
 
 interface LoginResponse {

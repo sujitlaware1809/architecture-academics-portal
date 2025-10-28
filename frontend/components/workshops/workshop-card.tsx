@@ -4,6 +4,7 @@ import Image from "next/image"
 import { Clock, User, MapPin, BookOpen, Award, Tag } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { LoginRequiredButton } from "@/components/login-required"
 import { useState } from "react"
 import { api } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
@@ -72,9 +73,7 @@ export function WorkshopCard({ workshop, onViewDetails }: WorkshopCardProps) {
   const availableSeats = workshop.max_participants - workshop.registered_count
   const isLimitedSeats = availableSeats < workshop.max_participants * 0.3
 
-  const handleRegister = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-    
+  const handleRegister = async () => {
     // Check if user is logged in
     const token = localStorage.getItem('access_token')
     if (!token) {
@@ -250,7 +249,8 @@ export function WorkshopCard({ workshop, onViewDetails }: WorkshopCardProps) {
             >
               View Details
             </button>
-            <button
+            <LoginRequiredButton
+              action="register for workshops"
               className={`flex-1 py-2.5 rounded-lg font-medium transition-colors text-sm text-white ${
                 isRegistered 
                   ? 'bg-green-500 cursor-default'
@@ -262,7 +262,7 @@ export function WorkshopCard({ workshop, onViewDetails }: WorkshopCardProps) {
               disabled={isRegistering || isRegistered}
             >
               {isRegistering ? 'Registering...' : isRegistered ? '✓ Registered' : 'Register Now'}
-            </button>
+            </LoginRequiredButton>
           </div>
         </div>
       </div>

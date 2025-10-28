@@ -19,6 +19,7 @@ import {
   TrendingUp,
   Award,
   GraduationCap,
+  Mic
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -42,9 +43,9 @@ export default function HomePage() {
 
   const mainSections = [
     { title: "COURSES", icon: BookOpen, description: "Explore architecture courses", color: "bg-slate-800", href: "/courses" },
-    { title: "JOBS", icon: Briefcase, description: "Find career opportunities", color: "bg-purple-500", href: isAuthenticated ? "/jobs-portal" : "/login" },
+    { title: "JOBS", icon: Briefcase, description: "Find career opportunities", color: "bg-purple-500", href: "/jobs-portal" },
     { title: "EVENTS", icon: Calendar, description: "Upcoming architecture events", color: "bg-purple-500", href: "/events" },
-    { title: "BLOGS", icon: FileText, description: "Read architecture articles", color: "bg-blue-500", href: "/blogs" },
+    { title: "EXPERT TALK", icon: Mic, description: "Learn from industry experts", color: "bg-blue-500", href: "/expert-talk" },
     { title: "DISCUSSIONS", icon: MessageSquare, description: "Community Q&A forum", color: "bg-red-500", href: "/discussions" },
     { title: "WORKSHOPS & FDPs", icon: Wrench, description: "Professional development", color: "bg-purple-500", href: "/workshops" },
   ]
@@ -54,11 +55,11 @@ export default function HomePage() {
   ] : []
 
   const secondarySections = [
-    { title: "SURVEYS", icon: Users, description: "Community surveys", color: "bg-yellow-500", href: "#" },
-    { title: "COMPETITIONS", icon: Trophy, description: "Design competitions", color: "bg-blue-500", href: "#" },
-    { title: "CONTEXTUAL STUDY", icon: Building, description: "Urban & rural architecture studies", color: "bg-cyan-500", href: "#" },
-    { title: "NATA COURSES", icon: BookOpen, description: "National Aptitude Test preparation", color: "bg-orange-500", href: "#" },
-    { title: "PUBLICATIONS", icon: FileText, description: "Research & publications", color: "bg-green-500", href: "#" },
+    { title: "SURVEYS", icon: Users, description: "Community surveys", color: "bg-yellow-500", href: "#", count: "0" },
+    { title: "COMPETITIONS", icon: Trophy, description: "Design competitions", color: "bg-blue-500", href: "#", count: "0" },
+    { title: "CONTEXTUAL STUDY", icon: Building, description: "Urban & rural architecture studies", color: "bg-cyan-500", href: "#", count: "0" },
+    { title: "NATA COURSES", icon: GraduationCap, description: "National Aptitude Test preparation", color: "bg-orange-500", href: "/nata-courses", count: "0" },
+    { title: "PUBLICATIONS", icon: FileText, description: "Research & publications", color: "bg-green-500", href: "#", count: "0" },
   ]
 
   // Hardcoded Featured Articles
@@ -201,8 +202,8 @@ export default function HomePage() {
               </div>
               
               <p className="text-xl md:text-2xl text-gray-600 leading-relaxed max-w-xl font-medium">
-                Join <span className="font-bold text-purple-600">10,000+</span> architects shaping the world. 
-                Access elite courses, connect with masters, and unlock opportunities.
+                Join the <span className="font-bold text-purple-600">architectural fraternity</span> and shape the world. 
+                Access courses, connect with professionals, and unlock opportunities.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -223,15 +224,15 @@ export default function HomePage() {
               {/* Stats - Modern Cards */}
               <div className="grid grid-cols-3 gap-4 pt-8">
                 <div className="bg-gradient-to-br from-purple-50 to-white p-4 rounded-2xl border border-purple-100 hover:shadow-lg transition-all hover:-translate-y-1">
-                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">10K+</div>
+                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">0</div>
                   <div className="text-xs md:text-sm text-gray-600 font-semibold mt-1">Students</div>
                 </div>
                 <div className="bg-gradient-to-br from-indigo-50 to-white p-4 rounded-2xl border border-indigo-100 hover:shadow-lg transition-all hover:-translate-y-1">
-                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">500+</div>
+                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">0</div>
                   <div className="text-xs md:text-sm text-gray-600 font-semibold mt-1">Courses</div>
                 </div>
                 <div className="bg-gradient-to-br from-pink-50 to-white p-4 rounded-2xl border border-pink-100 hover:shadow-lg transition-all hover:-translate-y-1">
-                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">1K+</div>
+                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">0</div>
                   <div className="text-xs md:text-sm text-gray-600 font-semibold mt-1">Jobs</div>
                 </div>
               </div>
@@ -287,10 +288,10 @@ export default function HomePage() {
         <div className="mb-16">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Comprehensive Platform for Architects
+              Comprehensive Platform for Architectural Fraternity
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Access all the tools and resources you need to thrive in your architecture career
+              A holistic platform for the architectural fraternity - Access all the tools and resources you need to thrive in your architecture career
             </p>
           </div>
           
@@ -308,7 +309,7 @@ export default function HomePage() {
               return (
                 <Link 
                   key={section.title}
-                  href={section.href === "#" ? (isAuthenticated ? "#" : "/login") : section.href}
+                  href={section.href === "#" ? "#" : section.href}
                   className="group"
                 >
                   <Card className={`h-full border-2 ${colors.border} hover:border-current hover:${colors.text} transition-all duration-300 hover:shadow-2xl bg-white overflow-hidden`}>
@@ -402,8 +403,14 @@ export default function HomePage() {
               return (
                 <Link 
                   key={section.title}
-                  href={section.href === "#" ? (isAuthenticated ? "#" : "/login") : section.href}
+                  href={section.href === "#" ? "#" : section.href}
                   className="group"
+                  onClick={(e) => {
+                    if (section.href === "#") {
+                      e.preventDefault()
+                      alert("Coming soon! This feature is currently under development.")
+                    }
+                  }}
                 >
                   <Card className="h-full border-2 border-gray-100 hover:border-gray-300 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-white">
                     <CardHeader className="text-center pb-4 space-y-4">
@@ -417,6 +424,12 @@ export default function HomePage() {
                       <CardTitle className="text-sm font-bold text-gray-900 group-hover:text-gray-700 transition-colors">
                         {section.title}
                       </CardTitle>
+                      {/* Show count badge */}
+                      <div className="mt-2">
+                        <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
+                          {section.count || "0"} items
+                        </Badge>
+                      </div>
                     </CardHeader>
                     <CardContent className="pt-0 pb-4">
                       <CardDescription className="text-xs text-center text-gray-600">
@@ -429,8 +442,7 @@ export default function HomePage() {
                         size="sm"
                         className="text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium text-xs group-hover:gap-1 transition-all"
                       >
-                        {section.href === "#" ? (isAuthenticated ? "Coming Soon" : "Login") : 
-                         (isAuthenticated ? "Explore" : "Login")}
+                        {section.href === "#" ? "Coming Soon" : "Explore"}
                         <ArrowRight className="h-3 w-3 opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                       </Button>
                     </CardFooter>
@@ -491,12 +503,12 @@ export default function HomePage() {
                       Digital Design Tools Workshop
                     </h3>
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      Master the latest CAD and BIM software in our intensive hands-on workshop...
+                      Coming soon - Master the latest CAD and BIM software in our intensive hands-on workshop...
                     </p>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-xs border-blue-300 text-blue-700">
                         <Calendar className="h-3 w-3 mr-1" />
-                        Workshop
+                        Coming Soon
                       </Badge>
                       <span className="text-xs text-gray-500">5 hours ago</span>
                     </div>
@@ -524,7 +536,7 @@ export default function HomePage() {
                       <span className="text-sm font-semibold text-gray-700">Active Courses</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-3xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">127</span>
+                      <span className="font-bold text-3xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">0</span>
                       <ArrowRight className="h-4 w-4 text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </div>
@@ -537,7 +549,7 @@ export default function HomePage() {
                     </div>
                     <span className="text-sm font-semibold text-gray-700">Job Listings</span>
                   </div>
-                  <span className="font-bold text-3xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">89</span>
+                  <span className="font-bold text-3xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">0</span>
                 </div>
 
                 <div className="flex justify-between items-center p-4 rounded-xl hover:bg-purple-50 transition-all duration-300">
@@ -547,7 +559,7 @@ export default function HomePage() {
                     </div>
                     <span className="text-sm font-semibold text-gray-700">Events</span>
                   </div>
-                  <span className="font-bold text-3xl bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">23</span>
+                  <span className="font-bold text-3xl bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">0</span>
                 </div>
 
                 <div className="flex justify-between items-center p-4 rounded-xl hover:bg-purple-50 transition-all duration-300">
@@ -557,7 +569,7 @@ export default function HomePage() {
                     </div>
                     <span className="text-sm font-semibold text-gray-700">Members</span>
                   </div>
-                  <span className="font-bold text-3xl bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">2.4k</span>
+                  <span className="font-bold text-3xl bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">0</span>
                 </div>
               </div>
             </CardContent>
@@ -746,7 +758,7 @@ export default function HomePage() {
             <Card className="border-2 border-purple-100 bg-gradient-to-br from-purple-50 to-white">
               <CardContent className="p-6 text-center">
                 <MessageSquare className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">2,450+</div>
+                <div className="text-2xl font-bold text-gray-900">0</div>
                 <div className="text-sm text-gray-600">Discussions</div>
               </CardContent>
             </Card>
@@ -754,7 +766,7 @@ export default function HomePage() {
             <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white">
               <CardContent className="p-6 text-center">
                 <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">10K+</div>
+                <div className="text-2xl font-bold text-gray-900">0</div>
                 <div className="text-sm text-gray-600">Members</div>
               </CardContent>
             </Card>
@@ -762,7 +774,7 @@ export default function HomePage() {
             <Card className="border-2 border-green-100 bg-gradient-to-br from-green-50 to-white">
               <CardContent className="p-6 text-center">
                 <FileText className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">850+</div>
+                <div className="text-2xl font-bold text-gray-900">0</div>
                 <div className="text-sm text-gray-600">Articles</div>
               </CardContent>
             </Card>
@@ -770,8 +782,8 @@ export default function HomePage() {
             <Card className="border-2 border-orange-100 bg-gradient-to-br from-orange-50 to-white">
               <CardContent className="p-6 text-center">
                 <Star className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">98%</div>
-                <div className="text-sm text-gray-600">Satisfaction</div>
+                <div className="text-2xl font-bold text-gray-900">Coming Soon</div>
+                <div className="text-sm text-gray-600">Features</div>
               </CardContent>
             </Card>
           </div>
@@ -792,7 +804,7 @@ export default function HomePage() {
                   Ready to Start Your Journey?
                 </h3>
                 <p className="text-lg text-purple-100 mb-8 max-w-2xl mx-auto">
-                  Join thousands of architecture professionals and students who are already advancing their careers with us
+                  Join the architectural fraternity and connect with professionals, students, and enthusiasts who are shaping the future of architecture
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

@@ -10,8 +10,18 @@ const PUBLIC_PATHS = [
   '/login',
   '/register',
   '/blogs',
+  '/blogs-discussions',
   '/contact-us',
-  '/advertise-with-us'
+  '/advertise-with-us',
+  '/courses',
+  '/course-test',
+  '/nata-courses',
+  '/jobs-portal',
+  '/events',
+  '/workshops',
+  '/discussions',
+  '/test',
+  '/video-demo'
 ];
 
 export function AuthMiddleware({ children }: { children: React.ReactNode }) {
@@ -20,8 +30,14 @@ export function AuthMiddleware({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Skip auth check for public paths
+      // Skip auth check for public paths (exact match)
       if (PUBLIC_PATHS.includes(pathname)) {
+        return;
+      }
+
+      // Skip auth check for paths that start with public prefixes
+      const publicPrefixes = ['/courses/', '/nata-courses/', '/blogs/', '/jobs-portal/', '/events/', '/workshops/'];
+      if (publicPrefixes.some(prefix => pathname.startsWith(prefix))) {
         return;
       }
 

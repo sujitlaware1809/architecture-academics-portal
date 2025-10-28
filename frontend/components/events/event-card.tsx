@@ -4,6 +4,7 @@ import Image from "next/image"
 import { Calendar, Clock, MapPin, User } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { LoginRequiredButton } from "@/components/login-required"
 import { useState } from "react"
 import { api } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
@@ -66,9 +67,7 @@ export function EventCard({ event, onViewDetails }: EventCardProps) {
   const displayLocation = event.location || event.venue || 'TBD'
   const isOnline = event.is_online
 
-  const handleRegister = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-    
+  const handleRegister = async () => {
     // Check if user is logged in
     const token = localStorage.getItem('access_token')
     if (!token) {
@@ -220,7 +219,8 @@ export function EventCard({ event, onViewDetails }: EventCardProps) {
             >
               View Details
             </button>
-            <button
+            <LoginRequiredButton
+              action="register for events"
               className={`flex-1 py-2.5 rounded-lg font-medium transition-colors text-center text-sm ${
                 isRegistered 
                   ? 'bg-green-500 text-white cursor-default' 
@@ -230,7 +230,7 @@ export function EventCard({ event, onViewDetails }: EventCardProps) {
               disabled={isRegistering || isRegistered}
             >
               {isRegistering ? 'Registering...' : isRegistered ? '✓ Registered' : 'Register Now'}
-            </button>
+            </LoginRequiredButton>
           </div>
         </div>
       </div>
