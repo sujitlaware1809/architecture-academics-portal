@@ -101,8 +101,10 @@ export const api = {
       }
 
       // Store token in localStorage
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
 
       return { data };
     } catch (error) {
@@ -146,8 +148,10 @@ export const api = {
   },
 
   async logout(): Promise<void> {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+    }
   },
 
   // User Profile
@@ -171,14 +175,18 @@ export const api = {
       if (!response.ok) {
         if (response.status === 401) {
           // Token expired, clear storage
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('user');
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user');
+          }
         }
         return { error: data.detail || 'Failed to fetch user data' };
       }
 
       // Update stored user data
-      localStorage.setItem('user', JSON.stringify(data));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user', JSON.stringify(data));
+      }
 
       return { data };
     } catch (error) {
@@ -210,7 +218,9 @@ export const api = {
       }
 
       // Update stored user data
-      localStorage.setItem('user', JSON.stringify(data));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user', JSON.stringify(data));
+      }
 
       return { data, message: 'Profile updated successfully!' };
     } catch (error) {
@@ -484,15 +494,18 @@ export const api = {
 
   // Utility functions
   getStoredUser(): User | null {
+    if (typeof window === 'undefined') return null; // Server-side check
     const userData = localStorage.getItem('user');
     return userData ? JSON.parse(userData) : null;
   },
 
   getStoredToken(): string | null {
+    if (typeof window === 'undefined') return null; // Server-side check
     return localStorage.getItem('access_token');
   },
 
   isAuthenticated(): boolean {
+    if (typeof window === 'undefined') return false; // Server-side check
     return !!this.getStoredToken();
   },
 };

@@ -14,31 +14,35 @@
 chmod 400 deploy_1.pem
 
 # SSH into server
-ssh -i deploy_1.pem ubuntu@52.66.127.84
+ssh -i deploy_1.pem ec2-user@52.66.127.84
 ```
 
 ### Install Required Software
 ```bash
-# Update system
-sudo apt update && sudo apt upgrade -y
+# Update system (Amazon Linux 2023 uses dnf, Amazon Linux 2 uses yum)
+sudo dnf update -y
+# OR for Amazon Linux 2: sudo yum update -y
 
 # Install Python
-sudo apt install python3 python3-pip python3-venv -y
+sudo dnf install python3 python3-pip -y
+# OR for Amazon Linux 2: sudo yum install python3 python3-pip -y
 
 # Install Node.js and pnpm
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt install nodejs -y
-npm install -g pnpm
+curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+sudo dnf install nodejs -y
+# OR for Amazon Linux 2: sudo yum install nodejs -y
+sudo npm install -g pnpm
 
-# Install Git
-sudo apt install git -y
+# Install Git (usually pre-installed)
+sudo dnf install git -y
+# OR for Amazon Linux 2: sudo yum install git -y
 ```
 
 ### Clone Repository
 ```bash
-cd /home/ubuntu
-git clone https://github.com/YOUR_USERNAME/architecture-academics-portal.git
-cd architecture-academics-portal
+cd /home/ec2-user
+git clone https://github.com/YOUR_USERNAME/Suresh_Sir_Arch.git
+cd Suresh_Sir_Arch
 ```
 
 ### Setup Backend
@@ -75,8 +79,8 @@ pnpm build
 ### Setup Systemd Services
 ```bash
 # Copy service files
-sudo cp /home/ubuntu/architecture-academics-portal/backend.service /etc/systemd/system/
-sudo cp /home/ubuntu/architecture-academics-portal/frontend.service /etc/systemd/system/
+sudo cp /home/ec2-user/Suresh_Sir_Arch/backend.service /etc/systemd/system/
+sudo cp /home/ec2-user/Suresh_Sir_Arch/frontend.service /etc/systemd/system/
 
 # Enable and start services
 sudo systemctl enable backend
@@ -99,7 +103,7 @@ Add these secrets:
 
 ### `EC2_USERNAME`
 ```
-ubuntu
+ec2-user
 ```
 
 ### `EC2_SSH_KEY`
@@ -178,7 +182,7 @@ sudo systemctl restart frontend
 
 ### Manual Deploy
 ```bash
-cd /home/ubuntu/architecture-academics-portal
+cd /home/ec2-user/Suresh_Sir_Arch
 git pull origin main
 
 # For backend
@@ -188,7 +192,7 @@ pip install -r requirements.txt
 sudo systemctl restart backend
 
 # For frontend
-cd ../frontend
+cd ../arch-client-web-1.0-main/arch-client-web-1.0-main
 pnpm install
 pnpm build
 sudo systemctl restart frontend
@@ -215,7 +219,7 @@ sudo journalctl -u backend -n 50
 sudo lsof -i :8000
 
 # Manually test
-cd /home/ubuntu/architecture-academics-portal/backend
+cd /home/ec2-user/Suresh_Sir_Arch/backend
 source venv/bin/activate
 python run_server.py
 ```
@@ -229,7 +233,7 @@ sudo journalctl -u frontend -n 50
 sudo lsof -i :3000
 
 # Manually test
-cd /home/ubuntu/architecture-academics-portal/frontend
+cd /home/ec2-user/Suresh_Sir_Arch/arch-client-web-1.0-main/arch-client-web-1.0-main
 pnpm start
 ```
 
