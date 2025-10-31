@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 User=ec2-user
-WorkingDirectory=/home/ec2-user/Suresh_Sir_Arch/arch-client-web-1.0-main/arch-client-web-1.0-main
+WorkingDirectory=/home/ec2-user/architecture-academics-portal/frontend
 Environment="PATH=/usr/bin:/usr/local/bin"
 Environment="NODE_ENV=production"
 ExecStart=/usr/bin/pnpm start

@@ -5,9 +5,10 @@ After=network.target
 [Service]
 Type=simple
 User=ec2-user
-WorkingDirectory=/home/ec2-user/Suresh_Sir_Arch/backend
-Environment="PATH=/home/ec2-user/Suresh_Sir_Arch/backend/venv/bin"
-ExecStart=/home/ec2-user/Suresh_Sir_Arch/backend/venv/bin/python run_server.py
+WorkingDirectory=/home/ec2-user/architecture-academics-portal/backend
+Environment="PATH=/home/ec2-user/architecture-academics-portal/backend/venv/bin"
+Environment="PYTHONPATH=/home/ec2-user/architecture-academics-portal/backend"
+ExecStart=/home/ec2-user/architecture-academics-portal/backend/venv/bin/python run_server.py
 Restart=always
 RestartSec=10
 
