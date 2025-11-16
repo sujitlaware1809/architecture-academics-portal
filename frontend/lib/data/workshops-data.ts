@@ -11,7 +11,7 @@ export const mockWorkshops: Workshop[] = [
       image: "/placeholder-user.jpg"
     },
     date: "2025-10-15",
-    duration: "3 days (6 hours/day)",
+    duration: 18,
     mode: "Online",
     price: 4999,
     category: "Computational Design",
@@ -30,8 +30,8 @@ export const mockWorkshops: Workshop[] = [
       "Understanding of geometric principles",
       "Laptop with Rhino 7 and Grasshopper installed (trial version acceptable)"
     ],
-    isTrending: true,
-    imageUrl: "/placeholder.jpg"
+    isTrending: true,`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0,
+    imageUrl: "/placeholder.jpg",`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0
   },
   {
     id: 2,
@@ -42,10 +42,10 @@ export const mockWorkshops: Workshop[] = [
       bio: "Professor Chen is a sustainability expert who has published extensively on ecological building materials. She consults for green building councils worldwide and has received awards for her research in biomaterials for construction."
     },
     date: "2025-09-20",
-    duration: "2 days (5 hours/day)",
+    duration: 18,
     mode: "Offline",
     venue: "Design Institute, Chicago",
-    price: "Free",
+    price: 0,
     category: "Sustainable Design",
     difficulty: "Beginner",
     syllabus: [
@@ -57,8 +57,8 @@ export const mockWorkshops: Workshop[] = [
       "Cost considerations and lifecycle analysis",
       "Hands-on material testing and evaluation"
     ],
-    limitedSeats: true,
-    imageUrl: "/placeholder.jpg"
+    limitedSeats: true,`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0,
+    imageUrl: "/placeholder.jpg",`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0
   },
   {
     id: 3,
@@ -69,7 +69,7 @@ export const mockWorkshops: Workshop[] = [
       bio: "Marcus has implemented BIM processes for major architectural and engineering firms worldwide. He specializes in BIM management protocols and has developed custom solutions for multidisciplinary coordination on complex projects."
     },
     date: "2025-11-05",
-    duration: "4 days (4 hours/day)",
+    duration: 18,
     mode: "Online",
     price: 6499,
     category: "BIM",
@@ -88,7 +88,7 @@ export const mockWorkshops: Workshop[] = [
       "Previous experience in collaborative BIM projects",
       "Understanding of project management principles"
     ],
-    isTrending: true
+    isTrending: true,`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0
   },
   {
     id: 4,
@@ -99,7 +99,7 @@ export const mockWorkshops: Workshop[] = [
       bio: "Award-winning architectural photographer with work featured in major design publications including Architectural Digest and Dezeen. Isabella combines technical expertise with an architect's eye for space and form."
     },
     date: "2025-09-25",
-    duration: "1 day (8 hours)",
+    duration: 18,
     mode: "Offline",
     venue: "Urban Photography Studio, New York",
     price: 2999,
@@ -119,7 +119,7 @@ export const mockWorkshops: Workshop[] = [
       "Digital camera with manual controls (DSLR or mirrorless preferred)",
       "Tripod (recommended but not required)"
     ],
-    limitedSeats: true
+    limitedSeats: true,`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0
   },
   {
     id: 5,
@@ -131,9 +131,9 @@ export const mockWorkshops: Workshop[] = [
       image: "/placeholder-user.jpg"
     },
     date: "2025-10-10",
-    duration: "5 days (4 hours/day)",
+    duration: 18,
     mode: "Online",
-    price: "Free",
+    price: 0,
     category: "Education",
     difficulty: "Intermediate",
     syllabus: [
@@ -150,8 +150,8 @@ export const mockWorkshops: Workshop[] = [
       "Current teaching position in architecture or design field",
       "Minimum 2 years of teaching experience"
     ],
-    isFDP: true,
-    imageUrl: "/placeholder.jpg"
+    isFDP: true,`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0,
+    imageUrl: "/placeholder.jpg",`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0
   },
   {
     id: 6,
@@ -162,10 +162,10 @@ export const mockWorkshops: Workshop[] = [
       bio: "Professor Richards has published over 50 peer-reviewed papers on architectural research and secured major research grants from NSF and other institutions. She specializes in helping faculty develop robust research agendas that complement their teaching."
     },
     date: "2025-11-15",
-    duration: "3 days (6 hours/day)",
+    duration: 18,
     mode: "Online",
     venue: "Architecture Research Center (or online)",
-    price: "Free",
+    price: 0,
     category: "Research",
     difficulty: "Advanced",
     syllabus: [
@@ -178,7 +178,7 @@ export const mockWorkshops: Workshop[] = [
       "Establishing research collaborations and networks",
       "Publication strategies and open access considerations"
     ],
-    isFDP: true
+    isFDP: true,`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0
   },
   {
     id: 7,
@@ -189,7 +189,7 @@ export const mockWorkshops: Workshop[] = [
       bio: "Jason has pioneered VR applications in major architectural firms and developed custom workflows for integrating VR into the design process. His work has been featured at technology conferences worldwide."
     },
     date: "2025-09-18",
-    duration: "2 days (6 hours/day)",
+    duration: 18,
     mode: "Offline",
     venue: "Tech Innovation Hub, San Francisco",
     price: 5499,
@@ -209,8 +209,8 @@ export const mockWorkshops: Workshop[] = [
       "Familiarity with rendering concepts",
       "Laptop meeting minimum requirements for VR development"
     ],
-    isTrending: true,
-    imageUrl: "/placeholder.jpg"
+    isTrending: true,`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0,
+    imageUrl: "/placeholder.jpg",`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0
   },
   {
     id: 8,
@@ -221,9 +221,9 @@ export const mockWorkshops: Workshop[] = [
       bio: "Dr. Wong specializes in educational technology for design disciplines and has developed assessment frameworks used by leading architecture schools. She consults on curriculum development and educational technology integration."
     },
     date: "2025-10-05",
-    duration: "2 days (4 hours/day)",
+    duration: 18,
     mode: "Online",
-    price: "Free",
+    price: 0,
     category: "Education Technology",
     difficulty: "Intermediate",
     syllabus: [
@@ -235,7 +235,7 @@ export const mockWorkshops: Workshop[] = [
       "Academic integrity in digital design submission",
       "Data-informed teaching in architecture studios"
     ],
-    isFDP: true
+    isFDP: true,`n    max_participants: 50,`n    status: "published",`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",`n    registered_count: 0
   },
   {
     id: 9,
@@ -246,7 +246,7 @@ export const mockWorkshops: Workshop[] = [
       bio: "Acoustical engineer and architect with 20 years of experience designing concert halls, auditoriums, and acoustic solutions for various building types. Dr. Mendes combines scientific principles with practical design applications."
     },
     date: "2025-11-20",
-    duration: "2 days (5 hours/day)",
+    duration: 18,
     mode: "Online",
     price: 3999,
     category: "Building Science",
@@ -266,3 +266,7 @@ export const mockWorkshops: Workshop[] = [
     ]
   }
 ]
+
+
+
+

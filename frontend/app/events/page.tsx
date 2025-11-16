@@ -61,15 +61,15 @@ export default function EventsPortal() {
       filtered = filtered.filter(event => 
         event.title.toLowerCase().includes(query) ||
         event.description.toLowerCase().includes(query) ||
-        event.organizer.toLowerCase().includes(query) ||
-        event.tags.some(tag => tag.toLowerCase().includes(query))
+        event.organizer?.toLowerCase().includes(query) ||
+        event.tags?.some(tag => tag.toLowerCase().includes(query))
       )
     }
 
     // Apply category filter
     if (filters.category) {
       filtered = filtered.filter(event => 
-        event.tags.some(tag => tag.toLowerCase() === filters.category.toLowerCase())
+        event.tags?.some(tag => tag.toLowerCase() === filters.category.toLowerCase())
       )
     }
 
@@ -85,13 +85,13 @@ export default function EventsPortal() {
     // Apply location filter
     if (filters.location) {
       filtered = filtered.filter(event => 
-        event.venue.toLowerCase().includes(filters.location.toLowerCase())
+        event.venue?.toLowerCase().includes(filters.location.toLowerCase())
       )
     }
 
     // Filter by online status
     if (filters.isOnline) {
-      filtered = filtered.filter(event => event.isOnline)
+      filtered = filtered.filter(event => event.is_online)
     }
 
     setFilteredEvents(filtered)

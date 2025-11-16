@@ -36,7 +36,7 @@ export default function NewCoursePage() {
         // status is automatically set to 'published' by backend
       }
       
-      const res = await api.post('/admin/courses', courseData)
+      const res = await api.post('/api/admin/courses', courseData)
       if (res && res.data) {
         router.push('/admin/courses')
       }

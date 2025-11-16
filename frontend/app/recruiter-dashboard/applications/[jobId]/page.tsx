@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { 
@@ -35,7 +35,10 @@ const getStatusInfo = (status: string) => {
     { value: status, label: status, className: "bg-gray-100 text-gray-800" };
 }
 
-export default function JobApplications({ params }: { params: { jobId: string } }) {
+export default function JobApplications({ params }: { params: Promise<{ jobId: string }> }) {
+  // Unwrap the params Promise using React.use()
+  const { jobId } = use(params)
+  
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [job, setJob] = useState<any>(null)
@@ -70,13 +73,13 @@ export default function JobApplications({ params }: { params: { jobId: string } 
     
     fetchJobDetails()
     fetchApplications()
-  }, [router, params.jobId])
+  }, [router, jobId])
 
   const fetchJobDetails = async () => {
     try {
       setLoading(true)
       const token = api.getStoredToken()
-      const response = await fetch(`http://localhost:8000/jobs/${params.jobId}`, {
+      const response = await fetch(`http://localhost:8000/jobs/${jobId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -99,7 +102,7 @@ export default function JobApplications({ params }: { params: { jobId: string } 
     try {
       setLoading(true)
       const token = api.getStoredToken()
-      const response = await fetch(`http://localhost:8000/jobs/${params.jobId}/applications`, {
+      const response = await fetch(`http://localhost:8000/jobs/${jobId}/applications`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -151,24 +154,20 @@ export default function JobApplications({ params }: { params: { jobId: string } 
   }
 
   const sendMessage = async () => {
-    // In a real application, you would implement this function to send messages to applicants
-    // This is a placeholder to show how it might work
     if (!message.trim() || !selectedApplication) return
     
     try {
       setMessageSuccess(null)
       setMessageError(null)
       
-      // Simulating a message send
-      setTimeout(() => {
-        setMessageSuccess("Message sent successfully! (This is a simulation)")
-        setMessage("")
-      }, 1000)
-      
-      // In a real implementation, you would have an API call like:
-      /*
       const token = api.getStoredToken()
-      const response = await fetch(`http://localhost:8000/applications/${selectedApplication.id}/messages`, {
+      
+      if (!token) {
+        setMessageError("You must be logged in to send messages.")
+        return
+      }
+      
+      const response = await fetch(`http://localhost:8000/applications/${selectedApplication.id}/message`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -178,15 +177,21 @@ export default function JobApplications({ params }: { params: { jobId: string } 
       })
       
       if (response.ok) {
-        setMessageSuccess("Message sent successfully!")
+        setMessageSuccess("Message sent successfully to the applicant!")
         setMessage("")
+        // Refresh applications to get updated messages
+        fetchApplications()
       } else {
-        setMessageError("Failed to send message")
+        const errorData = await response.json().catch(() => ({}))
+        setMessageError(errorData.detail || "Failed to send message. Please try again.")
       }
-      */
     } catch (error) {
       console.error('Error sending message:', error)
-      setMessageError("Error sending message. Please try again.")
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        setMessageError("Cannot connect to server. Please make sure the backend is running on http://localhost:8000")
+      } else {
+        setMessageError("Error sending message. Please check your connection and try again.")
+      }
     }
   }
 
@@ -365,15 +370,34 @@ export default function JobApplications({ params }: { params: { jobId: string } 
                           <div className="flex items-start space-x-3">
                             <FileText className="h-5 w-5 text-gray-500 mt-0.5" />
                             <div>
-                              <div className="text-sm font-medium text-gray-700">Resume</div>
-                              <a 
-                                href={selectedApplication.resume_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-purple-600 hover:text-purple-800 underline mt-1 inline-block"
-                              >
-                                View Resume
-                              </a>
+                              <div className="text-sm font-medium text-gray-700 mb-2">Resume</div>
+                              <div className="flex flex-col gap-2">
+                                <a 
+                                  href={selectedApplication.resume_url.startsWith('http') 
+                                    ? selectedApplication.resume_url 
+                                    : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${selectedApplication.resume_url}`
+                                  } 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
+                                >
+                                  <FileText className="h-4 w-4" />
+                                  View Resume
+                                </a>
+                                <a 
+                                  href={selectedApplication.resume_url.startsWith('http') 
+                                    ? selectedApplication.resume_url 
+                                    : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${selectedApplication.resume_url}`
+                                  } 
+                                  download
+                                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
+                                >
+                                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                  </svg>
+                                  Download Resume
+                                </a>
+                              </div>
                             </div>
                           </div>
                         )}

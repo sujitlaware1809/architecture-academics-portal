@@ -34,116 +34,227 @@ async def get_nata_courses(
     db: Session = Depends(get_db)
 ):
     """Get all NATA preparation courses"""
-    # Sample NATA courses data - in production, this would come from database
-    nata_courses = [
-        {
-            "id": 1,
-            "title": "NATA Drawing Fundamentals",
-            "description": "Master the art of architectural drawing with comprehensive techniques for NATA preparation",
-            "instructor": "Prof. Arjun Mehta",
-            "duration": "8 weeks",
-            "difficulty": "Beginner",
-            "price": 4999,
-            "originalPrice": 7999,
-            "rating": 4.8,
-            "studentsEnrolled": 1250,
-            "lessonsCount": 45,
-            "certificateIncluded": True,
-            "moodleUrl": "https://moodle.architectureacademics.com/course/nata-drawing",
-            "thumbnail": "/api/placeholder/400/250",
-            "category": "Drawing",
-            "skills": ["Perspective Drawing", "Sketching", "Geometric Construction", "Shading"],
-            "features": [
-                "Live interactive sessions",
-                "Personal feedback on drawings",
-                "Practice worksheets",
-                "Mock test papers",
-                "Moodle LMS access"
+    try:
+        # Try to get courses from database
+        courses = crud.get_all_nata_courses(db, category=category, status="active")
+        
+        # If no courses in DB, use sample data for demo
+        if not courses:
+            nata_courses = [
+                {
+                    "id": 1,
+                    "title": "NATA Drawing Fundamentals",
+                    "description": "Master the art of architectural drawing with comprehensive techniques for NATA preparation",
+                    "instructor": "Prof. Arjun Mehta",
+                    "duration": "8 weeks",
+                    "difficulty": "Beginner",
+                    "price": 4999,
+                    "originalPrice": 7999,
+                    "rating": 4.8,
+                    "studentsEnrolled": 1250,
+                    "lessonsCount": 45,
+                    "certificateIncluded": True,
+                    "moodleUrl": "https://moodle.architectureacademics.com/course/nata-drawing",
+                    "thumbnail": "https://placehold.co/400x250/png?text=Drawing+Course",
+                    "category": "Drawing",
+                    "skills": ["Perspective Drawing", "Sketching", "Geometric Construction", "Shading"],
+                    "features": [
+                        "Live interactive sessions",
+                        "Personal feedback on drawings",
+                        "Practice worksheets",
+                        "Mock test papers",
+                        "Moodle LMS access"
+                    ]
+                },
+                {
+                    "id": 2,
+                    "title": "NATA Mathematics Mastery",
+                    "description": "Complete mathematics preparation covering all NATA syllabus topics with solved examples",
+                    "instructor": "Dr. Priya Sharma",
+                    "duration": "6 weeks",
+                    "difficulty": "Intermediate",
+                    "price": 3999,
+                    "originalPrice": 5999,
+                    "rating": 4.7,
+                    "studentsEnrolled": 890,
+                    "lessonsCount": 38,
+                    "certificateIncluded": True,
+                    "moodleUrl": "https://moodle.architectureacademics.com/course/nata-mathematics",
+                    "thumbnail": "https://placehold.co/400x250/png?text=Mathematics+Course",
+                    "category": "Mathematics",
+                    "skills": ["Algebra", "Geometry", "Trigonometry", "Coordinate Geometry"],
+                    "features": [
+                        "Video lectures with animations",
+                        "Step-by-step solutions",
+                        "Practice questions bank",
+                        "Weekly assessments",
+                        "Doubt clearing sessions"
+                    ]
+                },
+                {
+                    "id": 3,
+                    "title": "NATA General Aptitude & Reasoning",
+                    "description": "Enhance logical reasoning, visual perception and general aptitude skills for NATA success",
+                    "instructor": "Mr. Karan Singh",
+                    "duration": "4 weeks",
+                    "difficulty": "Beginner",
+                    "price": 2999,
+                    "originalPrice": 4499,
+                    "rating": 4.6,
+                    "studentsEnrolled": 675,
+                    "lessonsCount": 28,
+                    "certificateIncluded": True,
+                    "moodleUrl": "https://moodle.architectureacademics.com/course/nata-aptitude",
+                    "thumbnail": "https://placehold.co/400x250/png?text=General+Aptitude+Course",
+                    "category": "General Aptitude",
+                    "skills": ["Logical Reasoning", "Visual Perception", "Spatial Ability", "Pattern Recognition"],
+                    "features": [
+                        "Interactive visual exercises",
+                        "Timed practice tests",
+                        "Performance analytics",
+                        "Mobile app access",
+                        "Progress tracking"
+                    ]
+                },
+                {
+                    "id": 4,
+                    "title": "Complete NATA Preparation Course",
+                    "description": "Comprehensive 12-week program covering all NATA subjects with mock tests and personal mentoring",
+                    "instructor": "Team Architecture Academics",
+                    "duration": "12 weeks",
+                    "difficulty": "Advanced",
+                    "price": 9999,
+                    "originalPrice": 15999,
+                    "rating": 4.9,
+                    "studentsEnrolled": 2100,
+                    "lessonsCount": 120,
+                    "certificateIncluded": True,
+                    "moodleUrl": "https://moodle.architectureacademics.com/course/complete-nata",
+                    "thumbnail": "https://placehold.co/400x250/png?text=Complete+Course",
+                    "category": "Full Course",
+                    "skills": ["All NATA Skills", "Test Strategy", "Time Management", "Exam Psychology"],
+                    "features": [
+                        "Personal mentor assignment",
+                        "Weekly one-on-one sessions",
+                        "Full-length mock tests",
+                        "Performance analysis reports",
+                        "Admission guidance",
+                        "Complete Moodle course access"
+                    ]
+                },
+                {
+                    "id": 5,
+                    "title": "NATA Advanced Drawing & Visualization",
+                    "description": "Take your architectural drawing skills to the next level with advanced techniques and visualization methods",
+                    "instructor": "Ar. Deepika Patel",
+                    "duration": "10 weeks",
+                    "difficulty": "Advanced",
+                    "price": 5999,
+                    "originalPrice": 8999,
+                    "rating": 4.8,
+                    "studentsEnrolled": 780,
+                    "lessonsCount": 52,
+                    "certificateIncluded": True,
+                    "moodleUrl": "https://moodle.architectureacademics.com/course/nata-advanced-drawing",
+                    "thumbnail": "https://placehold.co/400x250/png?text=Advanced+Drawing",
+                    "category": "Drawing",
+                    "skills": ["3D Visualization", "Architectural Rendering", "Digital Drawing", "Advanced Perspective"],
+                    "features": [
+                        "Advanced drawing workshops",
+                        "Digital tools training",
+                        "Portfolio development",
+                        "Industry expert sessions",
+                        "Competition preparation"
+                    ]
+                },
+                {
+                    "id": 6,
+                    "title": "NATA Mock Test Series Premium",
+                    "description": "Intensive practice with full-length mock tests, detailed analysis, and personalized improvement strategies",
+                    "instructor": "NATA Expert Panel",
+                    "duration": "4 weeks",
+                    "difficulty": "Intermediate",
+                    "price": 2499,
+                    "originalPrice": 3999,
+                    "rating": 4.7,
+                    "studentsEnrolled": 1500,
+                    "lessonsCount": 24,
+                    "certificateIncluded": True,
+                    "moodleUrl": "https://moodle.architectureacademics.com/course/nata-mock-tests",
+                    "thumbnail": "https://placehold.co/400x250/png?text=Mock+Tests",
+                    "category": "Full Course",
+                    "skills": ["Time Management", "Exam Strategy", "Score Improvement", "Error Analysis"],
+                    "features": [
+                        "15 full-length mock tests",
+                        "Detailed solutions",
+                        "Performance analytics",
+                        "Topic-wise analysis",
+                        "Expert review sessions"
+                    ]
+                },
+                {
+                    "id": 7,
+                    "title": "NATA Visual Memory & Observation",
+                    "description": "Specialized training to enhance visual memory, observation skills, and spatial understanding",
+                    "instructor": "Dr. Neha Gupta",
+                    "duration": "6 weeks",
+                    "difficulty": "Intermediate",
+                    "price": 3499,
+                    "originalPrice": 5499,
+                    "rating": 4.6,
+                    "studentsEnrolled": 920,
+                    "lessonsCount": 32,
+                    "certificateIncluded": True,
+                    "moodleUrl": "https://moodle.architectureacademics.com/course/nata-visual-memory",
+                    "thumbnail": "https://placehold.co/400x250/png?text=Visual+Memory",
+                    "category": "General Aptitude",
+                    "skills": ["Visual Memory", "Spatial Recognition", "Pattern Analysis", "Quick Sketching"],
+                    "features": [
+                        "Memory enhancement exercises",
+                        "Visual perception training",
+                        "Pattern recognition practice",
+                        "Real-time assessments",
+                        "Progress tracking tools"
+                    ]
+                }
             ]
-        },
-        {
-            "id": 2,
-            "title": "NATA Mathematics Mastery",
-            "description": "Complete mathematics preparation covering all NATA syllabus topics with solved examples",
-            "instructor": "Dr. Priya Sharma",
-            "duration": "6 weeks",
-            "difficulty": "Intermediate",
-            "price": 3999,
-            "originalPrice": 5999,
-            "rating": 4.7,
-            "studentsEnrolled": 890,
-            "lessonsCount": 38,
-            "certificateIncluded": True,
-            "moodleUrl": "https://moodle.architectureacademics.com/course/nata-mathematics",
-            "thumbnail": "/api/placeholder/400/250",
-            "category": "Mathematics",
-            "skills": ["Algebra", "Geometry", "Trigonometry", "Coordinate Geometry"],
-            "features": [
-                "Video lectures with animations",
-                "Step-by-step solutions",
-                "Practice questions bank",
-                "Weekly assessments",
-                "Doubt clearing sessions"
-            ]
-        },
-        {
-            "id": 3,
-            "title": "NATA General Aptitude & Reasoning",
-            "description": "Enhance logical reasoning, visual perception and general aptitude skills for NATA success",
-            "instructor": "Mr. Karan Singh",
-            "duration": "4 weeks",
-            "difficulty": "Beginner",
-            "price": 2999,
-            "originalPrice": 4499,
-            "rating": 4.6,
-            "studentsEnrolled": 675,
-            "lessonsCount": 28,
-            "certificateIncluded": True,
-            "moodleUrl": "https://moodle.architectureacademics.com/course/nata-aptitude",
-            "thumbnail": "/api/placeholder/400/250",
-            "category": "General Aptitude",
-            "skills": ["Logical Reasoning", "Visual Perception", "Spatial Ability", "Pattern Recognition"],
-            "features": [
-                "Interactive visual exercises",
-                "Timed practice tests",
-                "Performance analytics",
-                "Mobile app access",
-                "Progress tracking"
-            ]
-        },
-        {
-            "id": 4,
-            "title": "Complete NATA Preparation Course",
-            "description": "Comprehensive 12-week program covering all NATA subjects with mock tests and personal mentoring",
-            "instructor": "Team Architecture Academics",
-            "duration": "12 weeks",
-            "difficulty": "Advanced",
-            "price": 9999,
-            "originalPrice": 15999,
-            "rating": 4.9,
-            "studentsEnrolled": 2100,
-            "lessonsCount": 120,
-            "certificateIncluded": True,
-            "moodleUrl": "https://moodle.architectureacademics.com/course/complete-nata",
-            "thumbnail": "/api/placeholder/400/250",
-            "category": "Full Course",
-            "skills": ["All NATA Skills", "Test Strategy", "Time Management", "Exam Psychology"],
-            "features": [
-                "Personal mentor assignment",
-                "Weekly one-on-one sessions",
-                "Full-length mock tests",
-                "Performance analysis reports",
-                "Admission guidance",
-                "Complete Moodle course access"
-            ]
-        }
-    ]
-    
-    # Filter by category if provided
-    if category and category != "All":
-        nata_courses = [course for course in nata_courses if course["category"] == category]
-    
-    return {"success": True, "data": nata_courses}
+            
+            # Filter by category if provided
+            if category and category != "All":
+                nata_courses = [course for course in nata_courses if course["category"] == category]
+            
+            return {"success": True, "data": nata_courses}
+        
+        # Convert database courses to dictionary format
+        courses_list = []
+        import json
+        for course in courses:
+            course_dict = {
+                "id": course.id,
+                "title": course.title,
+                "description": course.description,
+                "instructor": course.instructor,
+                "duration": course.duration,
+                "difficulty": course.difficulty,
+                "price": float(course.price),
+                "originalPrice": float(course.original_price),
+                "rating": float(course.rating),
+                "studentsEnrolled": course.students_enrolled,
+                "lessonsCount": course.lessons_count,
+                "certificateIncluded": course.certificate_included,
+                "moodleUrl": course.moodle_url,
+                "thumbnail": course.thumbnail,
+                "category": course.category,
+                "skills": json.loads(course.skills) if course.skills else [],
+                "features": json.loads(course.features) if course.features else []
+            }
+            courses_list.append(course_dict)
+        
+        return {"success": True, "data": courses_list}
+        
+    except Exception as e:
+        print(f"Error fetching NATA courses: {str(e)}")
+        return {"success": False, "message": f"Error fetching courses: {str(e)}"}
 
 @router.get("/{course_id}")
 async def get_nata_course_detail(
@@ -161,7 +272,7 @@ async def get_nata_course_detail(
             "bio": "Renowned architect and educator with 15+ years of experience in NATA preparation. Former HOD at SPA Delhi.",
             "rating": 4.9,
             "studentsCount": 5000,
-            "image": "/api/placeholder/80/80"
+            "image": "https://placehold.co/80x80/png?text=Instructor"
         },
         "duration": "8 weeks",
         "difficulty": "Beginner",
@@ -172,7 +283,7 @@ async def get_nata_course_detail(
         "lessonsCount": 45,
         "certificateIncluded": True,
         "moodleUrl": "https://moodle.architectureacademics.com/course/nata-drawing",
-        "thumbnail": "/api/placeholder/600/400",
+        "thumbnail": "https://placehold.co/600x400/png?text=Drawing+Course+Detail",
         "category": "Drawing",
         "skills": ["Perspective Drawing", "Sketching", "Geometric Construction", "Shading", "Composition"],
         "syllabus": [
@@ -266,6 +377,9 @@ async def enroll_in_nata_course(
             2: 102,  # NATA Mathematics Foundation
             3: 103,  # NATA General Aptitude
             4: 104,  # NATA Complete Package
+            5: 105,  # NATA Advanced Drawing & Visualization
+            6: 106,  # NATA Mock Test Series Premium
+            7: 107,  # NATA Visual Memory & Observation
         }
         
         moodle_course_id = moodle_course_mapping.get(course_id, course_id)

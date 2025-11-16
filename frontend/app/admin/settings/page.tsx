@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Settings, Save, Database, Mail, Shield, Globe, Upload, FileText } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { api } from '@/lib/api';
 
 interface AppSettings {
   site_name: string;
@@ -88,11 +89,38 @@ export default function AdminSettingsPage() {
   // Fetch settings from backend
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/admin/settings');
+      const token = api.getStoredToken();
+      if (!token) {
+        console.warn('No authentication token found');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/settings`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
       if (response.ok) {
         const data = await response.json();
-        setSettings(data.settings || settings);
+        console.log('Fetched settings from backend:', data);
+        // Merge fetched settings with default settings to ensure all properties exist
+        setSettings(prevSettings => ({
+          ...prevSettings,
+          ...data.settings,
+          // Ensure allowed_file_types is always an array
+          allowed_file_types: data.settings?.allowed_file_types || prevSettings.allowed_file_types
+        }));
         setSystemInfo(data.system_info || systemInfo);
+      } else if (response.status === 401) {
+        toast({
+          title: "Authentication Required",
+          description: "Please login as admin to access settings",
+          variant: "destructive"
+        });
       }
       // If backend is not available, use mock data (already set above)
     } catch (error) {
@@ -111,9 +139,15 @@ export default function AdminSettingsPage() {
     setSaving(true);
 
     try {
-      const response = await fetch('/api/admin/settings', {
+      const token = api.getStoredToken();
+      if (!token) {
+        throw new Error('Authentication required. Please login as admin.');
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/settings`, {
         method: 'PUT',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(settings),
@@ -124,6 +158,8 @@ export default function AdminSettingsPage() {
           title: "Success",
           description: "Settings updated successfully"
         });
+      } else if (response.status === 401) {
+        throw new Error('Authentication failed. Please login again.');
       } else {
         throw new Error('Failed to update settings');
       }
@@ -141,7 +177,7 @@ export default function AdminSettingsPage() {
 
   const handleBackupNow = async () => {
     try {
-      const response = await fetch('/api/admin/backup', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/backup`, {
         method: 'POST',
       });
 
@@ -397,10 +433,10 @@ export default function AdminSettingsPage() {
                 <Label htmlFor="allowed_file_types">Allowed File Types</Label>
                 <Input
                   id="allowed_file_types"
-                  value={settings.allowed_file_types.join(', ')}
+                  value={settings.allowed_file_types?.join(', ') || ''}
                   onChange={(e) => setSettings({ 
                     ...settings, 
-                    allowed_file_types: e.target.value.split(', ').map(type => type.trim()) 
+                    allowed_file_types: e.target.value.split(', ').map(type => type.trim()).filter(type => type.length > 0)
                   })}
                   placeholder="pdf, doc, docx, jpg, png"
                 />

@@ -13,7 +13,8 @@ import {
   LogOut,
   ChevronDown,
   Menu,
-  X
+  X,
+  FileText
 } from "lucide-react"
 
 interface AdminLayoutProps {
@@ -30,6 +31,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { name: "Workshops", href: "/admin/workshops", icon: Wrench },
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
     { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
+    { name: "Blogs", href: "/admin/blogs", icon: FileText },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ]

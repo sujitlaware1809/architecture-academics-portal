@@ -13,7 +13,8 @@ import {
   PlusCircle,
   Settings,
   Activity,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -45,17 +46,43 @@ export default function AdminDashboard() {
   })
 
   useEffect(() => {
-    fetchStats()
+    // Check if user is authenticated and has admin role
+    const token = api.getStoredToken();
+    const user = api.getStoredUser();
+    
+    if (!token) {
+      setError("Please login to access the admin dashboard");
+      setLoading(false);
+      return;
+    }
+
+    if (!user || user.role !== 'ADMIN') {
+      setError("Admin access required. Please login with admin credentials.");
+      setLoading(false);
+      return;
+    }
+
+    fetchStats();
   }, [])
 
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const response = await api.get('/admin/stats')
+      setError('')
+      const response = await api.get('/api/admin/stats')
       setStats(response.data)
     } catch (err: any) {
       console.error("Error fetching stats:", err)
-      setError(err.response?.data?.detail || "Failed to load dashboard statistics")
+      
+      if (err.message === 'Backend server not accessible') {
+        setError("Unable to connect to the server. Please ensure the backend is running.")
+      } else if (err.response?.status === 401) {
+        setError("Authentication failed. Please login as admin.")
+      } else if (err.response?.status === 403) {
+        setError("Access denied. Admin privileges required.")
+      } else {
+        setError(err.response?.data?.detail || err.message || "Failed to load dashboard statistics")
+      }
     } finally {
       setLoading(false)
     }
@@ -109,6 +136,7 @@ export default function AdminDashboard() {
     { name: "Manage Workshops", href: "/admin/workshops", icon: Wrench, color: "bg-blue-100 text-blue-600 hover:bg-blue-200" },
     { name: "Manage Courses", href: "/admin/courses", icon: BookOpen, color: "bg-green-100 text-green-600 hover:bg-green-200" },
     { name: "Manage Jobs", href: "/admin/jobs", icon: Briefcase, color: "bg-yellow-100 text-yellow-600 hover:bg-yellow-200" },
+    { name: "Manage Blogs", href: "/admin/blogs", icon: FileText, color: "bg-pink-100 text-pink-600 hover:bg-pink-200" },
     { name: "Manage Users", href: "/admin/users", icon: Users, color: "bg-red-100 text-red-600 hover:bg-red-200" },
     { name: "Settings", href: "/admin/settings", icon: Settings, color: "bg-gray-100 text-gray-600 hover:bg-gray-200" },
   ]
@@ -125,6 +153,8 @@ export default function AdminDashboard() {
   }
 
   if (error) {
+    const isAuthError = error.includes("login") || error.includes("Authentication") || error.includes("Admin access");
+    
     return (
       <div className="max-w-2xl mx-auto mt-12">
         <Card className="border-red-200 bg-red-50">
@@ -135,8 +165,27 @@ export default function AdminDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-red-600">{error}</p>
-            <Button onClick={fetchStats} className="mt-4">Retry</Button>
+            <p className="text-red-600 mb-4">{error}</p>
+            
+            {isAuthError && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-blue-800 mb-2">Admin Login Required</h4>
+                <p className="text-blue-700 text-sm mb-3">Please log in with admin credentials to access the dashboard:</p>
+                <div className="bg-white border border-blue-200 rounded p-3 text-sm">
+                  <div className="font-mono">
+                    <div><strong>Email:</strong> admin@architectureacademics.com</div>
+                    <div><strong>Password:</strong> Admin@123</div>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Link href="/login">
+                    <Button size="sm" className="mr-2">Go to Login</Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+            
+            <Button onClick={fetchStats} variant="outline">Retry</Button>
           </CardContent>
         </Card>
       </div>

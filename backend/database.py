@@ -57,6 +57,14 @@ class User(Base):
     company_website = Column(String, nullable=True)
     company_description = Column(Text, nullable=True)
     
+    # Email verification
+    email_otp = Column(String, nullable=True)
+    email_otp_expires_at = Column(DateTime, nullable=True)
+    
+    # Password reset
+    password_reset_token = Column(String, nullable=True)
+    password_reset_expires_at = Column(DateTime, nullable=True)
+    
     # Relationships
     posted_jobs = relationship("Job", back_populates="recruiter")
     applications = relationship("JobApplication", back_populates="applicant")
@@ -510,6 +518,31 @@ class DiscussionReplyLike(Base):
     # Relationships
     reply = relationship("DiscussionReply", back_populates="likes")
     user = relationship("User", back_populates="discussion_reply_likes")
+
+class NATACourse(Base):
+    __tablename__ = "nata_courses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True, nullable=False)
+    description = Column(Text, nullable=False)
+    instructor = Column(String, nullable=False)
+    duration = Column(String, nullable=False)  # e.g., "8 weeks"
+    difficulty = Column(String, nullable=False)  # Beginner, Intermediate, Advanced
+    price = Column(Numeric(10, 2), nullable=False)
+    original_price = Column(Numeric(10, 2), nullable=False)
+    rating = Column(Numeric(2, 1), default=4.5)
+    students_enrolled = Column(Integer, default=0)
+    lessons_count = Column(Integer, default=0)
+    certificate_included = Column(Boolean, default=True)
+    moodle_url = Column(String, nullable=True)
+    thumbnail = Column(String, nullable=True)
+    category = Column(String, nullable=False)  # Drawing, Mathematics, General Aptitude, Full Course
+    skills = Column(Text, nullable=True)  # JSON format: ["Sketching", "Perspective Drawing"]
+    features = Column(Text, nullable=True)  # JSON format
+    syllabus = Column(Text, nullable=True)  # JSON format with modules and lessons
+    status = Column(String, default="active")  # active, inactive, archived
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 def get_db():
     db = SessionLocal()

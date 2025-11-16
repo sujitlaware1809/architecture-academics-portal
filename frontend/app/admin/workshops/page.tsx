@@ -61,7 +61,7 @@ export default function AdminWorkshopsPage() {
   const fetchWorkshops = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/admin/workshops');
+      const response = await api.get('/api/admin/workshops');
       if (response.data) {
         setWorkshops(response.data);
       }
@@ -94,7 +94,7 @@ export default function AdminWorkshopsPage() {
       if (editingWorkshop) {
         await api.put(`/admin/workshops/${editingWorkshop.id}`, payload);
       } else {
-        await api.post('/admin/workshops', payload);
+        await api.post('/api/admin/workshops', payload);
       }
 
       toast({

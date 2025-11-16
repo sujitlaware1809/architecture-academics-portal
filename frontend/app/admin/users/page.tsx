@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2, Plus, User, Users, Shield, UserCheck, Mail } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { api } from '@/lib/api';
 
 interface User {
   id: number;
@@ -43,85 +44,35 @@ export default function AdminUsersPage() {
   // Fetch users from backend
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/admin/users');
+      const token = api.getStoredToken();
+      if (!token) {
+        throw new Error('Authentication required. Please login first.');
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
+      } else if (response.status === 401) {
+        throw new Error('Authentication failed. Please login again.');
       } else {
-        // Fallback mock data if backend is not available
-        setUsers([
-          {
-            id: 1,
-            username: "admin",
-            email: "admin@architectureacademics.com",
-            full_name: "Administrator",
-            role: "admin",
-            status: "active",
-            last_login: "2025-09-19T10:30:00Z",
-            created_at: "2025-01-01T00:00:00Z"
-          },
-          {
-            id: 2,
-            username: "john_doe",
-            email: "john.doe@email.com",
-            full_name: "John Doe",
-            role: "student",
-            status: "active",
-            last_login: "2025-09-18T14:22:00Z",
-            created_at: "2025-09-01T10:00:00Z",
-            enrolled_courses: 3
-          },
-          {
-            id: 3,
-            username: "prof_smith",
-            email: "sarah.smith@university.edu",
-            full_name: "Dr. Sarah Smith",
-            role: "instructor",
-            status: "active",
-            last_login: "2025-09-19T09:15:00Z",
-            created_at: "2025-08-15T08:30:00Z"
-          },
-          {
-            id: 4,
-            username: "jane_student",
-            email: "jane.wilson@email.com",
-            full_name: "Jane Wilson",
-            role: "student",
-            status: "active",
-            last_login: "2025-09-17T16:45:00Z",
-            created_at: "2025-09-05T12:00:00Z",
-            enrolled_courses: 2
-          },
-          {
-            id: 5,
-            username: "hr_recruiter",
-            email: "recruiter@techcorp.com",
-            full_name: "Mike Johnson",
-            role: "recruiter",
-            status: "active",
-            last_login: "2025-09-19T11:00:00Z",
-            created_at: "2025-08-20T14:30:00Z",
-            posted_jobs: 5
-          },
-          {
-            id: 6,
-            username: "inactive_user",
-            email: "inactive@email.com",
-            full_name: "Inactive User",
-            role: "student",
-            status: "inactive",
-            last_login: "2025-08-15T12:00:00Z",
-            created_at: "2025-07-01T10:00:00Z"
-          }
-        ]);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch users",
+        description: "Failed to fetch users from database",
         variant: "destructive"
       });
+      setUsers([]); // Set empty array instead of hardcoded fallback
     } finally {
       setLoading(false);
     }
@@ -135,9 +86,14 @@ export default function AdminUsersPage() {
     e.preventDefault();
     
     try {
+      const token = api.getStoredToken();
+      if (!token) {
+        throw new Error('Authentication required. Please login first.');
+      }
+
       const url = editingUser 
-        ? `/api/admin/users/${editingUser.id}`
-        : '/api/admin/users';
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${editingUser.id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`;
       
       const method = editingUser ? 'PUT' : 'POST';
       
@@ -148,6 +104,7 @@ export default function AdminUsersPage() {
       const response = await fetch(url, {
         method,
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(submitData),
@@ -203,8 +160,17 @@ export default function AdminUsersPage() {
     if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
 
     try {
-      const response = await fetch(`/api/admin/users/${id}`, {
+      const token = api.getStoredToken();
+      if (!token) {
+        throw new Error('Authentication required. Please login first.');
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {

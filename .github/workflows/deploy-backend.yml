@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
 
 jobs:
@@ -13,20 +14,34 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Deploy to EC2
-      uses: appleboy/ssh-action@master
+      uses: appleboy/ssh-action@v1.0.3
       with:
-        host: 52.66.127.84
+        host: 15.206.47.135
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Navigate to backend directory
-          cd /home/ubuntu/architecture-academics-portal/backend
+          # Navigate to project directory
+          cd /home/ec2-user/architecture-academics-portal
+          
+          # Create database backup before deployment
+          echo "💾 Creating database backup..."
+          chmod +x deployment/backup-database.sh
+          ./deployment/backup-database.sh || echo "⚠️ Backup failed or no database found"
+          
+          # Stop backend service if running
+          sudo systemctl stop backend || true
           
           # Pull latest code
           git pull origin main
+          
+          # Navigate to backend directory
+          cd backend
+          
+          # Create virtual environment if it doesn't exist
+          python3 -m venv venv || true
           
           # Activate virtual environment
           source venv/bin/activate
@@ -34,7 +49,13 @@ jobs:
           # Install dependencies
           pip install -r requirements.txt
           
-          # Restart backend service
-          sudo systemctl restart backend
+          # Skip database migrations to preserve existing data
+          # python migrate_db.py || true
+          echo "ℹ️  Skipping database migrations to preserve existing data"
           
-          echo "Backend deployment completed!"
+          # Start backend service
+          sudo systemctl start backend
+          sudo systemctl enable backend
+          
+          echo "Backend deployment completed successfully!"
+          echo "Backend API accessible at: http://15.206.47.135:8000"

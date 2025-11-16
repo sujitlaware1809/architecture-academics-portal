@@ -1,4 +1,7 @@
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  // Await the params in server components
+  const { id } = await params
+  
   // This is a simplified example - in a real app, you would fetch the course data based on the ID
   const mockCourseData = {
     title: "Fundamentals of Architectural Design",

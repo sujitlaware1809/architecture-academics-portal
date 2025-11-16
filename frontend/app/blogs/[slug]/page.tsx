@@ -389,17 +389,26 @@ The question is not whether to learn parametric design, but when to start. The a
     try {
       setLoading(true)
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Fetch from real API
+      const response = await fetch(`http://localhost:8000/blogs/slug/${slug}`)
       
-      // Find blog by slug from hardcoded data
-      const foundBlog = hardcodedBlogs.find(b => b.slug === slug)
-      
-      if (foundBlog) {
-        setBlog(foundBlog)
+      if (response.ok) {
+        const data = await response.json()
+        setBlog(data)
+      } else {
+        // Fallback to hardcoded data if API fails
+        const foundBlog = hardcodedBlogs.find(b => b.slug === slug)
+        if (foundBlog) {
+          setBlog(foundBlog)
+        }
       }
     } catch (error) {
       console.error("Error fetching blog:", error)
+      // Fallback to hardcoded data on error
+      const foundBlog = hardcodedBlogs.find(b => b.slug === slug)
+      if (foundBlog) {
+        setBlog(foundBlog)
+      }
     } finally {
       setLoading(false)
     }

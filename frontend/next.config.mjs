@@ -1,18 +1,31 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true,
-    domains: [
-      'architectureacademics.local',
-      '*.architectureacademics.com',
-      'architectureacademics.online',
-      '*.architectureacademics.online'
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'architectureacademics.local',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.architectureacademics.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'architectureacademics.online',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.architectureacademics.online',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
     ],
   },
   async rewrites() {

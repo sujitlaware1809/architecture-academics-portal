@@ -8,7 +8,7 @@ export const mockEvents: Event[] = [
     date: "2025-10-15",
     time: "9:00 AM - 5:00 PM",
     venue: "Grand Convention Center, New York",
-    isOnline: false,
+    is_online: false,
     organizer: "Global Architecture Association",
     tags: ["Conference", "Professional"],
     agenda: [
@@ -31,8 +31,8 @@ export const mockEvents: Event[] = [
         image: "/placeholder-user.jpg"
       }
     ],
-    registrationLink: "#register",
-    imageUrl: "/placeholder.jpg"
+    registrationLink: "#register",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",
+    imageUrl: "/placeholder.jpg",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z"
   },
   {
     id: 2,
@@ -41,7 +41,7 @@ export const mockEvents: Event[] = [
     date: "2025-09-20",
     time: "1:00 PM - 4:00 PM",
     venue: "Design Institute, Chicago",
-    isOnline: false,
+    is_online: false,
     organizer: "Green Building Council",
     tags: ["Workshop", "Sustainable"],
     agenda: [
@@ -50,8 +50,8 @@ export const mockEvents: Event[] = [
       "2:30 PM - Hands-on Design Exercise",
       "3:30 PM - Group Presentations and Feedback"
     ],
-    registrationLink: "#register",
-    imageUrl: "/placeholder.jpg"
+    registrationLink: "#register",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",
+    imageUrl: "/placeholder.jpg",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z"
   },
   {
     id: 3,
@@ -60,7 +60,7 @@ export const mockEvents: Event[] = [
     date: "2025-11-05",
     time: "10:00 AM - 3:00 PM",
     venue: "Tech Innovation Hub, San Francisco",
-    isOnline: false,
+    is_online: false,
     organizer: "Architecture & Technology Institute",
     tags: ["Seminar", "Technology"],
     agenda: [
@@ -70,7 +70,7 @@ export const mockEvents: Event[] = [
       "1:00 PM - Parametric Design Workshop",
       "2:30 PM - Future Trends Discussion"
     ],
-    registrationLink: "#register"
+    registrationLink: "#register",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z"
   },
   {
     id: 4,
@@ -79,10 +79,10 @@ export const mockEvents: Event[] = [
     date: "2025-09-25",
     time: "4:00 PM - 7:00 PM",
     venue: "Online Event",
-    isOnline: true,
+    is_online: true,
     organizer: "Career Advancement Network",
     tags: ["Workshop", "Career"],
-    registrationLink: "#register"
+    registrationLink: "#register",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z"
   },
   {
     id: 5,
@@ -91,7 +91,7 @@ export const mockEvents: Event[] = [
     date: "2025-10-10",
     time: "9:00 AM - 4:00 PM",
     venue: "Heritage Museum, Boston",
-    isOnline: false,
+    is_online: false,
     organizer: "Preservation Society",
     tags: ["Symposium", "Heritage"],
     agenda: [
@@ -103,8 +103,8 @@ export const mockEvents: Event[] = [
       "2:30 PM - Hands-on Demonstration: Documentation Techniques",
       "3:30 PM - Closing Remarks and Q&A"
     ],
-    registrationLink: "#register",
-    imageUrl: "/placeholder.jpg"
+    registrationLink: "#register",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",
+    imageUrl: "/placeholder.jpg",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z"
   },
   {
     id: 6,
@@ -113,10 +113,10 @@ export const mockEvents: Event[] = [
     date: "2025-11-15",
     time: "9:00 AM (Day 1) - 5:00 PM (Day 2)",
     venue: "Innovation Center, Seattle",
-    isOnline: false,
+    is_online: false,
     organizer: "Urban Future Initiative",
     tags: ["Hackathon", "Urban Planning"],
-    registrationLink: "#register"
+    registrationLink: "#register",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z"
   },
   {
     id: 7,
@@ -125,11 +125,11 @@ export const mockEvents: Event[] = [
     date: "2025-09-18",
     time: "10:00 AM - 5:00 PM",
     venue: "Photography Studio, Los Angeles",
-    isOnline: false,
+    is_online: false,
     organizer: "Architectural Media Group",
     tags: ["Workshop", "Photography"],
-    registrationLink: "#register",
-    imageUrl: "/placeholder.jpg"
+    registrationLink: "#register",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z",
+    imageUrl: "/placeholder.jpg",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z"
   },
   {
     id: 8,
@@ -138,7 +138,7 @@ export const mockEvents: Event[] = [
     date: "2025-10-05",
     time: "2:00 PM - 4:00 PM",
     venue: "Online Event",
-    isOnline: true,
+    is_online: true,
     organizer: "Sustainable Architecture Institute",
     tags: ["Webinar", "Sustainable"],
     speakers: [
@@ -148,7 +148,7 @@ export const mockEvents: Event[] = [
         image: "/placeholder-user.jpg"
       }
     ],
-    registrationLink: "#register"
+    registrationLink: "#register",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z"
   },
   {
     id: 9,
@@ -157,9 +157,12 @@ export const mockEvents: Event[] = [
     date: "2025-11-20",
     time: "9:00 AM - 3:00 PM",
     venue: "Wellness Center, Denver",
-    isOnline: false,
+    is_online: false,
     organizer: "Architecture & Health Coalition",
     tags: ["Symposium", "Wellness"],
-    registrationLink: "#register"
+    registrationLink: "#register",`n    duration: 120,`n    status: "published",`n    participants_count: 0,`n    created_at: "2025-01-01T00:00:00Z",`n    updated_at: "2025-01-01T00:00:00Z"
   }
 ]
+
+
+

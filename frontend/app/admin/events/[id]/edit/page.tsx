@@ -1,16 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import EventForm from "../../components/event-form"
 import { Loader2 } from "lucide-react"
 import { getEventById } from "@/lib/api"
 
-export default function EditEvent({ params }: { params: { id: string } }) {
+export default function EditEvent({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const router = useRouter()
-  const { id } = params
 
   useEffect(() => {
     async function fetchEvent() {

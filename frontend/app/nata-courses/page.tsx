@@ -8,13 +8,14 @@ import { LoginRequiredButton } from "@/components/login-required"
 import { 
   BookOpen, Clock, Users, Star, Play, FileText, Award, 
   CheckCircle, Calendar, Target, TrendingUp, Download,
-  Video, PenTool, Ruler, Palette, Building2, Lightbulb
+  Video, PenTool, Ruler, Palette, Building2, Lightbulb,
+  Search, FolderOpen, ChevronDown, X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
+import "./courses.css"
 
 interface NATACourse {
   id: number
@@ -23,6 +24,8 @@ interface NATACourse {
   instructor: string
   duration: string
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced'
+  price: number
+  originalPrice: number
   rating: number
   studentsEnrolled: number
   lessonsCount: number
@@ -31,12 +34,18 @@ interface NATACourse {
   thumbnail: string
   category: 'Drawing' | 'Mathematics' | 'General Aptitude' | 'Full Course'
   skills: string[]
-  syllabus: {
+  features: string[]
+  syllabus?: {
     module: string
     topics: string[]
     duration: string
+    lessons?: {
+      title: string
+      type: 'video' | 'assignment' | 'quiz'
+      duration: string
+      preview?: boolean
+    }[]
   }[]
-  features: string[]
 }
 
 export default function NATACoursesPage() {
@@ -44,227 +53,105 @@ export default function NATACoursesPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Sample NATA courses data
   const sampleCourses: NATACourse[] = [
-    {
-      id: 1,
-      title: "NATA Drawing Fundamentals",
-      description: "Master the art of architectural drawing with comprehensive techniques for NATA preparation",
-      instructor: "Prof. Arjun Mehta",
-      duration: "8 weeks",
-      difficulty: 'Beginner',
-      rating: 4.8,
-      studentsEnrolled: 1250,
-      lessonsCount: 45,
-      certificateIncluded: true,
-      moodleUrl: "https://moodle.architectureacademics.com/course/nata-drawing",
-      thumbnail: "/api/placeholder/400/250",
-      category: 'Drawing',
-      skills: ['Perspective Drawing', 'Sketching', 'Geometric Construction', 'Shading'],
-      syllabus: [
-        {
-          module: "Basic Drawing Techniques",
-          topics: ["Line Drawing", "Basic Shapes", "Proportions", "Hand-eye Coordination"],
-          duration: "2 weeks"
-        },
-        {
-          module: "Perspective Drawing",
-          topics: ["One-point Perspective", "Two-point Perspective", "Three-point Perspective"],
-          duration: "2 weeks"
-        },
-        {
-          module: "Architectural Elements",
-          topics: ["Building Components", "Structural Elements", "Landscape Elements"],
-          duration: "2 weeks"
-        },
-        {
-          module: "Advanced Techniques",
-          topics: ["Shading & Rendering", "Texture Studies", "Composition", "Speed Drawing"],
-          duration: "2 weeks"
-        }
-      ],
-      features: [
-        "Live interactive sessions",
-        "Personal feedback on drawings",
-        "Practice worksheets",
-        "Mock test papers",
-        "Moodle LMS access"
-      ]
-    },
-    {
-      id: 2,
-      title: "NATA Mathematics Mastery",
-      description: "Complete mathematics preparation covering all NATA syllabus topics with solved examples",
-      instructor: "Dr. Priya Sharma",
-      duration: "6 weeks",
-      difficulty: 'Intermediate',
-      rating: 4.7,
-      studentsEnrolled: 980,
-      lessonsCount: 32,
-      certificateIncluded: true,
-      moodleUrl: "https://moodle.architectureacademics.com/course/nata-mathematics",
-      thumbnail: "/api/placeholder/400/250",
-      category: 'Mathematics',
-      skills: ['Algebra', 'Geometry', 'Trigonometry', 'Coordinate Geometry'],
-      syllabus: [
-        {
-          module: "Algebra & Number Systems",
-          topics: ["Linear Equations", "Quadratic Equations", "Logarithms", "Progressions"],
-          duration: "1.5 weeks"
-        },
-        {
-          module: "Geometry",
-          topics: ["Triangles", "Circles", "Polygons", "Mensuration"],
-          duration: "2 weeks"
-        },
-        {
-          module: "Trigonometry",
-          topics: ["Ratios", "Identities", "Heights & Distances", "Applications"],
-          duration: "1.5 weeks"
-        },
-        {
-          module: "Coordinate Geometry",
-          topics: ["Straight Lines", "Circles", "Parabola", "Distance Formula"],
-          duration: "1 week"
-        }
-      ],
-      features: [
-        "Video lectures with animations",
-        "Step-by-step solutions",
-        "Practice questions bank",
-        "Weekly assessments",
-        "Doubt clearing sessions"
-      ]
-    },
-    {
-      id: 3,
-      title: "NATA General Aptitude & Reasoning",
-      description: "Enhance logical reasoning, visual perception and general aptitude skills for NATA success",
-      instructor: "Mr. Karan Singh",
-      duration: "4 weeks",
-      difficulty: 'Beginner',
-      rating: 4.6,
-      studentsEnrolled: 675,
-      lessonsCount: 28,
-      certificateIncluded: true,
-      moodleUrl: "https://moodle.architectureacademics.com/course/nata-aptitude",
-      thumbnail: "/api/placeholder/400/250",
-      category: 'General Aptitude',
-      skills: ['Logical Reasoning', 'Visual Perception', 'Spatial Ability', 'Pattern Recognition'],
-      syllabus: [
-        {
-          module: "Logical Reasoning",
-          topics: ["Analogies", "Classification", "Series", "Coding-Decoding"],
-          duration: "1 week"
-        },
-        {
-          module: "Visual Perception",
-          topics: ["Pattern Recognition", "Figure Completion", "Mirror Images", "Hidden Figures"],
-          duration: "1 week"
-        },
-        {
-          module: "Spatial Ability",
-          topics: ["3D Visualization", "Rotation", "Reflection", "Cross-sections"],
-          duration: "1 week"
-        },
-        {
-          module: "General Aptitude",
-          topics: ["Data Interpretation", "Quantitative Comparison", "Problem Solving"],
-          duration: "1 week"
-        }
-      ],
-      features: [
-        "Interactive visual exercises",
-        "Timed practice tests",
-        "Performance analytics",
-        "Mobile app access",
-        "Progress tracking"
-      ]
-    },
-    {
-      id: 4,
-      title: "Complete NATA Preparation Course",
-      description: "Comprehensive 12-week program covering all NATA subjects with mock tests and personal mentoring",
-      instructor: "Team Architecture Academics",
-      duration: "12 weeks",
-      difficulty: 'Advanced',
-      rating: 4.9,
-      studentsEnrolled: 2100,
-      lessonsCount: 120,
-      certificateIncluded: true,
-      moodleUrl: "https://moodle.architectureacademics.com/course/complete-nata",
-      thumbnail: "/api/placeholder/400/250",
-      category: 'Full Course',
-      skills: ['All NATA Skills', 'Test Strategy', 'Time Management', 'Exam Psychology'],
-      syllabus: [
-        {
-          module: "Foundation Phase",
-          topics: ["NATA Overview", "Study Plan", "Basic Skills Assessment"],
-          duration: "1 week"
-        },
-        {
-          module: "Drawing Intensive",
-          topics: ["All Drawing Modules", "Portfolio Development", "Speed Training"],
-          duration: "5 weeks"
-        },
-        {
-          module: "Mathematics Deep Dive",
-          topics: ["Complete Syllabus", "Problem Solving Techniques", "Formula Sheets"],
-          duration: "3 weeks"
-        },
-        {
-          module: "Aptitude & Mock Tests",
-          topics: ["Reasoning Skills", "Full Length Tests", "Analysis & Improvement"],
-          duration: "3 weeks"
-        }
-      ],
-      features: [
-        "Personal mentor assignment",
-        "Weekly one-on-one sessions",
-        "Full-length mock tests",
-        "Performance analysis reports",
-        "Admission guidance",
-        "Complete Moodle course access"
-      ]
-    }
+    // ... your existing course data ...
   ]
 
-  const categories = ['All', 'Drawing', 'Mathematics', 'General Aptitude', 'Full Course']
+  const categories = ['All', ...Array.from(new Set(courses.map(course => course.category))).sort()]
 
   useEffect(() => {
     const fetchData = async () => {
-      // Simulate API call
-      setCourses(sampleCourses)
-      
-      // Fetch current user
-      if (auth.isAuthenticated()) {
-        const user = await auth.getCurrentUser()
-        setCurrentUser(user)
+      try {
+        // Fetch NATA courses and user data in parallel
+        const [coursesResponse, user] = await Promise.all([
+          api.get('/nata-courses'),
+          auth.isAuthenticated() ? auth.getCurrentUser() : null
+        ]);
+
+        // Handle courses response
+        if (coursesResponse && coursesResponse.data) {
+          const coursesData = coursesResponse.data;
+          
+          // Check if it's the wrapped format { data: [...] }
+          if (coursesData.data && Array.isArray(coursesData.data)) {
+            setCourses(coursesData.data);
+          }
+          // Or if it's direct array format
+          else if (Array.isArray(coursesData)) {
+            setCourses(coursesData);
+          }
+          // Or if it has success flag format { success: true, data: [...] }
+          else if (coursesData.success && Array.isArray(coursesData.data)) {
+            setCourses(coursesData.data);
+          }
+          else {
+            console.error('Unexpected courses response format:', coursesData);
+            setCourses([]);
+          }
+        } else {
+          console.error('Invalid courses response:', coursesResponse);
+          setCourses([]);
+        }
+
+        // Set user if authenticated
+        if (user) {
+          setCurrentUser(user);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setCourses([]);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false)
     }
 
     fetchData()
   }, [])
 
-  const filteredCourses = selectedCategory === 'All' 
-    ? courses 
-    : courses.filter(course => course.category === selectedCategory)
+  const filteredCourses = courses
+    .filter(course => {
+      const matchesCategory = selectedCategory === 'All' || course.category === selectedCategory
+      const matchesSearch = searchQuery === '' || [
+        course.title,
+        course.description,
+        course.instructor,
+        ...course.skills,
+        ...(course.syllabus?.map(s => s.module) || [])
+      ].some(text => 
+        text.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      return matchesCategory && matchesSearch
+    })
 
-  const handleEnrollCourse = (course: NATACourse) => {
+  const handleEnrollCourse = async (course: NATACourse) => {
     if (!currentUser) {
       window.location.href = `/login?redirect=${encodeURIComponent('/nata-courses')}`
       return
     }
 
-    // Redirect to Moodle course or enrollment page
-    if (course.moodleUrl) {
-      window.open(course.moodleUrl, '_blank')
-    } else {
-      // Handle enrollment logic
-      alert(`Enrolling in ${course.title}. This will integrate with Moodle LMS.`)
+    try {
+      // Call backend enrollment endpoint
+      const response = await api.post(`/nata-courses/${course.id}/enroll`, {})
+
+      if (response.success) {
+        // Get access URL from response
+        const accessUrl = response.data.sso_url || response.data.course_url
+
+        if (accessUrl) {
+          // Open course in new tab using SSO link
+          window.open(accessUrl, '_blank')
+        } else {
+          throw new Error('No course access URL provided')
+        }
+      } else {
+        throw new Error(response.message || 'Enrollment failed')
+      }
+    } catch (error: any) {
+      console.error('Enrollment error:', error)
+      alert(error.message || 'Failed to enroll in course. Please try again.')
     }
   }
 
@@ -280,200 +167,209 @@ export default function NATACoursesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="flex justify-center mb-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-full p-4">
-                <Building2 className="h-12 w-12 text-white" />
-              </div>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              NATA Preparation Courses
+      <section className="relative bg-gradient-to-r from-blue-600 to-purple-600 pt-16 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-white mb-4 font-serif">
+              Master NATA with Expert-Led Courses
             </h1>
-            <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-              Master the National Aptitude Test in Architecture with our comprehensive, 
-              Moodle-integrated courses designed by industry experts
+            <p className="text-xl text-blue-100 max-w-2xl mx-auto mb-8">
+              Comprehensive NATA preparation covering drawing, mathematics, general aptitude, and complete exam strategies from industry experts
             </p>
-            
-            <div className="grid md:grid-cols-3 gap-6 mt-12">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
-                <Award className="h-8 w-8 text-yellow-300 mb-3 mx-auto" />
-                <h3 className="font-semibold mb-2">Expert Instructors</h3>
-                <p className="text-sm text-blue-100">Learn from experienced architects and educators</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
-                <Target className="h-8 w-8 text-green-300 mb-3 mx-auto" />
-                <h3 className="font-semibold mb-2">Focused Curriculum</h3>
-                <p className="text-sm text-blue-100">Syllabus designed specifically for NATA success</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
-                <TrendingUp className="h-8 w-8 text-orange-300 mb-3 mx-auto" />
-                <h3 className="font-semibold mb-2">Proven Results</h3>
-                <p className="text-sm text-blue-100">95% of our students clear NATA on first attempt</p>
-              </div>
+            <div className="flex items-center justify-center gap-4">
+              <a
+                href="#course-catalog"
+                className="inline-flex items-center px-6 py-3 rounded-full bg-white text-blue-600 font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
+              >
+                Browse Courses
+              </a>
+              <Link
+                href="/profile/my-courses"
+                className="inline-flex items-center px-6 py-3 rounded-full bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                My Courses
+              </Link>
             </div>
           </div>
         </div>
-      </div>
+        <div className="absolute inset-0 overflow-hidden opacity-20">
+          <div className="absolute right-0 top-0 w-1/2 h-full bg-pattern-dots"></div>
+          <div className="absolute left-0 bottom-0 w-1/2 h-1/2 bg-pattern-dots"></div>
+        </div>
+      </section>
 
-      {/* Course Categories */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              onClick={() => setSelectedCategory(category)}
-              className="px-6 py-2"
+      {/* Search and Filter Section */}
+      <section className="bg-white shadow-md rounded-lg -mt-10 max-w-6xl mx-auto z-20 relative p-6">
+        <div className="flex flex-col lg:flex-row gap-4 items-stretch">
+          {/* Search bar */}
+          <div className="relative flex-grow">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Input
+              placeholder="Search courses, topics, or instructors..."
+              className="pl-10 h-12 text-base border-gray-300 focus-visible:ring-blue-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-wrap gap-2 items-center">
+            {/* Category Filter */}
+            <div className="relative">
+              <button className={`flex items-center px-4 py-2 rounded-full text-sm ${selectedCategory === "" ? 'bg-gray-100 text-gray-700' : 'bg-blue-100 text-blue-800'} hover:bg-blue-100 hover:text-blue-800 transition-colors`}>
+                <span className="mr-1">Category:</span>
+                <span className="font-medium">{selectedCategory || 'All'}</span>
+                <ChevronDown className="ml-1 h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Reset Filters */}
+            {(selectedCategory || searchQuery) && (
+              <button
+                onClick={() => {
+                  setSelectedCategory("")
+                  setSearchQuery("")
+                }}
+                className="flex items-center px-4 py-2 rounded-full text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+              >
+                <X className="mr-1 h-4 w-4" />
+                Reset
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Course Catalog Section */}
+      <section id="course-catalog" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-10 font-serif text-center">
+          NATA Sections
+        </h2>
+
+        {filteredCourses.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-lg text-gray-600 mb-4">No courses match your search criteria.</p>
+            <button
+              onClick={() => {
+                setSelectedCategory("")
+                setSearchQuery("")
+              }}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
-              {category}
-            </Button>
-          ))}
-        </div>
-
-        {/* Courses Grid */}
-        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-8">
-          {filteredCourses.map((course) => (
-            <Card key={course.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative">
-                <img 
-                  src={course.thumbnail} 
-                  alt={course.title}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-4 left-4">
-                  <Badge className="bg-white text-gray-900 font-semibold">
-                    {course.category}
-                  </Badge>
-                </div>
-                <div className="absolute top-4 right-4">
-                  <Badge variant="secondary" className="bg-black/20 text-white backdrop-blur-sm">
-                    {course.difficulty}
-                  </Badge>
-                </div>
-              </div>
-
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
-                    {course.title}
-                  </h3>
-                </div>
-
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                  {course.description}
-                </p>
-
-                <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{course.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <BookOpen className="h-4 w-4" />
-                    <span>{course.lessonsCount} lessons</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    <span>{course.studentsEnrolled}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{course.rating}</span>
-                    <span className="text-gray-500 text-sm">({course.studentsEnrolled} students)</span>
-                  </div>
-                  {course.certificateIncluded && (
-                    <Badge variant="outline" className="text-green-600 border-green-600">
-                      <Award className="h-3 w-3 mr-1" />
-                      Certificate
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {course.skills.slice(0, 3).map((skill, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {skill}
-                    </Badge>
-                  ))}
-                  {course.skills.length > 3 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{course.skills.length - 3} more
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  <LoginRequiredButton
-                    onClick={() => handleEnrollCourse(course)}
-                    action="enroll in courses"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    {course.moodleUrl ? (
-                      <>
-                        <Play className="h-4 w-4 mr-2" />
-                        Access on Moodle
-                      </>
-                    ) : (
-                      <>
-                        <BookOpen className="h-4 w-4 mr-2" />
-                        Enroll Now
-                      </>
-                    )}
-                  </LoginRequiredButton>
-                  
-                  <Link href={`/nata-courses/${course.id}`}>
-                    <Button variant="outline" className="w-full">
-                      View Details
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Moodle Integration Info */}
-        <div className="mt-16 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-white rounded-full p-4 w-16 h-16 mx-auto mb-6 shadow-lg">
-              <Lightbulb className="h-8 w-8 text-green-600 mx-auto" />
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Powered by Moodle LMS
-            </h2>
-            <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-              Our NATA courses are integrated with Moodle Learning Management System, 
-              providing you with a seamless, interactive learning experience with 
-              progress tracking, assignments, and community features.
-            </p>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-lg p-6 shadow-md">
-                <Video className="h-8 w-8 text-blue-600 mb-3 mx-auto" />
-                <h3 className="font-semibold mb-2">Interactive Content</h3>
-                <p className="text-sm text-gray-600">Video lectures, quizzes, and assignments</p>
-              </div>
-              <div className="bg-white rounded-lg p-6 shadow-md">
-                <TrendingUp className="h-8 w-8 text-green-600 mb-3 mx-auto" />
-                <h3 className="font-semibold mb-2">Progress Tracking</h3>
-                <p className="text-sm text-gray-600">Monitor your learning journey and improvements</p>
-              </div>
-              <div className="bg-white rounded-lg p-6 shadow-md">
-                <Users className="h-8 w-8 text-purple-600 mb-3 mx-auto" />
-                <h3 className="font-semibold mb-2">Community Learning</h3>
-                <p className="text-sm text-gray-600">Connect with peers and instructors</p>
-              </div>
-            </div>
+              Clear Filters
+            </button>
           </div>
-        </div>
-      </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredCourses.map((course) => (
+              <article key={course.id} className="group cursor-pointer h-full">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 h-full flex flex-col">
+                  {/* Course Image */}
+                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-purple-100 via-indigo-100 to-pink-100">
+                    <img
+                      src={course.thumbnail}
+                      alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0"></div>
+                    
+                    {/* Status Badges */}
+                    <div className="absolute top-4 left-4 flex gap-2">
+                      <Badge className="bg-white/95 text-gray-900 font-semibold backdrop-blur-sm">
+                        {course.category}
+                      </Badge>
+                      <Badge variant="secondary" className="bg-black/30 text-white backdrop-blur-sm">
+                        {course.difficulty}
+                      </Badge>
+                    </div>
+
+                    {/* Rating Badge */}
+                    <div className="absolute bottom-4 left-4 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
+                      <div className="flex items-center text-yellow-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={`h-4 w-4 ${i < Math.floor(course.rating) ? 'fill-current' : 'text-gray-300'}`} />
+                        ))}
+                      </div>
+                      <span className="text-xs font-medium text-gray-700 ml-1">{course.rating}</span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 flex-1 flex flex-col">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 leading-tight group-hover:text-purple-600 transition-colors line-clamp-2">
+                      {course.title}
+                    </h3>
+
+                    <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-2 flex-1">
+                      {course.description}
+                    </p>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3.5 w-3.5" />
+                        <span>{course.studentsEnrolled.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>{course.duration}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+              <BookOpen className="h-3.5 w-3.5" />
+              <span>{course.lessonsCount} sections</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {course.skills.slice(0, 3).map((skill, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200">
+                          {skill}
+                        </Badge>
+                      ))}
+                      {course.skills.length > 3 && (
+                        <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200">
+                          +{course.skills.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-gray-100">
+                      <LoginRequiredButton
+                        onClick={() => handleEnrollCourse(course)}
+                        action="enroll in course"
+                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-colors text-sm flex items-center justify-center gap-2"
+                      >
+                        <Play className="h-4 w-4" />
+                        View Course Player
+                      </LoginRequiredButton>
+
+                      <Link href={`/nata-courses/${course.id}`} className="mt-2 block">
+                        <Button 
+                          variant="outline"
+                          className="w-full border-gray-200 hover:bg-gray-50 text-gray-700"
+                        >
+                          View Sections
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
     </div>
   )
 }

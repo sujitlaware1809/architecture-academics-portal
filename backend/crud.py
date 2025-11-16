@@ -1,10 +1,11 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, func
 from database import User, Job, JobApplication, SavedJob, Course, CourseEnrollment, Workshop, WorkshopRegistration, Event, EventRegistration, SystemSettings, CourseLesson, CourseMaterial, LessonProgress
 import schemas
 from auth import get_password_hash, verify_password
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timedelta
+from email_service import generate_otp, send_otp_email  # Use real email sending
 
 # User CRUD operations
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
@@ -16,19 +17,123 @@ def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
 
 def create_user(db: Session, user: schemas.UserCreate) -> User:
-    """Create a new user"""
+    """Create a new user with email verification"""
     hashed_password = get_password_hash(user.password)
+    
+    # Generate OTP
+    otp = generate_otp()
+    otp_expires = datetime.utcnow() + timedelta(minutes=10)  # OTP valid for 10 minutes
+    
     db_user = User(
         email=user.email,
         first_name=user.first_name,
         last_name=user.last_name,
         hashed_password=hashed_password,
-        role=user.role if hasattr(user, 'role') else schemas.UserRole.USER
+        role=user.role if hasattr(user, 'role') else schemas.UserRole.USER,
+        is_verified=False,  # Set to False initially
+        email_otp=otp,
+        email_otp_expires_at=otp_expires
     )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    
+    # Send OTP via email
+    send_otp_email(user.email, otp, f"{user.first_name} {user.last_name}")
+    
     return db_user
+
+def verify_email_otp(db: Session, email: str, otp: str) -> bool:
+    """Verify email OTP and activate user account"""
+    user = get_user_by_email(db, email)
+    
+    if not user:
+        return False
+    
+    # Check if OTP is valid and not expired
+    if (user.email_otp == otp and 
+        user.email_otp_expires_at and 
+        user.email_otp_expires_at > datetime.utcnow()):
+        
+        # Activate user account
+        user.is_verified = True
+        user.email_otp = None
+        user.email_otp_expires_at = None
+        db.commit()
+        return True
+    
+    return False
+
+def resend_otp(db: Session, email: str) -> bool:
+    """Resend OTP to user email"""
+    user = get_user_by_email(db, email)
+    
+    if not user or user.is_verified:
+        return False
+    
+    # Generate new OTP
+    otp = generate_otp()
+    otp_expires = datetime.utcnow() + timedelta(minutes=10)
+    
+    # Update user with new OTP
+    user.email_otp = otp
+    user.email_otp_expires_at = otp_expires
+    db.commit()
+    
+    # Send OTP via email
+    send_otp_email(email, otp, f"{user.first_name} {user.last_name}")
+    
+    return True
+
+def create_password_reset_token(db: Session, email: str) -> bool:
+    """Generate and send password reset token via email"""
+    from email_service import send_password_reset_email
+    import secrets
+    
+    user = get_user_by_email(db, email)
+    if not user:
+        # Return True anyway for security (don't reveal if email exists)
+        return True
+    
+    # Generate secure reset token
+    reset_token = secrets.token_urlsafe(32)
+    reset_expires = datetime.utcnow() + timedelta(minutes=15)  # Token valid for 15 minutes
+    
+    # Update user with reset token
+    user.password_reset_token = reset_token
+    user.password_reset_expires_at = reset_expires
+    db.commit()
+    
+    # Send password reset email
+    try:
+        send_password_reset_email(email, reset_token, f"{user.first_name} {user.last_name}")
+        print(f"Password reset email sent to {email}")
+        return True
+    except Exception as e:
+        print(f"Failed to send password reset email to {email}: {e}")
+        return False
+
+def reset_password_with_token(db: Session, token: str, new_password: str) -> bool:
+    """Reset user password using valid token"""
+    # Find user with the reset token
+    user = db.query(User).filter(
+        User.password_reset_token == token,
+        User.password_reset_expires_at > datetime.utcnow()
+    ).first()
+    
+    if not user:
+        return False
+    
+    # Update password and clear reset token
+    user.hashed_password = get_password_hash(new_password)
+    user.password_reset_token = None
+    user.password_reset_expires_at = None
+    user.updated_at = datetime.utcnow()
+    
+    db.commit()
+    
+    print(f"Password reset successful for user: {user.email}")
+    return True
 
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     """Authenticate user with email and password"""
@@ -117,7 +222,14 @@ def get_jobs(
     return query.offset(skip).limit(limit).all()
 
 def get_recruiter_jobs(db: Session, recruiter_id: int, skip: int = 0, limit: int = 50):
-    return db.query(Job).filter(Job.recruiter_id == recruiter_id).offset(skip).limit(limit).all()
+    jobs = db.query(Job).filter(Job.recruiter_id == recruiter_id).offset(skip).limit(limit).all()
+    # Enrich with applications count
+    for job in jobs:
+        try:
+            job.applications_count = len(job.applications) if job.applications else 0
+        except Exception:
+            job.applications_count = 0
+    return jobs
 
 def get_all_jobs(db: Session, skip: int = 0, limit: int = 100):
     """Get all jobs for admin management with pagination"""
@@ -211,7 +323,10 @@ def create_job_application(db: Session, application: schemas.JobApplicationCreat
     return db_application
 
 def get_user_applications(db: Session, user_id: int, skip: int = 0, limit: int = 50):
-    return db.query(JobApplication).filter(JobApplication.applicant_id == user_id).offset(skip).limit(limit).all()
+    """Get all applications for a user with job details loaded"""
+    return db.query(JobApplication).options(
+        joinedload(JobApplication.job)
+    ).filter(JobApplication.applicant_id == user_id).offset(skip).limit(limit).all()
 
 def delete_application(db: Session, application_id: int, user_id: int):
     """Delete a job application"""
@@ -280,6 +395,9 @@ def add_application_message(db: Session, application_id: int, message: str, user
     if not application:
         return None
     
+    # Import json module
+    import json
+    
     # Create message object
     new_message = {
         "user_id": user_id,
@@ -291,7 +409,6 @@ def add_application_message(db: Session, application_id: int, message: str, user
     # Get existing messages or initialize empty list
     messages = []
     if application.messages:
-        import json
         try:
             messages = json.loads(application.messages)
         except:
@@ -1741,3 +1858,83 @@ def delete_question_reply(db: Session, reply_id: int):
         return True
     return False
 
+
+# NATA Course CRUD operations
+def get_all_nata_courses(db: Session, skip: int = 0, limit: int = 100, category: Optional[str] = None, status: str = "active") -> List:
+    """Get all NATA courses with optional filtering"""
+    from database import NATACourse
+    query = db.query(NATACourse).filter(NATACourse.status == status)
+    
+    if category and category != "All":
+        query = query.filter(NATACourse.category == category)
+    
+    return query.offset(skip).limit(limit).all()
+
+def get_nata_course_by_id(db: Session, course_id: int):
+    """Get a specific NATA course by ID"""
+    from database import NATACourse
+    return db.query(NATACourse).filter(NATACourse.id == course_id).first()
+
+def create_nata_course(db: Session, course_data: dict):
+    """Create a new NATA course"""
+    from database import NATACourse
+    import json
+    
+    db_course = NATACourse(
+        title=course_data.get("title"),
+        description=course_data.get("description"),
+        instructor=course_data.get("instructor"),
+        duration=course_data.get("duration"),
+        difficulty=course_data.get("difficulty"),
+        price=course_data.get("price"),
+        original_price=course_data.get("original_price"),
+        rating=course_data.get("rating", 4.5),
+        students_enrolled=course_data.get("students_enrolled", 0),
+        lessons_count=course_data.get("lessons_count", 0),
+        certificate_included=course_data.get("certificate_included", True),
+        moodle_url=course_data.get("moodle_url"),
+        thumbnail=course_data.get("thumbnail"),
+        category=course_data.get("category"),
+        skills=json.dumps(course_data.get("skills", [])),
+        features=json.dumps(course_data.get("features", [])),
+        syllabus=json.dumps(course_data.get("syllabus", [])),
+        status=course_data.get("status", "active")
+    )
+    
+    db.add(db_course)
+    db.commit()
+    db.refresh(db_course)
+    return db_course
+
+def update_nata_course(db: Session, course_id: int, course_data: dict):
+    """Update a NATA course"""
+    from database import NATACourse
+    import json
+    
+    db_course = db.query(NATACourse).filter(NATACourse.id == course_id).first()
+    
+    if db_course:
+        for key, value in course_data.items():
+            if key in ["skills", "features", "syllabus"]:
+                setattr(db_course, key, json.dumps(value))
+            elif hasattr(db_course, key):
+                setattr(db_course, key, value)
+        
+        db_course.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(db_course)
+    
+    return db_course
+
+def delete_nata_course(db: Session, course_id: int) -> bool:
+    """Delete a NATA course"""
+    from database import NATACourse
+    
+    db_course = db.query(NATACourse).filter(NATACourse.id == course_id).first()
+    
+    if db_course:
+        db.delete(db_course)
+        db.commit()
+        return True
+    
+    return False

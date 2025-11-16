@@ -350,17 +350,20 @@ export default function JobsPortal() {
               </div>
             </Link>
 
-            {/* Navigation Links */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/jobs-portal" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
-                Jobs
+            {/* Combined Navigation Links */}
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link href="/jobs-portal" className="flex items-center space-x-1.5 text-gray-700 hover:text-purple-600 font-medium transition-colors group">
+                <Search className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                <span>Jobs</span>
               </Link>
-              <Link href="/jobs-portal/post-job" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
-                Post Job
+              <Link href="/jobs-portal/post-job" className="flex items-center space-x-1.5 text-gray-700 hover:text-purple-600 font-medium transition-colors group">
+                <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                <span>Post Job</span>
               </Link>
               {isAuthenticated && (
-                <Link href="/jobs-portal/dashboard" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
-                  Dashboard
+                <Link href="/jobs-portal/dashboard" className="flex items-center space-x-1.5 text-gray-700 hover:text-purple-600 font-medium transition-colors group">
+                  <Briefcase className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                  <span>Dashboard</span>
                 </Link>
               )}
             </nav>
@@ -369,17 +372,20 @@ export default function JobsPortal() {
             <div className="flex items-center space-x-4">
               {isAuthenticated ? (
                 <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2">
+                  <Link 
+                    href="/profile"
+                    className="flex items-center space-x-2 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
+                  >
                     <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-sky-500 rounded-full flex items-center justify-center">
                       <User className="h-4 w-4 text-white" />
                     </div>
                     <span className="hidden sm:block text-sm font-medium text-gray-700">
                       {user?.first_name}
                     </span>
-                  </div>
+                  </Link>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 hover:text-red-600 transition-colors"
+                    className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
                     <span className="hidden sm:block">Logout</span>
@@ -460,13 +466,6 @@ export default function JobsPortal() {
                 <span>Filters</span>
                 <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
               </button>
-                <div className="text-sm text-gray-500 mb-1">Or upload a file (PDF/DOCX)</div>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                  onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
-                  className="w-full"
-                />
             </div>
 
             {/* Filter Dropdowns */}
@@ -670,30 +669,99 @@ export default function JobsPortal() {
       </section>
 
       {applyModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white p-6 rounded-lg w-11/12 max-w-md">
-            <h3 className="text-lg font-semibold mb-2">Apply for Job</h3>
-            <label className="block text-sm text-gray-700">Cover Letter</label>
-            <textarea
-              value={coverLetterInput}
-              onChange={(e) => setCoverLetterInput(e.target.value)}
-              className="w-full border p-2 rounded mb-3"
-              rows={5}
-            />
-            <label className="block text-sm text-gray-700">Resume URL (optional)</label>
-            <input
-              value={resumeUrlInput}
-              onChange={(e) => setResumeUrlInput(e.target.value)}
-              className="w-full border p-2 rounded mb-4"
-              placeholder="https://drive.google.com/your-resume"
-            />
-            <div className="flex justify-end gap-2">
-              <button className="px-4 py-2 bg-gray-200 rounded" onClick={() => setApplyModalOpen(false)}>Cancel</button>
-              <button className="px-4 py-2 bg-purple-600 text-white rounded" onClick={handleApplySubmit}>Submit Application</button>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-sky-600 bg-clip-text text-transparent">
+              Apply for Job
+            </h3>
+            
+            {/* Cover Letter */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cover Letter <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={coverLetterInput}
+                onChange={(e) => setCoverLetterInput(e.target.value)}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                rows={5}
+                placeholder="Tell us why you're a great fit for this position..."
+                required
+              />
+            </div>
+
+            {/* Resume File Upload */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Upload Resume (PDF) <span className="text-red-500">*</span>
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-purple-500 transition-colors">
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+                  className="w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-lg file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-purple-50 file:text-purple-700
+                    hover:file:bg-purple-100
+                    cursor-pointer"
+                  required
+                />
+                {resumeFile && (
+                  <p className="mt-2 text-sm text-green-600 flex items-center">
+                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    {resumeFile.name} selected
+                  </p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">PDF format only, max 10MB</p>
+              </div>
+            </div>
+
+            {/* Optional Resume URL */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Resume URL (Optional)
+              </label>
+              <input
+                type="url"
+                value={resumeUrlInput}
+                onChange={(e) => setResumeUrlInput(e.target.value)}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="https://drive.google.com/your-resume"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Or provide a link to your online resume (LinkedIn, Google Drive, etc.)
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3">
+              <button 
+                className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors" 
+                onClick={() => {
+                  setApplyModalOpen(false)
+                  setCoverLetterInput('')
+                  setResumeFile(null)
+                  setResumeUrlInput('')
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                className="px-5 py-2 bg-gradient-to-r from-purple-600 to-sky-600 hover:from-purple-700 hover:to-sky-700 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
+                onClick={handleApplySubmit}
+                disabled={!coverLetterInput.trim() || (!resumeFile && !resumeUrlInput)}
+              >
+                {applying ? 'Submitting...' : 'Submit Application'}
+              </button>
             </div>
           </div>
         </div>
-  )}
+      )}
       {/* Floating Post Job Button (Mobile) */}
       <Link
         href="/jobs-portal/post-job"

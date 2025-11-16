@@ -78,6 +78,20 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+class OTPVerification(BaseModel):
+    email: EmailStr
+    otp: str
+
+class OTPRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordReset(BaseModel):
+    token: str
+    new_password: str
+
 class UserProfile(BaseModel):
     bio: Optional[str] = None
     phone: Optional[str] = None

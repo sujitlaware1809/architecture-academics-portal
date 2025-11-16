@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Clock, User, MapPin, Tag, Award, BookOpen, X, CheckCircle, ChevronRight } from "lucide-react"
+import { Clock, User, MapPin, Tag, Award, BookOpen, X, CheckCircle, ChevronRight, Calendar } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Workshop } from "./workshop-card"
 
@@ -53,7 +53,7 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
               <div className="flex gap-2 mb-3 flex-wrap">
                 <Badge 
                   variant="outline" 
-                  className={`category-tag-large ${workshop.difficulty.toLowerCase()}`}
+                  className={`category-tag-large ${workshop.difficulty?.toLowerCase()}`}
                 >
                   {workshop.difficulty}
                 </Badge>
@@ -86,7 +86,7 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
               <div className="space-y-3 text-gray-600">
                 <div className="flex items-center gap-3">
                   <User className="h-5 w-5 text-purple-500" />
-                  <span>Conducted by <span className="font-medium">{workshop.trainer.name}</span></span>
+                  <span>Conducted by <span className="font-medium">{workshop.trainer?.name}</span></span>
                 </div>
                 
                 <div className="flex items-center gap-3">
@@ -111,7 +111,7 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
                 
                 <div className="flex items-center gap-3">
                   <Tag className="h-5 w-5 text-purple-500" />
-                  <span className="font-medium">{workshop.price === 'Free' ? 'Free' : `₹${workshop.price}`}</span>
+                  <span className="font-medium">{workshop.price === 0 ? 'Free' : `₹${workshop.price}`}</span>
                 </div>
               </div>
             </div>
@@ -125,7 +125,7 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
                 Syllabus Outline
               </h3>
               <ul className="space-y-3">
-                {workshop.syllabus.map((item, index) => (
+                {workshop.syllabus?.map((item, index) => (
                   <li key={index} className="flex gap-3 items-start">
                     <ChevronRight className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-700">{item}</p>
@@ -161,10 +161,10 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
             </h3>
             <div className="flex gap-4 items-center mb-4">
               <div className="h-16 w-16 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                {workshop.trainer.image ? (
+                {workshop.trainer?.image ? (
                   <Image
-                    src={workshop.trainer.image}
-                    alt={workshop.trainer.name}
+                    src={workshop.trainer?.image}
+                    alt={workshop.trainer?.name}
                     width={64}
                     height={64}
                     className="object-cover"
@@ -174,10 +174,10 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
                 )}
               </div>
               <div>
-                <h4 className="font-medium text-gray-800 text-lg">{workshop.trainer.name}</h4>
+                <h4 className="font-medium text-gray-800 text-lg">{workshop.trainer?.name}</h4>
               </div>
             </div>
-            <p className="text-gray-700">{workshop.trainer.bio}</p>
+            <p className="text-gray-700">{workshop.trainer?.bio}</p>
           </div>
           
           {/* CTA */}
@@ -206,3 +206,4 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
     </div>
   )
 }
+

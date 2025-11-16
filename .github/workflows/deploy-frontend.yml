@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
   workflow_dispatch:
 
 jobs:
@@ -13,28 +14,40 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Deploy to EC2
-      uses: appleboy/ssh-action@master
+      uses: appleboy/ssh-action@v1.0.3
       with:
-        host: 52.66.127.84
+        host: 15.206.47.135
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Navigate to frontend directory
-          cd /home/ubuntu/architecture-academics-portal/frontend
+          # Navigate to project directory
+          cd /home/ec2-user/architecture-academics-portal
+          
+          # Stop frontend service if running
+          sudo systemctl stop frontend || true
           
           # Pull latest code
           git pull origin main
           
+          # Navigate to frontend directory
+          cd frontend
+          
+          # Create/Update environment variables
+          echo "NEXT_PUBLIC_API_URL=http://15.206.47.135:8000" > .env.local
+          echo "NEXT_PUBLIC_SITE_URL=http://15.206.47.135:3000" >> .env.local
+          
           # Install dependencies
-          pnpm install
+          npm install
           
           # Build frontend
-          pnpm build
+          npm run build
           
-          # Restart frontend service
-          sudo systemctl restart frontend
+          # Start frontend service
+          sudo systemctl start frontend
+          sudo systemctl enable frontend
           
-          echo "Frontend deployment completed!"
+          echo "Frontend deployment completed successfully!"
+          echo "Frontend accessible at: http://15.206.47.135:3000"

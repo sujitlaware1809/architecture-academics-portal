@@ -48,10 +48,22 @@ interface RegisterRequest {
   company?: string;
 }
 
+interface RegisterResponse {
+  message: string;
+  email: string;
+  requires_verification: boolean;
+}
+
+interface OTPVerificationRequest {
+  email: string;
+  otp: string;
+}
+
 interface LoginResponse {
   access_token: string;
   token_type: string;
   user: User;
+  message?: string;
 }
 
 interface Event {
@@ -117,7 +129,7 @@ export const api = {
     }
   },
 
-  async register(userData: RegisterRequest): Promise<ApiResponse<User>> {
+  async register(userData: RegisterRequest): Promise<ApiResponse<RegisterResponse>> {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -140,9 +152,55 @@ export const api = {
         return { error: data.detail || data.message || 'Registration failed' };
       }
 
-      return { data, message: 'Registration successful! Please login.' };
+      return { data, message: data.message || 'Registration successful! Please verify your email.' };
     } catch (error) {
       console.error('Registration error:', error);
+      return { error: 'Network error. Please try again.' };
+    }
+  },
+
+  async verifyOTP(otpData: OTPVerificationRequest): Promise<ApiResponse<LoginResponse>> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(otpData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { error: data.detail || data.message || 'OTP verification failed' };
+      }
+
+      return { data, message: data.message || 'Email verified successfully!' };
+    } catch (error) {
+      console.error('OTP verification error:', error);
+      return { error: 'Network error. Please try again.' };
+    }
+  },
+
+  async resendOTP(email: string): Promise<ApiResponse<{ message: string; email: string }>> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { error: data.detail || data.message || 'Failed to resend OTP' };
+      }
+
+      return { data, message: data.message || 'OTP sent successfully!' };
+    } catch (error) {
+      console.error('Resend OTP error:', error);
       return { error: 'Network error. Please try again.' };
     }
   },

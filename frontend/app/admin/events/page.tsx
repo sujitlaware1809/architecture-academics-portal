@@ -93,7 +93,7 @@ export default function EventsManagement() {
       setLoading(true)
       setError("")
       const params = statusFilter !== "all" ? { status: statusFilter } : {}
-      const response = await api.get('/admin/events', { params })
+      const response = await api.get('/api/admin/events', { params })
       setEvents(response.data)
     } catch (err: any) {
       console.error("Error fetching events:", err)
@@ -151,9 +151,9 @@ export default function EventsManagement() {
       }
 
       if (editingEvent) {
-        await api.put(`/admin/events/${editingEvent.id}`, payload)
+        await api.put(`/api/admin/events/${editingEvent.id}`, payload)
       } else {
-        await api.post('/admin/events', payload)
+        await api.post('/api/admin/events', payload)
       }
 
       setShowModal(false)
@@ -168,7 +168,7 @@ export default function EventsManagement() {
 
   const handleDelete = async (id: number) => {
     try {
-      await api.delete(`/admin/events/${id}`)
+      await api.delete(`/api/admin/events/${id}`)
       setDeleteConfirm(null)
       fetchEvents()
     } catch (err: any) {
@@ -179,7 +179,7 @@ export default function EventsManagement() {
 
   const handleStatusChange = async (id: number, newStatus: string) => {
     try {
-      await api.put(`/admin/events/${id}`, { status: newStatus })
+      await api.put(`/api/admin/events/${id}`, { status: newStatus })
       fetchEvents()
     } catch (err: any) {
       console.error("Error updating status:", err)
@@ -191,7 +191,7 @@ export default function EventsManagement() {
     setLoadingRegistrations(true)
     setShowRegistrations(true)
     try {
-      const response = await api.get(`/admin/events/${event.id}/registrations`)
+      const response = await api.get(`/api/admin/events/${event.id}/registrations`)
       setSelectedEventRegistrations(response.data)
     } catch (err: any) {
       console.error("Error fetching registrations:", err)

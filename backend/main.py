@@ -4,6 +4,10 @@ from pathlib import Path
 import crud
 import schemas
 from database import SessionLocal
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Import route modules
 from routes import (
@@ -22,7 +26,9 @@ from routes import (
 )
 
 # Import middleware
-from middleware.cors_middleware import configure_cors
+import os
+import ast
+from fastapi.middleware.cors import CORSMiddleware
 
 # Create FastAPI app
 app = FastAPI(
@@ -44,8 +50,22 @@ RESUME_DIR.mkdir(exist_ok=True)
 # Serve static files
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+
 # Configure CORS middleware
-configure_cors(app)
+origins = [
+    "http://localhost:3000",     # Next.js development server
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",     # Backend API
+    "http://127.0.0.1:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Register route modules
 app.include_router(auth_routes.router)
@@ -105,6 +125,30 @@ async def startup_event():
         print("✅ Predefined recruiter account created/verified")
         print("📧 Email: recruiter@architectureacademics.com")
         print("🔑 Password: Recruiter@123")
+        
+        # Create sample courses if none exist
+        from database import Course
+        existing_courses_count = db.query(Course).count()
+        
+        if existing_courses_count == 0:
+            print("📚 Creating sample courses...")
+            from seed_data import get_sample_courses
+            
+            sample_courses = get_sample_courses()
+            created_courses = 0
+            
+            for course_data in sample_courses:
+                try:
+                    course = crud.create_course(db, course_data)
+                    if course:
+                        created_courses += 1
+                        print(f"✅ Created course: {course.title}")
+                except Exception as e:
+                    print(f"❌ Failed to create course: {e}")
+            
+            print(f"🎉 Created {created_courses} sample courses!")
+        else:
+            print(f"✅ Found {existing_courses_count} existing courses in database")
         
         # Create sample jobs if none exist
         existing_jobs = crud.get_jobs(db, limit=1)
@@ -193,46 +237,17 @@ async def startup_event():
         else:
             print(f"✅ Found {len(existing_jobs)} existing jobs in database")
         
-        # Create sample blogs if none exist
+        # Seed sample blogs if none exist
         from database import Blog
         existing_blogs_count = db.query(Blog).count()
         
         if existing_blogs_count == 0:
-            print("📝 Creating sample blog posts...")
-            
-            sample_blogs = [
-                schemas.BlogCreate(
-                    title="The Future of Sustainable Architecture in 2025",
-                    content="""Sustainable architecture is no longer just a trend—it's a necessity. As we progress through 2025, the architecture industry is witnessing groundbreaking innovations in eco-friendly design and construction methods.
-
-## Key Trends in Sustainable Design
-
-### 1. Net-Zero Energy Buildings
-Modern architects are focusing on designing buildings that produce as much energy as they consume. Through the integration of solar panels, wind turbines, and advanced insulation techniques, net-zero buildings are becoming more accessible and affordable.
-
-### 2. Biophilic Design
-Incorporating nature into built environments improves mental health and productivity. Living walls, natural lighting, and indoor gardens are essential elements in contemporary sustainable architecture.
-
-The future of architecture lies in sustainability. As professionals in this field, we have the responsibility and opportunity to shape a better, greener future for generations to come.""",
-                    excerpt="Exploring the latest trends and innovations in sustainable architecture, from net-zero buildings to biophilic design and smart technology.",
-                    category=schemas.BlogCategory.SUSTAINABLE_DESIGN,
-                    tags="sustainability, green architecture, net-zero, biophilic design, smart buildings",
-                    is_featured=True,
-                    status=schemas.BlogStatus.PUBLISHED
-                )
-            ]
-            
-            created_blogs = 0
-            for blog_data in sample_blogs:
-                try:
-                    blog = crud.create_blog(db, blog_data, recruiter.id)  # Using recruiter as default author
-                    if blog:
-                        created_blogs += 1
-                        print(f"📝 Created blog: {blog.title}")
-                except Exception as e:
-                    print(f"❌ Failed to create blog: {e}")
-            
-            print(f"🎉 Created {created_blogs} sample blog posts!")
+            print("📝 Seeding sample blog posts...")
+            try:
+                from seed_blogs import seed_blogs
+                seed_blogs()
+            except Exception as e:
+                print(f"❌ Failed to seed blogs: {e}")
         else:
             print(f"✅ Found {existing_blogs_count} existing blogs in database")
         
@@ -282,4 +297,4 @@ Any advice on cost-effective sustainable alternatives to traditional materials w
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)

@@ -34,6 +34,7 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [apiError, setApiError] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
 
   useEffect(() => {
     const redirect = searchParams.get('redirect')
@@ -114,15 +115,15 @@ export default function RegisterPage() {
           : 'Registration failed. Please try again.'
         setApiError(errorMessage)
       } else {
-        // Registration successful - redirect to profile setup
-        window.dispatchEvent(new Event('auth-change'))
+        // Registration successful - redirect to OTP verification
+        setSuccessMessage("Registration successful! Please verify your email to continue.")
+        
+        // Store email for verification and redirect
+        localStorage.setItem('pendingVerificationEmail', formData.email)
+        
         setTimeout(() => {
-          if (redirectTo) {
-            router.push(redirectTo)
-          } else {
-            router.push("/profile/setup")
-          }
-        }, 1000)
+          router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`)
+        }, 2000)
       }
     } catch (error) {
       console.error('Registration error:', error)
@@ -278,6 +279,16 @@ export default function RegisterPage() {
               {apiError && (
                 <div className="mb-4 p-3 bg-red-500/20 border border-red-400/30 rounded-lg">
                   <p className="text-sm text-red-200">{apiError}</p>
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="mb-4 p-4 bg-green-500/20 border border-green-400/30 rounded-lg flex items-center space-x-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-300" />
+                  <div>
+                    <p className="text-sm font-semibold text-green-200">{successMessage}</p>
+                    <p className="text-xs text-green-300 mt-1">Redirecting to login page...</p>
+                  </div>
                 </div>
               )}
 

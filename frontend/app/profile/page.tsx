@@ -178,8 +178,47 @@ export default function ProfilePage() {
         </div>
       </header>
 
+      {/* Quick Navigation */}
+      <div className="max-w-4xl mx-auto px-4 pt-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Link
+            href="/profile/my-courses"
+            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-purple-100 hover:border-purple-300"
+          >
+            <BookOpen className="h-5 w-5 text-purple-600" />
+            <span className="text-sm font-medium text-gray-700">My Courses</span>
+          </Link>
+          
+          <Link
+            href="/profile/my-applications"
+            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-purple-100 hover:border-purple-300 relative"
+          >
+            <Briefcase className="h-5 w-5 text-purple-600" />
+            <span className="text-sm font-medium text-gray-700">My Applications</span>
+            {/* Notification badge - will show if there are messages */}
+            <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse"></span>
+          </Link>
+          
+          <Link
+            href="/profile/my-events"
+            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-purple-100 hover:border-purple-300"
+          >
+            <BookOpen className="h-5 w-5 text-purple-600" />
+            <span className="text-sm font-medium text-gray-700">My Events</span>
+          </Link>
+          
+          <Link
+            href="/profile/my-workshops"
+            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-purple-100 hover:border-purple-300"
+          >
+            <BookOpen className="h-5 w-5 text-purple-600" />
+            <span className="text-sm font-medium text-gray-700">My Workshops</span>
+          </Link>
+        </div>
+      </div>
+
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      <main className="max-w-4xl mx-auto px-4 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Summary */}
           <div className="lg:col-span-1">

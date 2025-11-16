@@ -137,93 +137,18 @@ export default function BlogsPage() {
     try {
       setLoading(true); setError(null)
       
-      // Try the new API format first
-      let blogsData: Blog[] = []
-      try {
-        const response = await api.get("/blogs")
-        console.log("Blogs API response:", response) // Debug log
-        
-        // Handle API response format { data: [...] }
-        if (response && Array.isArray(response.data)) {
-          blogsData = response.data
-        } else if (Array.isArray(response)) {
-          blogsData = response
-        } else {
-          console.warn("Unexpected blogs response format:", response)
-          blogsData = []
-        }
-      } catch (apiError) {
-        console.warn("API endpoint failed, falling back to hardcoded data:", apiError)
-        
-        // Fallback to hardcoded data if backend is not available
-        blogsData = [
-          {
-            id: 1,
-            title: "Sustainable Architecture: Building for Tomorrow",
-            excerpt: "Explore how modern architects are integrating eco-friendly practices and green technologies into contemporary building design.",
-            content: "Full content here...",
-            category: "Sustainable Design",
-            tags: "sustainability, green building, eco-friendly",
-            featured_image: null,
-            is_featured: true,
-            status: "published",
-            views_count: 1250,
-            likes_count: 89,
-            comments_count: 23,
-            slug: "sustainable-architecture-building-tomorrow",
-            author_id: 1,
-            author: { id: 1, first_name: "Dr. Priya", last_name: "Sharma", email: "priya@example.com" },
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            title: "The Rise of Parametric Design in Modern Architecture",
-            excerpt: "Discover how computational design tools are revolutionizing the way architects approach complex geometries.",
-            content: "Full content here...",
-            category: "Technology",
-            tags: "parametric design, computational design, technology",
-            featured_image: null,
-            is_featured: false,
-            status: "published",
-            views_count: 890,
-            likes_count: 56,
-            comments_count: 12,
-            slug: "rise-parametric-design-modern-architecture",
-            author_id: 2,
-            author: { id: 2, first_name: "Rajesh", last_name: "Kumar", email: "rajesh@example.com" },
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 3,
-            title: "Indian Vernacular Architecture: Lessons for Today",
-            excerpt: "Understanding traditional building techniques from across India and their relevance in contemporary design.",
-            content: "Full content here...",
-            category: "Design Trends",
-            tags: "vernacular architecture, traditional design, heritage",
-            featured_image: null,
-            is_featured: false,
-            status: "published",
-            views_count: 1450,
-            likes_count: 102,
-            comments_count: 34,
-            slug: "indian-vernacular-architecture-lessons",
-            author_id: 3,
-            author: { id: 3, first_name: "Arjun", last_name: "Mehta", email: "arjun@example.com" },
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ]
-      }
+      const response = await fetch('http://localhost:8000/blogs?limit=100')
+      if (!response.ok) throw new Error('Failed to fetch blogs')
       
+      const blogsData: Blog[] = await response.json()
       setBlogs(blogsData)
+      
       const featured = blogsData.find((blog: Blog) => blog.is_featured)
       setFeaturedBlog(featured || null)
     } catch (err: any) {
       console.error("Error fetching blogs:", err)
-      setError("Unable to load blogs. Please try again later.")
-      setBlogs([]) // Set empty array on error
+      setError("Unable to load blogs. Please ensure the backend is running.")
+      setBlogs([])
     } finally { setLoading(false) }
   }
 
@@ -257,7 +182,7 @@ export default function BlogsPage() {
 
   const handleSubmitBlog = async () => {
     if (!blogForm.title || !blogForm.content) { 
-      alert("Please fill in title and content"); 
+      showNotification("Please fill in title and content", 'error'); 
       return 
     }
 
@@ -272,92 +197,52 @@ export default function BlogsPage() {
     
     try {
       setSubmitting(true)
+      const token = api.getStoredToken()
+      
+      if (!token) {
+        showNotification("Please login to create or edit blogs", 'error')
+        return
+      }
       
       if (editingBlog) { 
-        try {
-          await api.put(`/blogs/${editingBlog.id}`, blogData)
-        } catch (err: any) {
-          // Fallback: simulate successful update
-          console.warn("API update failed, simulating success:", err)
-          
-          // Update the blog in local state
-          setBlogs(prev => prev.map(blog => 
-            blog.id === editingBlog.id 
-              ? { ...blog, ...blogData, updated_at: new Date().toISOString() }
-              : blog
-          ))
-          
-          // Update featured blog if this was the featured one
-          if (editingBlog.is_featured || blogData.is_featured) {
-            setFeaturedBlog(prev => 
-              prev?.id === editingBlog.id 
-                ? { ...editingBlog, ...blogData }
-                : blogData.is_featured 
-                  ? { ...editingBlog, ...blogData }
-                  : prev
-            )
-          }
-          
-          showNotification(`Article "${blogData.title}" updated successfully! ${blogData.is_featured ? '⭐ Featured article updated.' : ''}`, 'success')
+        const response = await fetch(`http://localhost:8000/blogs/${editingBlog.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(blogData)
+        })
+        
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.detail || 'Failed to update blog')
         }
+        
+        showNotification(`Article "${blogData.title}" updated successfully!`, 'success')
       } else { 
-        try {
-          const response = await api.post("/blogs", blogData)
-          const newBlog = response.data || {
-            id: Date.now(),
-            ...blogData,
-            author_id: 1,
-            author: { id: 1, first_name: "Current", last_name: "User", email: "user@example.com" },
-            views_count: 0,
-            likes_count: 0,
-            comments_count: 0,
-            featured_image: null,
-            slug: blogData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-          
-          // Add new blog to local state
-          setBlogs(prev => [newBlog, ...prev])
-          
-          // Set as featured if marked
-          if (blogData.is_featured) {
-            setFeaturedBlog(newBlog)
-          }
-          
-          showNotification(`Article "${blogData.title}" created successfully! ${blogData.is_featured ? '⭐ Featured article created.' : ''}`, 'success')
-        } catch (err: any) {
-          // Fallback: create blog locally
-          console.warn("API creation failed, creating locally:", err)
-          
-          const newBlog = {
-            id: Date.now(),
-            ...blogData,
-            author_id: 1,
-            author: { id: 1, first_name: "Current", last_name: "User", email: "user@example.com" },
-            views_count: 0,
-            likes_count: 0,
-            comments_count: 0,
-            featured_image: null,
-            slug: blogData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-          
-          setBlogs(prev => [newBlog, ...prev])
-          
-          if (blogData.is_featured) {
-            setFeaturedBlog(newBlog)
-          }
-          
-          showNotification(`Article created locally. ${blogData.is_featured ? '⭐ Marked as featured.' : ''} Will sync when online.`, 'success')
+        const response = await fetch('http://localhost:8000/blogs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(blogData)
+        })
+        
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.detail || 'Failed to create blog')
         }
+        
+        showNotification(`Article "${blogData.title}" created successfully!`, 'success')
       }
       
       setShowBlogDialog(false)
+      fetchBlogs() // Refresh the blog list
     } catch (err: any) {
       console.error("Error saving blog:", err)
-      alert("Blog saved locally. Changes will sync when the server is available.")
+      showNotification(err.message || "Failed to save blog", 'error')
     } finally { 
       setSubmitting(false) 
     }
@@ -370,18 +255,31 @@ export default function BlogsPage() {
     const blogTitle = blogToDeleteData?.title || 'Article'
     
     try {
-      await api.delete(`/blogs/${blogToDelete}`)
-      setBlogs(prev => prev.filter(blog => blog.id !== blogToDelete))
+      const token = api.getStoredToken()
+      if (!token) {
+        showNotification("Please login to delete blogs", 'error')
+        return
+      }
+      
+      const response = await fetch(`http://localhost:8000/blogs/${blogToDelete}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || 'Failed to delete blog')
+      }
+      
       setShowDeleteDialog(false)
       setBlogToDelete(null)
       showNotification(`"${blogTitle}" deleted successfully`, 'success')
+      fetchBlogs() // Refresh the list
     } catch (err: any) {
       console.error("Error deleting blog:", err)
-      // Fallback: delete locally
-      setBlogs(prev => prev.filter(blog => blog.id !== blogToDelete))
-      setShowDeleteDialog(false)
-      setBlogToDelete(null)
-      showNotification(`"${blogTitle}" deleted locally. Will sync when online.`, 'success')
+      showNotification(err.message || "Failed to delete blog", 'error')
     }
   }
 
@@ -466,108 +364,69 @@ export default function BlogsPage() {
         </div>
       )}
       
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-        {/* Hero Header - Medium Style */}
+      {/* Simple Blog Grid Layout */}
+      <div className="min-h-screen bg-gray-50">
+        {/* Simple Header */}
         <div className="bg-white border-b border-gray-200">
-          <div className="container mx-auto px-4 py-16">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-                Architecture Stories
-              </h1>
-              <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                A place to read, write, and deepen your understanding of architecture, design, and built environments.
-              </p>
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex items-center justify-between max-w-7xl mx-auto">
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900">Blog</h1>
+                <p className="text-gray-600 mt-2">Discover architecture stories and insights</p>
+              </div>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-                <div className="relative flex-1 max-w-lg">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              {currentUser && (
+                <Button 
+                  onClick={handleCreateBlog}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg shadow-lg"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Write Article
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filter Bar */}
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-col md:flex-row gap-4">
+                {/* Search */}
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input 
-                    placeholder="Search stories..." 
+                    placeholder="Search articles..." 
                     value={searchQuery} 
                     onChange={(e) => setSearchQuery(e.target.value)} 
-                    className="pl-12 py-4 text-lg border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-full shadow-sm"
+                    className="pl-10"
                   />
                 </div>
                 
-                {currentUser && (
-                  <Button 
-                    onClick={handleCreateBlog}
-                    size="lg"
-                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                  >
-                    Start Writing
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Category Filter */}
-        <div className="bg-white border-b border-gray-100">
-          <div className="container mx-auto px-4 py-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {categories.map((category) => (
-                  <Button 
-                    key={category.value} 
-                    variant={selectedCategory === category.value ? "default" : "outline"} 
-                    size="sm"
-                    onClick={() => setSelectedCategory(category.value)} 
-                    className={`whitespace-nowrap rounded-full px-4 py-2 transition-all duration-200 ${
-                      selectedCategory === category.value 
-                        ? 'bg-green-600 text-white shadow-md' 
-                        : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
-                    }`}
-                  >
-                    {category.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Content Area */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-        {featuredBlog && selectedCategory === "all" && searchQuery === "" && (
-          <div className="mb-12">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-              <h2 className="text-2xl font-bold">Featured Article</h2>
-            </div>
-            <Link href={`/blogs/${featuredBlog.slug}`}>
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
-                <div className="p-8">
-                  <div className="flex items-center gap-4 mb-4">
-                    <Badge className="bg-blue-100 text-blue-800">{featuredBlog.category}</Badge>
-                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Featured</Badge>
-                  </div>
-                  <h3 className="text-3xl font-bold mb-4">{featuredBlog.title}</h3>
-                  <p className="text-gray-600 mb-6 text-lg">{featuredBlog.excerpt}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <UserIcon className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">{featuredBlog.author.first_name} {featuredBlog.author.last_name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">{formatDate(featuredBlog.created_at)}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1"><Eye className="h-4 w-4 text-gray-400" /><span className="text-sm text-gray-600">{featuredBlog.views_count}</span></div>
-                      <div className="flex items-center gap-1"><Heart className="h-4 w-4 text-gray-400" /><span className="text-sm text-gray-600">{featuredBlog.likes_count}</span></div>
-                      <div className="flex items-center gap-1"><MessageSquare className="h-4 w-4 text-gray-400" /><span className="text-sm text-gray-600">{featuredBlog.comments_count}</span></div>
-                    </div>
-                  </div>
+                {/* Category Filter */}
+                <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+                  {categories.map((category) => (
+                    <button
+                      key={category.value} 
+                      onClick={() => setSelectedCategory(category.value)} 
+                      className={`whitespace-nowrap px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                        selectedCategory === category.value 
+                          ? 'bg-purple-600 text-white shadow-md' 
+                          : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                      }`}
+                    >
+                      {category.label}
+                    </button>
+                  ))}
                 </div>
               </div>
-            </Link>
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
@@ -694,147 +553,100 @@ export default function BlogsPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Featured Article Layout - Medium Style */}
-            {filteredBlogs.some(blog => blog.is_featured) && (
-              <div className="border-b border-gray-200 pb-8 mb-8">
-                <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-6">Featured Story</h2>
-                {filteredBlogs.filter(blog => blog.is_featured).slice(0, 1).map((blog) => (
-                  <div key={blog.id} className="group cursor-pointer" onClick={() => window.location.href = `/blogs/${blog.slug}`}>
-                    <div className="grid md:grid-cols-2 gap-8 items-center">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {typeof blog.author === 'string' ? blog.author : `${blog.author?.first_name || ''} ${blog.author?.last_name || ''}`}
-                            </p>
-                            <p className="text-sm text-gray-500">{formatDate(blog.created_at)}</p>
-                          </div>
-                        </div>
-                        
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors leading-tight">
-                          {blog.title}
-                        </h1>
-                        
-                        <p className="text-lg text-gray-600 leading-relaxed line-clamp-3">
-                          {blog.excerpt || (blog.content ? blog.content.substring(0, 200) + "..." : "")}
-                        </p>
-                        
-                        <div className="flex items-center gap-6 text-sm text-gray-500">
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                            {blog.category}
-                          </Badge>
-                          <span>{blog.content ? Math.ceil(blog.content.length / 200) : 1} min read</span>
-                          <div className="flex items-center gap-4">
-                            <LoginRequiredButton
-                              onClick={() => {/* Handle like */}}
-                              action="like posts"
-                              className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors"
-                            >
-                              <Heart className="h-4 w-4" />
-                              {blog.likes_count || 0}
-                            </LoginRequiredButton>
-                            <LoginRequiredButton
-                              onClick={() => {/* Handle comment */}}
-                              action="comment on posts"
-                              className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors"
-                            >
-                              <MessageSquare className="h-4 w-4" />
-                              {blog.comments_count || 0}
-                            </LoginRequiredButton>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="order-first md:order-last">
-                        <img 
-                          src={blog.featured_image || '/api/placeholder/600/400'} 
-                          alt={blog.title}
-                          className="w-full h-64 md:h-80 object-cover rounded-lg shadow-lg group-hover:shadow-xl transition-shadow"
-                        />
+            {/* Article Grid */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {selectedCategory === "all" ? "All Articles" : categories.find(c => c.value === selectedCategory)?.label}
+                  <span className="ml-2 text-gray-500 font-normal">({filteredBlogs.length})</span>
+                </h2>
+              </div>
+              
+              {/* Grid Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredBlogs.map((blog) => (
+                  <article 
+                    key={blog.id} 
+                    className="group cursor-pointer bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-purple-300"
+                    onClick={() => window.location.href = `/blogs/${blog.slug}`}
+                  >
+                    {/* Image */}
+                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-purple-100 to-blue-100">
+                      <img 
+                        src={blog.featured_image || '/api/placeholder/400/300'} 
+                        alt={blog.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-3 right-3">
+                        <Badge className="bg-purple-600 text-white">
+                          {blog.category}
+                        </Badge>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            {/* Regular Articles Grid - Medium Style */}
-            <div className="space-y-8">
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                {selectedCategory === "all" ? "Latest Stories" : categories.find(c => c.value === selectedCategory)?.label}
-                <span className="ml-2 font-normal">({filteredBlogs.filter(blog => !blog.is_featured).length})</span>
-              </h2>
-              
-              <div className="grid gap-8">
-                {filteredBlogs.filter(blog => !blog.is_featured).map((blog) => (
-                  <article key={blog.id} className="group cursor-pointer py-6 border-b border-gray-100 last:border-b-0" onClick={() => window.location.href = `/blogs/${blog.slug}`}>
-                    <div className="grid md:grid-cols-4 gap-6">
-                      <div className="md:col-span-3 space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                          <span className="text-sm font-medium text-gray-900">
-                            {typeof blog.author === 'string' ? blog.author : `${blog.author?.first_name || ''} ${blog.author?.last_name || ''}`}
-                          </span>
-                          <span className="text-sm text-gray-500">·</span>
-                          <span className="text-sm text-gray-500">{formatDate(blog.created_at)}</span>
+                    
+                    {/* Content */}
+                    <div className="p-5 space-y-3">
+                      {/* Author */}
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                          <UserIcon className="h-4 w-4 text-white" />
                         </div>
-                        
-                        <h2 className="text-xl md:text-2xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors line-clamp-2">
-                          {blog.title}
-                        </h2>
-                        
-                        <p className="text-gray-600 line-clamp-2 leading-relaxed">
-                          {blog.excerpt || (blog.content ? blog.content.substring(0, 150) + "..." : "")}
-                        </p>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <Badge variant="outline" className="text-xs">
-                              {blog.category}
-                            </Badge>
-                            <span>{blog.content ? Math.ceil(blog.content.length / 200) : 1} min read</span>
-                          </div>
-                          
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <LoginRequiredButton
-                              onClick={() => {/* Handle like */}}
-                              action="like posts"
-                              className="flex items-center gap-1 hover:text-red-500 transition-colors"
-                            >
-                              <Heart className="h-4 w-4" />
-                              {blog.likes_count || 0}
-                            </LoginRequiredButton>
-                            <LoginRequiredButton
-                              onClick={() => {/* Handle comment */}}
-                              action="comment on posts"
-                              className="flex items-center gap-1 hover:text-blue-500 transition-colors"
-                            >
-                              <MessageSquare className="h-4 w-4" />
-                              {blog.comments_count || 0}
-                            </LoginRequiredButton>
-                            {currentUser && blog.author_id === currentUser.id && (
-                              <div className="flex gap-2 ml-4">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={(e) => { e.stopPropagation(); handleEditBlog(blog); }}
-                                  className="text-gray-400 hover:text-gray-600"
-                                >
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            )}
-                          </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {typeof blog.author === 'string' ? blog.author : `${blog.author?.first_name || ''} ${blog.author?.last_name || ''}`}
+                          </p>
+                          <p className="text-xs text-gray-500">{formatDate(blog.created_at)}</p>
                         </div>
                       </div>
                       
-                      <div className="md:col-span-1">
-                        <img 
-                          src={blog.featured_image || '/api/placeholder/200/150'} 
-                          alt={blog.title}
-                          className="w-full h-32 object-cover rounded-lg shadow-sm group-hover:shadow-md transition-shadow"
-                        />
+                      {/* Title */}
+                      <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors">
+                        {blog.title}
+                      </h3>
+                      
+                      {/* Excerpt */}
+                      <p className="text-sm text-gray-600 line-clamp-3">
+                        {blog.excerpt || (blog.content ? blog.content.substring(0, 120) + "..." : "")}
+                      </p>
+                      
+                      {/* Stats */}
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <div className="flex items-center gap-3 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Eye className="h-4 w-4" />
+                            {blog.views_count || 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Heart className="h-4 w-4" />
+                            {blog.likes_count || 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MessageSquare className="h-4 w-4" />
+                            {blog.comments_count || 0}
+                          </span>
+                        </div>
+                        
+                        {/* Actions for own blogs */}
+                        {currentUser && blog.author_id === currentUser.id && (
+                          <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); handleEditBlog(blog); }}
+                              className="h-8 w-8 p-0 text-blue-600 hover:bg-blue-50"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); confirmDeleteBlog(blog.id); }}
+                              className="h-8 w-8 p-0 text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </article>
@@ -843,7 +655,6 @@ export default function BlogsPage() {
             </div>
           </div>
         )}
-          </div>
         </div>
       </div>
 

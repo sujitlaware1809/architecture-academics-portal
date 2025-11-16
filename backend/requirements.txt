@@ -59,6 +59,11 @@ flake8==6.1.0
 mypy==1.7.1
 
 # Additional utilities
-phonenumbers==8.13.25
+phonumbers==8.13.25
 bleach==6.1.0
 markdown==3.5.1
+python-slugify==8.0.1
+
+# Email and OTP
+smtplib2==0.2.1
+random==1.0.1

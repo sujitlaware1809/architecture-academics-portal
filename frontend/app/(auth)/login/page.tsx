@@ -17,12 +17,20 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [redirectTo, setRedirectTo] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState("")
+  const [registrationMessage, setRegistrationMessage] = useState("")
 
   useEffect(() => {
     // Get redirect parameter from URL
     const redirect = searchParams.get('redirect')
     if (redirect) {
       setRedirectTo(redirect)
+    }
+    
+    // Check if user just registered
+    const message = searchParams.get('message')
+    if (message === 'registered') {
+      setRegistrationMessage("Registration successful! Please login with your credentials.")
     }
   }, [searchParams])
 
@@ -34,43 +42,77 @@ export default function LoginPage() {
     try {
       const result = await api.login({ email, password })
       
+      console.log('Login result:', result) // Debug log
+      
       if (result.error) {
-        // Ensure error is a string
+        // Check if error is about email verification
         const errorMessage = typeof result.error === 'string' 
           ? result.error 
           : 'Login failed. Please try again.'
-        setError(errorMessage)
+        
+        console.log('Login error message:', errorMessage) // Debug log
+        
+        // If error mentions email verification, redirect to OTP page
+        if (errorMessage.toLowerCase().includes('verify your email') || 
+            errorMessage.toLowerCase().includes('email verification') ||
+            errorMessage.toLowerCase().includes('check your inbox') ||
+            errorMessage.toLowerCase().includes('please verify') ||
+            errorMessage.toLowerCase().includes('otp')) {
+          
+          console.log('Detected unverified account, redirecting to OTP verification') // Debug log
+          
+          // Store email for verification and mark as coming from login
+          localStorage.setItem('pendingVerificationEmail', email)
+          localStorage.setItem('fromLogin', 'true')
+          
+          // Show helpful message and redirect immediately
+          setError("Email not verified. Redirecting to verification...")
+          
+          // Immediate redirect without delay for better UX
+          router.push(`/verify-otp?email=${encodeURIComponent(email)}&from=login`)
+          
+        } else {
+          console.log('Other login error:', errorMessage) // Debug log
+          setError(errorMessage)
+        }
       } else if (result.data) {
         // Login successful, dispatch custom event to notify other components
         window.dispatchEvent(new Event('auth-change'))
         
         const user = result.data.user
+        const userName = user.first_name || user.email.split('@')[0]
         
-        // Check if there's a redirect URL
-        if (redirectTo) {
-          router.push(redirectTo)
-          return
-        }
+        // Show success message
+        setSuccessMessage(`Welcome back, ${userName}! Login successful.`)
         
-        // Check if user is a recruiter (handle both string and enum object)
-        let userRole = "";
-        if (typeof user.role === "string") {
-          userRole = user.role;
-        } else if (typeof user.role === "object" && user.role !== null && "value" in user.role) {
-          userRole = user.role.value;
-        }
-        
-        if (userRole === 'RECRUITER') {
-          // Special case for the predefined recruiter
-          if (email === 'recruiter@architectureacademics.com') {
-            router.push("/recruiter-dashboard")
+        // Clear success message and redirect after 1.5 seconds
+        setTimeout(() => {
+          // Check if there's a redirect URL
+          if (redirectTo) {
+            router.push(redirectTo)
+            return
+          }
+          
+          // Check if user is a recruiter (handle both string and enum object)
+          let userRole = "";
+          if (typeof user.role === "string") {
+            userRole = user.role;
+          } else if (typeof user.role === "object" && user.role !== null && "value" in user.role) {
+            userRole = user.role.value;
+          }
+          
+          if (userRole === 'RECRUITER') {
+            // Special case for the predefined recruiter
+            if (email === 'recruiter@architectureacademics.com') {
+              router.push("/recruiter-dashboard")
+            } else {
+              router.push("/")
+            }
           } else {
+            // For regular users, redirect to main page
             router.push("/")
           }
-        } else {
-          // For regular users, redirect to main page
-          router.push("/")
-        }
+        }, 1500)
       }
     } catch (error) {
       console.error('Login error:', error)
@@ -149,6 +191,22 @@ export default function LoginPage() {
                 </div>
               )}
 
+              {registrationMessage && (
+                <div className="mb-4 p-4 bg-green-500/20 border border-green-400/30 rounded-lg">
+                  <p className="text-sm font-semibold text-green-200">{registrationMessage}</p>
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="mb-4 p-4 bg-green-500/20 border border-green-400/30 rounded-lg flex items-center space-x-3">
+                  <Shield className="h-5 w-5 text-green-300" />
+                  <div>
+                    <p className="text-sm font-semibold text-green-200">{successMessage}</p>
+                    <p className="text-xs text-green-300 mt-1">Redirecting...</p>
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleLogin} className="space-y-4">
                 {/* Email Field */}
                 <div className="space-y-1">
@@ -198,9 +256,9 @@ export default function LoginPage() {
                     />
                     <span className="text-gray-300 group-hover:text-white transition-colors">Remember me</span>
                   </label>
-                  <a href="#" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
+                  <Link href="/forgot-password" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
 
                 {/* Login Button */}
@@ -264,6 +322,12 @@ export default function LoginPage() {
                   Don't have an account?{" "}
                   <Link href="/register" className="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
                     Create one now →
+                  </Link>
+                </p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Need to verify your email?{" "}
+                  <Link href="/verify-otp" className="font-medium text-blue-400 hover:text-blue-300 transition-colors">
+                    Verify now →
                   </Link>
                 </p>
               </div>

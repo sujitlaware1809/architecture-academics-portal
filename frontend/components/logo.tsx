@@ -60,9 +60,9 @@ const Logo: React.FC<LogoProps> = ({
             <span className={`text-xs leading-tight ${
               variant === 'white' 
                 ? 'text-white opacity-75' 
-                : 'text-gray-600 font-medium'
+                : 'text-gray-500 font-medium lowercase'
             }`}>
-              ArchitectureAcademics.online
+              architectureacademics.online
             </span>
           )}
         </div>

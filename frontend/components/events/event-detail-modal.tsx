@@ -42,7 +42,7 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
             
             <div className="md:w-1/2">
               <div className="flex gap-2 mb-3 flex-wrap">
-                {event.tags.map((tag) => (
+                {event.tags?.map((tag) => (
                   <Badge 
                     key={tag} 
                     variant="secondary" 
@@ -79,7 +79,7 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
                 
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-teal-500" />
-                  <span>{event.isOnline ? 'Online Event' : event.venue}</span>
+                  <span>{event.is_online ? 'Online Event' : event.venue}</span>
                 </div>
                 
                 <div className="flex items-center gap-3">
@@ -158,3 +158,4 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
     </div>
   )
 }
+

@@ -1,7 +1,7 @@
 "use client"
 
-import { motion, AnimatePresence, Variants } from 'framer-motion'
-import { ReactNode } from 'react'
+import { motion, AnimatePresence, Variants, useMotionValue, animate } from 'framer-motion'
+import { ReactNode, useEffect, useState } from 'react'
 
 // Animation variants
 export const fadeInUp: Variants = {
@@ -460,6 +460,22 @@ export const AnimatedCounter: React.FC<{
   duration?: number
   className?: string
 }> = ({ from, to, duration = 2, className = "" }) => {
+  const mv = useMotionValue(from)
+  const [value, setValue] = useState(from)
+
+  useEffect(() => {
+    mv.set(from)
+    const controls = animate(mv, to, { duration, ease: "easeOut" })
+    const unsubscribe = mv.onChange((v) => {
+      // format as integer; adjust if you want decimals
+      setValue(Math.round(Number(v)))
+    })
+    return () => {
+      controls.stop()
+      unsubscribe()
+    }
+  }, [from, to, duration, mv])
+
   return (
     <motion.span
       className={className}
@@ -467,11 +483,7 @@ export const AnimatedCounter: React.FC<{
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <motion.span
-        initial={{ textContent: from }}
-        animate={{ textContent: to }}
-        transition={{ duration, ease: "easeOut" }}
-      />
+      {value}
     </motion.span>
   )
 }

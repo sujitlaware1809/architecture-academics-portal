@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { api } from "@/lib/api"
@@ -66,7 +66,8 @@ interface Comment {
   replies: Comment[]
 }
 
-export default function BlogDetailPage({ params }: { params: { slug: string } }) {
+export default function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params)
   const router = useRouter()
   const [blog, setBlog] = useState<Blog | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
@@ -87,7 +88,7 @@ export default function BlogDetailPage({ params }: { params: { slug: string } })
     }
     fetchBlog()
     fetchComments()
-  }, [params.slug])
+  }, [slug])
 
   useEffect(() => {
     if (blog && isAuthenticated) {
@@ -98,7 +99,7 @@ export default function BlogDetailPage({ params }: { params: { slug: string } })
   const fetchBlog = async () => {
     try {
       setLoading(true)
-      const response = await api.get(`/blogs/slug/${params.slug}`)
+      const response = await api.get(`/blogs/slug/${slug}`)
       setBlog(response.data)
     } catch (error) {
       console.error("Error fetching blog:", error)
@@ -109,12 +110,12 @@ export default function BlogDetailPage({ params }: { params: { slug: string } })
 
   const fetchComments = async () => {
     try {
-      const response = await api.get(`/blogs/${params.slug}/comments`)
+      const response = await api.get(`/blogs/${slug}/comments`)
       setComments(response.data)
     } catch (error: any) {
       // Get blog ID first, then fetch comments
       try {
-        const blogResponse = await api.get(`/blogs/slug/${params.slug}`)
+        const blogResponse = await api.get(`/blogs/slug/${slug}`)
         if (blogResponse.data) {
           const commentsResponse = await api.get(`/blogs/${blogResponse.data.id}/comments`)
           setComments(commentsResponse.data)

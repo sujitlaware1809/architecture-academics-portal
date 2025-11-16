@@ -62,117 +62,107 @@ export default function HomePage() {
     { title: "PUBLICATIONS", icon: FileText, description: "Research & publications", color: "bg-green-500", href: "#", count: "0" },
   ]
 
-  // Hardcoded Featured Articles
-  const featuredArticles = [
-    {
-      id: 1,
-      title: "Sustainable Architecture: Building for Tomorrow",
-      excerpt: "Explore how modern architects are integrating eco-friendly practices and green technologies into contemporary building design. Learn about passive solar design, green roofs, and sustainable materials.",
-      author: "Dr. Rajesh Kumar",
-      date: "2 days ago",
-      category: "Sustainability",
-      readTime: "8 min read",
-      image: "sustainable",
-      slug: "sustainable-architecture-building-tomorrow"
-    },
-    {
-      id: 2,
-      title: "The Rise of Parametric Design in Modern Architecture",
-      excerpt: "Discover how computational design tools are revolutionizing the way architects approach complex geometries and structural systems. From Grasshopper to algorithmic modeling.",
-      author: "Priya Sharma",
-      date: "5 days ago",
-      category: "Technology",
-      readTime: "10 min read",
-      image: "parametric",
-      slug: "rise-parametric-design-modern-architecture"
-    },
-    {
-      id: 3,
-      title: "Indian Vernacular Architecture: Lessons for Today",
-      excerpt: "Understanding traditional building techniques from across India and their relevance in contemporary sustainable design. Climate-responsive architecture from our heritage.",
-      author: "Arjun Mehta",
-      date: "1 week ago",
-      category: "Heritage",
-      readTime: "12 min read",
-      image: "vernacular",
-      slug: "indian-vernacular-architecture-lessons"
-    },
-    {
-      id: 4,
-      title: "BIM Revolution: Complete Guide for Architects",
-      excerpt: "Building Information Modeling is transforming the construction industry. Learn how to leverage Revit, ArchiCAD, and other BIM tools to enhance your workflow and collaboration.",
-      author: "Sneha Patel",
-      date: "1 week ago",
-      category: "Technology",
-      readTime: "15 min read",
-      image: "bim",
-      slug: "bim-revolution-complete-guide-architects"
-    }
-  ]
+  // State for dynamic data
+  const [featuredArticles, setFeaturedArticles] = useState<any[]>([])
+  const [popularDiscussions, setPopularDiscussions] = useState<any[]>([])
+  const [loadingBlogs, setLoadingBlogs] = useState(true)
+  const [loadingDiscussions, setLoadingDiscussions] = useState(true)
 
-  // Hardcoded Popular Discussions
-  const popularDiscussions = [
-    {
-      id: 1,
-      title: "Best software for rendering architectural designs?",
-      excerpt: "Looking for recommendations on rendering software. Currently using V-Ray but wondering if there are better alternatives for photorealistic renders...",
-      author: "Amit Singh",
-      replies: 24,
-      views: 1250,
-      lastActivity: "2 hours ago",
-      category: "Software",
-      tags: ["Rendering", "3D", "Software"],
-      solved: false
-    },
-    {
-      id: 2,
-      title: "How to prepare portfolio for architectural firms?",
-      excerpt: "I'm a fresh graduate and want to create an impressive portfolio. What should I include? How many projects? Any specific layout recommendations?",
-      author: "Neha Reddy",
-      replies: 18,
-      views: 890,
-      lastActivity: "5 hours ago",
-      category: "Career",
-      tags: ["Portfolio", "Jobs", "Career"],
-      solved: true
-    },
-    {
-      id: 3,
-      title: "NATA 2025 preparation strategy - Need advice",
-      excerpt: "Appearing for NATA next year. What are the best resources for preparation? Should I join coaching or is self-study sufficient?",
-      author: "Rohan Gupta",
-      replies: 32,
-      views: 2100,
-      lastActivity: "1 day ago",
-      category: "Education",
-      tags: ["NATA", "Exam", "Preparation"],
-      solved: false
-    },
-    {
-      id: 4,
-      title: "Sustainable materials for low-cost housing projects",
-      excerpt: "Working on a low-cost housing project and want to incorporate sustainable materials. What are some cost-effective eco-friendly alternatives?",
-      author: "Kavya Iyer",
-      replies: 15,
-      views: 670,
-      lastActivity: "1 day ago",
-      category: "Design",
-      tags: ["Sustainable", "Materials", "Housing"],
-      solved: true
-    },
-    {
-      id: 5,
-      title: "Freelancing as an architect - Tips and experiences?",
-      excerpt: "Thinking of starting freelance architectural practice. Would love to hear from experienced freelancers about challenges, client acquisition, pricing strategies...",
-      author: "Vikram Joshi",
-      replies: 41,
-      views: 1580,
-      lastActivity: "3 hours ago",
-      category: "Career",
-      tags: ["Freelancing", "Business", "Career"],
-      solved: false
+  // Fetch featured articles from backend
+  useEffect(() => {
+    const fetchFeaturedArticles = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs?is_featured=true&limit=4`)
+        if (response.ok) {
+          const data = await response.json()
+          setFeaturedArticles(data)
+        } else {
+          console.warn('Failed to fetch featured articles, using fallback')
+          // Fallback data if backend is unavailable
+          setFeaturedArticles([
+            {
+              id: 1,
+              title: "Sustainable Architecture: Building for Tomorrow",
+              excerpt: "Explore how modern architects are integrating eco-friendly practices and green technologies into contemporary building design.",
+              author: "Dr. Rajesh Kumar",
+              created_at: new Date(Date.now() - 2*24*60*60*1000).toISOString(),
+              category: "Sustainability",
+              estimated_read_time: 8,
+              featured_image: "sustainable",
+              slug: "sustainable-architecture-building-tomorrow"
+            },
+            {
+              id: 2,
+              title: "The Rise of Parametric Design in Modern Architecture",
+              excerpt: "Discover how computational design tools are revolutionizing the way architects approach complex geometries and structural systems.",
+              author: "Priya Sharma",
+              created_at: new Date(Date.now() - 5*24*60*60*1000).toISOString(),
+              category: "Technology",
+              estimated_read_time: 10,
+              featured_image: "parametric",
+              slug: "rise-parametric-design-modern-architecture"
+            }
+          ])
+        }
+      } catch (error) {
+        console.error('Error fetching featured articles:', error)
+        setFeaturedArticles([])
+      } finally {
+        setLoadingBlogs(false)
+      }
     }
-  ]
+
+    fetchFeaturedArticles()
+  }, [])
+
+  // Fetch popular discussions from backend
+  useEffect(() => {
+    const fetchPopularDiscussions = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/discussions?limit=4`)
+        if (response.ok) {
+          const data = await response.json()
+          setPopularDiscussions(data)
+        } else {
+          console.warn('Failed to fetch popular discussions, using fallback')
+          // Fallback data if backend is unavailable
+          setPopularDiscussions([
+            {
+              id: 1,
+              title: "Best software for rendering architectural designs?",
+              content: "Looking for recommendations on rendering software. Currently using V-Ray but wondering if there are better alternatives for photorealistic renders...",
+              author: "Amit Singh",
+              reply_count: 24,
+              view_count: 1250,
+              updated_at: new Date(Date.now() - 2*60*60*1000).toISOString(),
+              category: "Software",
+              tags: ["Rendering", "3D", "Software"],
+              is_solved: false
+            },
+            {
+              id: 2,
+              title: "How to prepare portfolio for architectural firms?",
+              content: "I'm a fresh graduate and want to create an impressive portfolio. What should I include? How many projects?",
+              author: "Neha Reddy",
+              reply_count: 18,
+              view_count: 890,
+              updated_at: new Date(Date.now() - 5*60*60*1000).toISOString(),
+              category: "Career",
+              tags: ["Portfolio", "Jobs", "Career"],
+              is_solved: true
+            }
+          ])
+        }
+      } catch (error) {
+        console.error('Error fetching popular discussions:', error)
+        setPopularDiscussions([])
+      } finally {
+        setLoadingDiscussions(false)
+      }
+    }
+
+    fetchPopularDiscussions()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/30 via-white to-white">
@@ -594,7 +584,25 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {featuredArticles.map((article) => (
+            {loadingBlogs ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="h-full border-2 border-gray-100">
+                  <div className="h-48 bg-gray-200 animate-pulse"></div>
+                  <CardHeader className="pb-3">
+                    <div className="h-6 bg-gray-200 rounded animate-pulse mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                  </CardHeader>
+                  <CardContent className="pb-4">
+                    <div className="space-y-2 mb-4">
+                      <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : featuredArticles.length > 0 ? featuredArticles.map((article) => (
               <Link key={article.id} href={`/blogs/${article.slug}`}>
                 <Card className="h-full border-2 border-gray-100 hover:border-purple-300 hover:shadow-xl transition-all duration-300 group overflow-hidden">
                   <div className="relative h-48 bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100 overflow-hidden">
@@ -616,37 +624,57 @@ export default function HomePage() {
 
                   <CardContent className="pb-4">
                     <CardDescription className="text-sm text-gray-600 line-clamp-3 mb-4">
-                      {article.excerpt}
+                      {article.excerpt || article.description || ''}
                     </CardDescription>
                     
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
                           <span className="text-white text-xs font-bold">
-                            {article.author.split(' ').map(n => n[0]).join('')}
+                            {(() => {
+                              // Handle both string and object author formats
+                              const authorName = typeof article.author === 'string' 
+                                ? article.author 
+                                : article.author?.first_name 
+                                  ? `${article.author.first_name} ${article.author.last_name || ''}`.trim()
+                                  : article.author?.email?.split('@')[0] || 'Author';
+                              return authorName.split(' ').map((n: string) => n[0]).slice(0, 2).join('');
+                            })()}
                           </span>
                         </div>
                         <div>
-                          <p className="text-xs font-semibold text-gray-900">{article.author}</p>
-                          <p className="text-xs text-gray-500">{article.date}</p>
+                          <p className="text-xs font-semibold text-gray-900">
+                            {(() => {
+                              // Handle both string and object author formats
+                              if (typeof article.author === 'string') {
+                                return article.author;
+                              } else if (article.author) {
+                                return article.author.first_name 
+                                  ? `${article.author.first_name} ${article.author.last_name || ''}`.trim()
+                                  : article.author.email?.split('@')[0] || 'Unknown Author';
+                              }
+                              return 'Unknown Author';
+                            })()}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {article.date || (article.created_at ? new Date(article.created_at).toLocaleDateString() : 'Unknown date')}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-500">
                         <BookOpen className="h-3 w-3" />
-                        {article.readTime}
+                        {article.readTime || `${article.estimated_read_time || 5} min read`}
                       </div>
                     </div>
                   </CardContent>
-
-                  <CardFooter className="pt-0">
-                    <Button variant="ghost" size="sm" className="w-full group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
-                      Read More
-                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </CardFooter>
                 </Card>
               </Link>
-            ))}
+            )) : (
+              <div className="col-span-full text-center py-12">
+                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No featured articles available</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -668,7 +696,29 @@ export default function HomePage() {
           </div>
 
           <div className="space-y-4">
-            {popularDiscussions.map((discussion) => (
+            {loadingDiscussions ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="border-2 border-gray-100">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+                      <div className="flex-1 min-w-0">
+                        <div className="h-6 bg-gray-200 rounded animate-pulse mb-2"></div>
+                        <div className="space-y-2 mb-3">
+                          <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                        </div>
+                        <div className="flex gap-2 mb-3">
+                          <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : popularDiscussions.length > 0 ? popularDiscussions.map((discussion) => (
               <Link key={discussion.id} href={`/discussions/${discussion.id}`}>
                 <Card className="border-2 border-gray-100 hover:border-purple-300 hover:shadow-lg transition-all duration-300 group">
                   <CardContent className="p-6">
@@ -676,7 +726,7 @@ export default function HomePage() {
                       {/* Discussion Icon */}
                       <div className="flex-shrink-0">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          discussion.solved 
+                          discussion.solved || discussion.is_solved
                             ? 'bg-green-100 text-green-600' 
                             : 'bg-purple-100 text-purple-600'
                         }`}>
@@ -690,7 +740,7 @@ export default function HomePage() {
                           <h3 className="font-bold text-lg text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">
                             {discussion.title}
                           </h3>
-                          {discussion.solved && (
+                          {(discussion.solved || discussion.is_solved) && (
                             <Badge className="bg-green-100 text-green-700 border border-green-200 flex-shrink-0">
                               ✓ Solved
                             </Badge>
@@ -698,16 +748,34 @@ export default function HomePage() {
                         </div>
 
                         <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                          {discussion.excerpt}
+                          {discussion.excerpt || discussion.content || ''}
                         </p>
 
                         {/* Tags */}
                         <div className="flex flex-wrap gap-2 mb-3">
-                          {discussion.tags.map((tag, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-700">
-                              {tag}
-                            </Badge>
-                          ))}
+                          {(() => {
+                            // Handle different tag formats from backend
+                            let tags = discussion.tags;
+                            
+                            // If tags is a string, try to parse it
+                            if (typeof tags === 'string') {
+                              try {
+                                tags = JSON.parse(tags);
+                              } catch {
+                                // If it's not JSON, split by comma
+                                tags = tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0);
+                              }
+                            }
+                            
+                            // Ensure it's an array
+                            const tagsArray = Array.isArray(tags) ? tags : [];
+                            
+                            return tagsArray.map((tag: string, index: number) => (
+                              <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                                {tag}
+                              </Badge>
+                            ));
+                          })()}
                         </div>
 
                         {/* Meta Information */}
@@ -715,29 +783,52 @@ export default function HomePage() {
                           <div className="flex items-center gap-1">
                             <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
                               <span className="text-white text-[10px] font-bold">
-                                {discussion.author.split(' ').map(n => n[0]).join('')}
+                                {(() => {
+                                  // Handle both string and object author formats
+                                  const authorName = typeof discussion.author === 'string' 
+                                    ? discussion.author 
+                                    : discussion.author?.first_name 
+                                      ? `${discussion.author.first_name} ${discussion.author.last_name || ''}`.trim()
+                                      : discussion.author?.email?.split('@')[0] || 'Unknown';
+                                  return authorName.split(' ').map((n: string) => n[0] || '').join('').slice(0, 2);
+                                })()}
                               </span>
                             </div>
-                            <span className="font-medium text-gray-700">{discussion.author}</span>
+                            <span className="font-medium text-gray-700">
+                              {(() => {
+                                // Handle both string and object author formats
+                                if (typeof discussion.author === 'string') {
+                                  return discussion.author;
+                                } else if (discussion.author) {
+                                  return discussion.author.first_name 
+                                    ? `${discussion.author.first_name} ${discussion.author.last_name || ''}`.trim()
+                                    : discussion.author.email?.split('@')[0] || 'Unknown User';
+                                }
+                                return 'Unknown User';
+                              })()}
+                            </span>
                           </div>
                           
                           <div className="flex items-center gap-1">
                             <MessageSquare className="h-3 w-3" />
-                            <span>{discussion.replies} replies</span>
+                            <span>{discussion.replies || discussion.reply_count || 0} replies</span>
                           </div>
                           
                           <div className="flex items-center gap-1">
                             <Users className="h-3 w-3" />
-                            <span>{discussion.views.toLocaleString()} views</span>
+                            <span>{(discussion.views || discussion.view_count || 0).toLocaleString()} views</span>
                           </div>
                           
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            <span>{discussion.lastActivity}</span>
+                            <span>
+                              {discussion.lastActivity || 
+                               (discussion.updated_at ? new Date(discussion.updated_at).toLocaleDateString() : 'Unknown')}
+                            </span>
                           </div>
 
                           <Badge variant="outline" className="text-xs border-purple-200 text-purple-700">
-                            {discussion.category}
+                            {discussion.category || 'General'}
                           </Badge>
                         </div>
                       </div>
@@ -750,7 +841,12 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
               </Link>
-            ))}
+            )) : (
+              <div className="text-center py-12">
+                <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No discussions available</p>
+              </div>
+            )}
           </div>
 
           {/* Community Stats */}

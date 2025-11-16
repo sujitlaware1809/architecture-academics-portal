@@ -74,59 +74,59 @@ export default function WorkshopsPortal() {
       filteredW = filteredW.filter(workshop => 
         workshop.title.toLowerCase().includes(query) ||
         workshop.description.toLowerCase().includes(query) ||
-        workshop.trainer.name.toLowerCase().includes(query) ||
-        workshop.category.toLowerCase().includes(query)
+        workshop.trainer?.name.toLowerCase().includes(query) ||
+        workshop.category?.toLowerCase().includes(query)
       )
       
       filteredF = filteredF.filter(workshop => 
         workshop.title.toLowerCase().includes(query) ||
         workshop.description.toLowerCase().includes(query) ||
-        workshop.trainer.name.toLowerCase().includes(query) ||
-        workshop.category.toLowerCase().includes(query)
+        workshop.trainer?.name.toLowerCase().includes(query) ||
+        workshop.category?.toLowerCase().includes(query)
       )
     }
 
     // Apply category filter
     if (filters.category) {
       filteredW = filteredW.filter(workshop => 
-        workshop.category.toLowerCase() === filters.category.toLowerCase()
+        workshop.category?.toLowerCase() === filters.category.toLowerCase()
       )
       
       filteredF = filteredF.filter(workshop => 
-        workshop.category.toLowerCase() === filters.category.toLowerCase()
+        workshop.category?.toLowerCase() === filters.category.toLowerCase()
       )
     }
 
     // Apply difficulty filter
     if (filters.difficulty) {
       filteredW = filteredW.filter(workshop => 
-        workshop.difficulty.toLowerCase() === filters.difficulty.toLowerCase()
+        workshop.difficulty?.toLowerCase() === filters.difficulty.toLowerCase()
       )
       
       filteredF = filteredF.filter(workshop => 
-        workshop.difficulty.toLowerCase() === filters.difficulty.toLowerCase()
+        workshop.difficulty?.toLowerCase() === filters.difficulty.toLowerCase()
       )
     }
 
     // Apply price filter
     if (filters.price) {
       if (filters.price === "free") {
-        filteredW = filteredW.filter(workshop => workshop.price === "Free")
-        filteredF = filteredF.filter(workshop => workshop.price === "Free")
+        filteredW = filteredW.filter(workshop => workshop.price === 0)
+        filteredF = filteredF.filter(workshop => workshop.price === 0)
       } else if (filters.price === "paid") {
-        filteredW = filteredW.filter(workshop => workshop.price !== "Free")
-        filteredF = filteredF.filter(workshop => workshop.price !== "Free")
+        filteredW = filteredW.filter(workshop => workshop.price !== 0)
+        filteredF = filteredF.filter(workshop => workshop.price !== 0)
       }
     }
 
     // Apply trainer filter
     if (filters.trainer) {
       filteredW = filteredW.filter(workshop => 
-        workshop.trainer.name.toLowerCase().includes(filters.trainer.toLowerCase())
+        workshop.trainer?.name.toLowerCase().includes(filters.trainer.toLowerCase())
       )
       
       filteredF = filteredF.filter(workshop => 
-        workshop.trainer.name.toLowerCase().includes(filters.trainer.toLowerCase())
+        workshop.trainer?.name.toLowerCase().includes(filters.trainer.toLowerCase())
       )
     }
 
@@ -553,3 +553,4 @@ export default function WorkshopsPortal() {
     </div>
   )
 }
+

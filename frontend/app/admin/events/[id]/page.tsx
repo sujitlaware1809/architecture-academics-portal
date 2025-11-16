@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import { 
   ArrowLeft, 
@@ -30,25 +30,48 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog"
 import { getEventById } from "@/lib/api"
 
-export default function EventPage({ params }: { params: { id: string } }) {
-  const [event, setEvent] = useState<any>(null)
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  venue: string;
+  category: string;
+  organizer: string;
+  contact: string;
+  website: string;
+  ticketPrice: string;
+  ticketUrl: string;
+  featuredImage: string | null;
+  status: string;
+}
+
+export default function EventPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
+  const [event, setEvent] = useState<Event | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const router = useRouter()
-  const { id } = params
 
   useEffect(() => {
     async function fetchEvent() {
       try {
         setLoading(true)
+        setError("") // Clear any previous errors
         const data = await getEventById(id)
-        setEvent(data)
+        if (data) {
+          setEvent(data)
+        } else {
+          setError("Event not found.")
+        }
       } catch (err) {
         console.error("Failed to fetch event:", err)
         setError("Failed to load event details. Please try again.")
@@ -57,7 +80,9 @@ export default function EventPage({ params }: { params: { id: string } }) {
       }
     }
 
-    fetchEvent()
+    if (id) {
+      fetchEvent()
+    }
   }, [id])
 
   const handleDeleteEvent = async () => {
@@ -88,6 +113,22 @@ export default function EventPage({ params }: { params: { id: string } }) {
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
           <span className="block sm:inline">{error}</span>
+        </div>
+        <button 
+          onClick={() => router.back()}
+          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          Go Back
+        </button>
+      </div>
+    )
+  }
+
+  if (!event) {
+    return (
+      <div className="p-6">
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">Event not found.</span>
         </div>
         <button 
           onClick={() => router.back()}
@@ -134,18 +175,30 @@ export default function EventPage({ params }: { params: { id: string } }) {
           <Card>
             <div className="aspect-video w-full overflow-hidden">
               <img 
-                src={event.featuredImage || "/placeholder.jpg"} 
+                src={event.featuredImage || "/api/placeholder/800/450"} 
                 alt={event.title}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/api/placeholder/800/450';
+                }}
               />
             </div>
             <CardHeader>
               <CardTitle>About This Event</CardTitle>
               <CardDescription>
                 <div className="flex space-x-4 mt-2">
-                  <Badge>{event.category}</Badge>
+                  {event.category && <Badge>{event.category}</Badge>}
                   <Badge variant={event.status === 'published' ? 'default' : 'outline'}>
-                    {event.status === 'published' ? 'Published' : event.status === 'draft' ? 'Draft' : 'Scheduled'}
+                    {event.status ? (
+                      event.status === 'published' ? 'Published' : 
+                      event.status === 'draft' ? 'Draft' : 
+                      event.status === 'upcoming' ? 'Upcoming' :
+                      event.status === 'ongoing' ? 'Ongoing' :
+                      event.status === 'completed' ? 'Completed' :
+                      event.status === 'cancelled' ? 'Cancelled' :
+                      event.status
+                    ) : 'Unknown'}
                   </Badge>
                 </div>
               </CardDescription>
@@ -166,27 +219,31 @@ export default function EventPage({ params }: { params: { id: string } }) {
                 <Calendar className="h-5 w-5 text-gray-500 mt-0.5 mr-3" />
                 <div>
                   <h3 className="font-medium">Date & Time</h3>
-                  <p>{new Date(event.date).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                  <p>{event.startTime} - {event.endTime}</p>
+                  <p>{event.date ? new Date(event.date).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Date not available'}</p>
+                  <p>{event.startTime && event.endTime ? `${event.startTime} - ${event.endTime}` : 'Time not available'}</p>
                 </div>
               </div>
 
-              <div className="flex items-start">
-                <MapPin className="h-5 w-5 text-gray-500 mt-0.5 mr-3" />
-                <div>
-                  <h3 className="font-medium">Location</h3>
-                  <p>{event.venue}</p>
-                  <p>{event.location}</p>
+              {(event.venue || event.location) && (
+                <div className="flex items-start">
+                  <MapPin className="h-5 w-5 text-gray-500 mt-0.5 mr-3" />
+                  <div>
+                    <h3 className="font-medium">Location</h3>
+                    {event.venue && <p>{event.venue}</p>}
+                    {event.location && <p>{event.location}</p>}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="flex items-start">
-                <User className="h-5 w-5 text-gray-500 mt-0.5 mr-3" />
-                <div>
-                  <h3 className="font-medium">Organizer</h3>
-                  <p>{event.organizer}</p>
+              {event.organizer && (
+                <div className="flex items-start">
+                  <User className="h-5 w-5 text-gray-500 mt-0.5 mr-3" />
+                  <div>
+                    <h3 className="font-medium">Organizer</h3>
+                    <p>{event.organizer}</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {event.contact && (
                 <div className="flex items-start">
@@ -244,7 +301,19 @@ export default function EventPage({ params }: { params: { id: string } }) {
               <CardTitle>Share This Event</CardTitle>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    // You could add a toast notification here
+                    console.log('Event link copied to clipboard');
+                  } catch (err) {
+                    console.error('Failed to copy link:', err);
+                  }
+                }}
+              >
                 <Share2 className="mr-2 h-4 w-4" />
                 Copy Event Link
               </Button>

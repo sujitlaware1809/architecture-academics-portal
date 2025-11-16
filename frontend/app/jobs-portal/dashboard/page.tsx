@@ -22,7 +22,8 @@ import {
   Edit,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  MessageCircle
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -72,6 +73,7 @@ export default function DashboardPage() {
   const [applications, setApplications] = useState<any[]>([])
   const [savedJobs, setSavedJobs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [totalMessages, setTotalMessages] = useState(0)
 
   // Fetch user's job applications
   const fetchApplications = async () => {
@@ -87,6 +89,20 @@ export default function DashboardPage() {
       if (response.ok) {
         const data = await response.json()
         setApplications(data)
+        
+        // Calculate total messages across all applications
+        let msgCount = 0
+        data.forEach((app: any) => {
+          if (app.messages) {
+            try {
+              const msgs = JSON.parse(app.messages)
+              msgCount += Array.isArray(msgs) ? msgs.length : 0
+            } catch (e) {
+              // ignore parse errors
+            }
+          }
+        })
+        setTotalMessages(msgCount)
       }
     } catch (error) {
       console.error('Error fetching applications:', error)
@@ -295,19 +311,29 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-green-500 to-green-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm">Interviews</p>
-                  <p className="text-2xl font-bold">
-                    {applications.filter(app => app.status === "interview_scheduled").length}
-                  </p>
+          <Link href="/profile/my-applications">
+            <Card className="border-0 shadow-lg bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:shadow-2xl transition-shadow cursor-pointer">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-indigo-100 text-sm">Messages</p>
+                    <p className="text-2xl font-bold">{totalMessages}</p>
+                    {totalMessages > 0 && (
+                      <p className="text-xs text-indigo-200 mt-1">Click to view</p>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <MessageCircle className="h-8 w-8 text-indigo-200" />
+                    {totalMessages > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center">
+                        <span className="text-xs font-bold">{totalMessages > 9 ? '9+' : totalMessages}</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <Calendar className="h-8 w-8 text-green-200" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card className="border-0 shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white">
             <CardContent className="p-6">
@@ -392,7 +418,19 @@ export default function DashboardPage() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {applications.map((application) => (
+                {applications.map((application) => {
+                  // Check if this application has messages
+                  let messageCount = 0
+                  if (application.messages) {
+                    try {
+                      const msgs = JSON.parse(application.messages)
+                      messageCount = Array.isArray(msgs) ? msgs.length : 0
+                    } catch (e) {
+                      messageCount = 0
+                    }
+                  }
+                  
+                  return (
                   <Card key={application.id} className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -409,6 +447,12 @@ export default function DashboardPage() {
                               {application.status === 'rejected' && <XCircle className="h-4 w-4" />}
                               <span>{getStatusLabel(application.status)}</span>
                             </div>
+                            {messageCount > 0 && (
+                              <div className="inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 animate-pulse">
+                                <MessageCircle className="h-4 w-4" />
+                                <span>{messageCount} message{messageCount > 1 ? 's' : ''}</span>
+                              </div>
+                            )}
                           </div>
                           <div className="flex items-center space-x-6 text-sm text-gray-600 mb-2">
                             <div className="flex items-center space-x-1">
@@ -435,6 +479,15 @@ export default function DashboardPage() {
                           )}
                         </div>
                         <div className="flex items-center space-x-2">
+                          {messageCount > 0 && (
+                            <Link 
+                              href="/profile/my-applications" 
+                              className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition-all flex items-center space-x-2"
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                              <span>View Messages</span>
+                            </Link>
+                          )}
                           <Link 
                             href={`/jobs-portal/job/${application.job?.id}`} 
                             className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
@@ -451,7 +504,7 @@ export default function DashboardPage() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )})}
               </div>
             )}
           </div>
