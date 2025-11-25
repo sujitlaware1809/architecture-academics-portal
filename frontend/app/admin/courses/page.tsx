@@ -601,17 +601,17 @@ export default function EnhancedAdminCoursesPage() {
           </CardHeader>
           <CardContent>
             {/* Upload Instructions */}
-            <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
+            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
               <div className="flex items-start space-x-3">
-                <div className="bg-purple-500 rounded-full p-2">
+                <div className="bg-blue-500 rounded-full p-2">
                   <Video className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-purple-800 mb-1">🎬 Admin Video Upload Center</h4>
-                  <p className="text-sm text-purple-700 mb-2">
+                  <h4 className="font-semibold text-blue-800 mb-1">🎬 Admin Video Upload Center</h4>
+                  <p className="text-sm text-blue-700 mb-2">
                     This is where you upload course videos! Each course should have 10-12 videos (5-10 minutes each).
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-purple-600">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-blue-600">
                         const parsedPrice = parseFloat(formData.price);
                         const price = Number.isFinite(parsedPrice) ? parsedPrice : 0;
                     <div>✅ First video automatically free (trial)</div>
@@ -684,6 +684,7 @@ export default function EnhancedAdminCoursesPage() {
                     </TableCell>
                   </TableRow>
                 ))}
+
               </TableBody>
             </Table>
           </CardContent>
@@ -815,6 +816,7 @@ export default function EnhancedAdminCoursesPage() {
                     </TableCell>
                   </TableRow>
                 ))}
+
               </TableBody>
             </Table>
           </CardContent>
@@ -862,6 +864,7 @@ export default function EnhancedAdminCoursesPage() {
                 </div>
               </div>
               
+
               <div className="space-y-2">
                 <Label htmlFor="lesson_description">Description</Label>
                 <Textarea
@@ -871,6 +874,7 @@ export default function EnhancedAdminCoursesPage() {
                 />
               </div>
               
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="video_duration">Duration (seconds)</Label>
@@ -894,6 +898,7 @@ export default function EnhancedAdminCoursesPage() {
                 </div>
               </div>
               
+
               <div className="space-y-2">
                 <Label htmlFor="video_file">Video File</Label>
                 <Input
@@ -925,6 +930,7 @@ export default function EnhancedAdminCoursesPage() {
                 </div>
               )}
               
+
               <div className="space-y-2">
                 <Label htmlFor="transcript">Transcript (Optional)</Label>
                 <Textarea
@@ -935,6 +941,7 @@ export default function EnhancedAdminCoursesPage() {
                 />
               </div>
               
+
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsLessonDialogOpen(false)}>
                   Cancel
@@ -982,6 +989,7 @@ export default function EnhancedAdminCoursesPage() {
                 </div>
               </div>
               
+
               <div className="space-y-2">
                 <Label htmlFor="material_description">Description</Label>
                 <Textarea
@@ -991,6 +999,7 @@ export default function EnhancedAdminCoursesPage() {
                 />
               </div>
               
+
               <div className="space-y-2">
                 <Label htmlFor="material_file">File</Label>
                 <Input
@@ -1022,6 +1031,7 @@ export default function EnhancedAdminCoursesPage() {
                 </div>
               )}
               
+
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -1033,6 +1043,7 @@ export default function EnhancedAdminCoursesPage() {
                 <Label htmlFor="is_downloadable">Allow Download</Label>
               </div>
               
+
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsMaterialDialogOpen(false)}>
                   Cancel

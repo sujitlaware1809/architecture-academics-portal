@@ -132,8 +132,8 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -143,9 +143,9 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
-      <header className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-600 shadow-lg">
+      <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex items-center space-x-3">
@@ -154,14 +154,14 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h1 className="text-2xl font-serif font-bold text-white">Architecture</h1>
-                <span className="text-sm text-purple-200 font-medium">Academics</span>
+                <span className="text-sm text-blue-200 font-medium">Academics</span>
               </div>
             </Link>
             
             <div className="flex items-center space-x-4">
               <Link 
                 href="/"
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-purple-100 hover:text-white transition-colors rounded-full hover:bg-white/20"
+                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-blue-100 hover:text-white transition-colors rounded-full hover:bg-white/20"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to Home</span>
@@ -183,17 +183,17 @@ export default function ProfilePage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Link
             href="/profile/my-courses"
-            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-purple-100 hover:border-purple-300"
+            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-blue-100 hover:border-blue-300"
           >
-            <BookOpen className="h-5 w-5 text-purple-600" />
+            <BookOpen className="h-5 w-5 text-blue-600" />
             <span className="text-sm font-medium text-gray-700">My Courses</span>
           </Link>
           
           <Link
             href="/profile/my-applications"
-            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-purple-100 hover:border-purple-300 relative"
+            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-blue-100 hover:border-blue-300 relative"
           >
-            <Briefcase className="h-5 w-5 text-purple-600" />
+            <Briefcase className="h-5 w-5 text-blue-600" />
             <span className="text-sm font-medium text-gray-700">My Applications</span>
             {/* Notification badge - will show if there are messages */}
             <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse"></span>
@@ -201,17 +201,17 @@ export default function ProfilePage() {
           
           <Link
             href="/profile/my-events"
-            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-purple-100 hover:border-purple-300"
+            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-blue-100 hover:border-blue-300"
           >
-            <BookOpen className="h-5 w-5 text-purple-600" />
+            <BookOpen className="h-5 w-5 text-blue-600" />
             <span className="text-sm font-medium text-gray-700">My Events</span>
           </Link>
           
           <Link
             href="/profile/my-workshops"
-            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-purple-100 hover:border-purple-300"
+            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-blue-100 hover:border-blue-300"
           >
-            <BookOpen className="h-5 w-5 text-purple-600" />
+            <BookOpen className="h-5 w-5 text-blue-600" />
             <span className="text-sm font-medium text-gray-700">My Workshops</span>
           </Link>
         </div>
@@ -224,7 +224,7 @@ export default function ProfilePage() {
           <div className="lg:col-span-1">
             <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="text-center pb-6">
-                <div className="mx-auto w-20 h-20 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mb-4">
+                <div className="mx-auto w-20 h-20 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mb-4">
                   <User className="h-10 w-10 text-white" />
                 </div>
                 <CardTitle className="text-xl font-serif font-bold text-gray-900">
@@ -262,7 +262,7 @@ export default function ProfilePage() {
                   {user.profile?.website && (
                     <div className="flex items-center text-gray-600">
                       <Globe className="h-4 w-4 mr-2" />
-                      <a href={user.profile.website} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">
+                      <a href={user.profile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                         {user.profile.website}
                       </a>
                     </div>
@@ -289,7 +289,7 @@ export default function ProfilePage() {
                 
                 <button
                   onClick={() => setIsEditing(!isEditing)}
-                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors rounded-lg hover:bg-purple-50"
+                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors rounded-lg hover:bg-blue-50"
                 >
                   {isEditing ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
                   <span>{isEditing ? "Cancel" : "Edit"}</span>
@@ -341,7 +341,7 @@ export default function ProfilePage() {
                         value={profileData.bio}
                         onChange={handleInputChange}
                         placeholder="Tell us about yourself"
-                        className="w-full h-24 px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-purple-500 resize-none"
+                        className="w-full h-24 px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500 resize-none"
                       />
                     ) : (
                       <div className="min-h-24 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
@@ -424,7 +424,7 @@ export default function ProfilePage() {
                         value={profileData.education}
                         onChange={handleInputChange}
                         placeholder="Your educational background"
-                        className="w-full h-20 px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-purple-500 resize-none"
+                        className="w-full h-20 px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500 resize-none"
                       />
                     ) : (
                       <div className="min-h-20 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
@@ -442,7 +442,7 @@ export default function ProfilePage() {
                         value={profileData.experience}
                         onChange={handleInputChange}
                         placeholder="Your work experience"
-                        className="w-full h-20 px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-purple-500 resize-none"
+                        className="w-full h-20 px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500 resize-none"
                       />
                     ) : (
                       <div className="min-h-20 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
@@ -457,7 +457,7 @@ export default function ProfilePage() {
                       <button
                         onClick={handleSaveProfile}
                         disabled={isSaving}
-                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium py-3 px-4 rounded-lg hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isSaving ? (
                           <div className="flex items-center justify-center">

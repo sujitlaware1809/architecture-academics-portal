@@ -34,8 +34,8 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
                   className="object-cover"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">
-                  <BookOpen className="h-24 w-24 text-purple-400/50" />
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-100 to-cyan-100">
+                  <BookOpen className="h-24 w-24 text-blue-400/50" />
                 </div>
               )}
               
@@ -85,12 +85,12 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
               
               <div className="space-y-3 text-gray-600">
                 <div className="flex items-center gap-3">
-                  <User className="h-5 w-5 text-purple-500" />
+                  <User className="h-5 w-5 text-blue-500" />
                   <span>Conducted by <span className="font-medium">{workshop.trainer?.name}</span></span>
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-purple-500" />
+                  <Calendar className="h-5 w-5 text-blue-500" />
                   <span>{new Date(workshop.date).toLocaleDateString('en-US', { 
                     weekday: 'long',
                     year: 'numeric', 
@@ -100,17 +100,17 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-purple-500" />
+                  <Clock className="h-5 w-5 text-blue-500" />
                   <span>{workshop.duration}</span>
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-purple-500" />
+                  <MapPin className="h-5 w-5 text-blue-500" />
                   <span>{workshop.mode} {workshop.venue ? `- ${workshop.venue}` : ''}</span>
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <Tag className="h-5 w-5 text-purple-500" />
+                  <Tag className="h-5 w-5 text-blue-500" />
                   <span className="font-medium">{workshop.price === 0 ? 'Free' : `₹${workshop.price}`}</span>
                 </div>
               </div>
@@ -121,13 +121,13 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
             {/* Syllabus */}
             <div>
               <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-purple-500" />
+                <BookOpen className="h-5 w-5 text-blue-500" />
                 Syllabus Outline
               </h3>
               <ul className="space-y-3">
                 {workshop.syllabus?.map((item, index) => (
                   <li key={index} className="flex gap-3 items-start">
-                    <ChevronRight className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                    <ChevronRight className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-700">{item}</p>
                   </li>
                 ))}
@@ -138,13 +138,13 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
             {workshop.prerequisites && workshop.prerequisites.length > 0 && (
               <div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-purple-500" />
+                  <CheckCircle className="h-5 w-5 text-blue-500" />
                   Prerequisites
                 </h3>
                 <ul className="space-y-3">
                   {workshop.prerequisites.map((item, index) => (
                     <li key={index} className="flex gap-3 items-start">
-                      <ChevronRight className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                      <ChevronRight className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                       <p className="text-gray-700">{item}</p>
                     </li>
                   ))}
@@ -154,9 +154,9 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
           </div>
           
           {/* Trainer Bio */}
-          <div className="mb-8 p-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+          <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg">
             <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Award className="h-5 w-5 text-purple-500" />
+              <Award className="h-5 w-5 text-blue-500" />
               About the Trainer
             </h3>
             <div className="flex gap-4 items-center mb-4">
@@ -183,7 +183,7 @@ export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalPr
           {/* CTA */}
           <div className={`p-6 rounded-lg ${
             workshop.isFDP 
-              ? 'bg-gradient-to-r from-indigo-50 to-purple-50' 
+              ? 'bg-gradient-to-r from-indigo-50 to-blue-50' 
               : 'bg-gradient-to-r from-blue-50 to-green-50'
           }`}>
             <h3 className="text-xl font-bold text-gray-800 mb-2">Ready to Enhance Your Skills?</h3>

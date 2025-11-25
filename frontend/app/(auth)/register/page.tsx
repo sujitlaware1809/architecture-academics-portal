@@ -220,48 +220,48 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20"></div>
+        <div className="absolute top-20 right-20 w-64 h-64 bg-blue-100/30 rounded-full filter blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-64 h-64 bg-indigo-100/30 rounded-full filter blur-3xl"></div>
       </div>
 
       {/* Content */}
       <div className="relative z-10 flex flex-col lg:flex-row min-h-screen">
         {/* Left Side - Branding */}
-        <div className="lg:w-1/2 flex flex-col justify-center items-center p-4 lg:p-6 text-white">
+        <div className="lg:w-1/2 flex flex-col justify-center items-center p-4 lg:p-6 text-gray-800">
           
           <div className="max-w-md space-y-4 mt-12 lg:mt-0">
             <div className="space-y-3">
-              <div className="inline-flex items-center space-x-2 bg-purple-500/20 px-3 py-1.5 rounded-full border border-purple-400/30">
-                <Sparkles className="h-4 w-4 text-purple-300" />
-                <span className="text-sm font-medium text-purple-200">Join Our Community!</span>
+              <div className="inline-flex items-center space-x-2 bg-blue-100 px-3 py-1.5 rounded-full border border-blue-200">
+                <Sparkles className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-700">Join Our Community!</span>
               </div>
-              <h2 className="text-3xl lg:text-4xl font-bold leading-tight">
+              <h2 className="text-3xl lg:text-4xl font-bold leading-tight text-gray-900">
                 Start Your
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
                   Architecture Journey
                 </span>
               </h2>
-              <p className="text-base text-gray-300">
+              <p className="text-base text-gray-600">
                 Join thousands of architecture professionals and students. Access NATA courses, job opportunities, and build your career.
               </p>
             </div>
 
             <div className="space-y-3 pt-2">
               <div className="flex items-center space-x-3">
-                <GraduationCap className="h-5 w-5 text-purple-300" />
-                <span className="text-sm text-gray-300">NATA Preparation Courses</span>
+                <GraduationCap className="h-5 w-5 text-blue-600" />
+                <span className="text-sm text-gray-700">NATA Preparation Courses</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Briefcase className="h-5 w-5 text-indigo-300" />
-                <span className="text-sm text-gray-300">Exclusive Job Opportunities</span>
+                <Briefcase className="h-5 w-5 text-indigo-600" />
+                <span className="text-sm text-gray-700">Exclusive Job Opportunities</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Users className="h-5 w-5 text-pink-300" />
-                <span className="text-sm text-gray-300">Professional Network</span>
+                <Users className="h-5 w-5 text-pink-600" />
+                <span className="text-sm text-gray-700">Professional Network</span>
               </div>
             </div>
           </div>
@@ -270,24 +270,24 @@ export default function RegisterPage() {
         {/* Right Side - Registration Form */}
         <div className="lg:w-1/2 flex items-center justify-center p-4 lg:p-6">
           <div className="w-full max-w-md">
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-6 max-h-[90vh] overflow-y-auto">
-              <div className="text-center mb-4">
-                <h3 className="text-xl font-bold text-white mb-1">Create Account</h3>
-                <p className="text-sm text-gray-300">Join the architecture community</p>
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 max-h-[90vh] overflow-y-auto">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h3>
+                <p className="text-gray-600">Join the architecture community</p>
               </div>
 
               {apiError && (
-                <div className="mb-4 p-3 bg-red-500/20 border border-red-400/30 rounded-lg">
-                  <p className="text-sm text-red-200">{apiError}</p>
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600">{apiError}</p>
                 </div>
               )}
 
               {successMessage && (
-                <div className="mb-4 p-4 bg-green-500/20 border border-green-400/30 rounded-lg flex items-center space-x-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-300" />
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
                   <div>
-                    <p className="text-sm font-semibold text-green-200">{successMessage}</p>
-                    <p className="text-xs text-green-300 mt-1">Redirecting to login page...</p>
+                    <p className="text-sm font-semibold text-green-700">{successMessage}</p>
+                    <p className="text-xs text-green-600 mt-1">Redirecting to login page...</p>
                   </div>
                 </div>
               )}
@@ -295,35 +295,35 @@ export default function RegisterPage() {
               <form onSubmit={handleRegister} className="space-y-4">
                 {/* Name Fields */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-200">First Name</label>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">First Name</label>
                     <Input
                       name="firstName"
                       placeholder="John"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className="h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+                      className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
                       required
                     />
-                    {errors.firstName && <p className="text-xs text-red-300">{errors.firstName}</p>}
+                    {errors.firstName && <p className="text-xs text-red-600">{errors.firstName}</p>}
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-200">Last Name</label>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Last Name</label>
                     <Input
                       name="lastName"
                       placeholder="Doe"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      className="h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+                      className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
                       required
                     />
-                    {errors.lastName && <p className="text-xs text-red-300">{errors.lastName}</p>}
+                    {errors.lastName && <p className="text-xs text-red-600">{errors.lastName}</p>}
                   </div>
                 </div>
 
                 {/* Email */}
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-200">Email Address</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
@@ -332,32 +332,32 @@ export default function RegisterPage() {
                       placeholder="john.doe@example.com"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="pl-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+                      className="pl-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
                       required
                     />
                   </div>
-                  {errors.email && <p className="text-xs text-red-300">{errors.email}</p>}
+                  {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
                 </div>
 
                 {/* User Type Selection */}
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-gray-200">I am a</label>
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-gray-700">I am a</label>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => handleSelectChange("student")}
                       className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
                         formData.userType === "student" 
-                          ? "border-indigo-500 bg-indigo-500/20 shadow-md" 
-                          : "border-white/20 bg-white/5 hover:border-white/30"
+                          ? "border-indigo-500 bg-indigo-50 shadow-md" 
+                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
                       }`}
                     >
                       <div className="flex flex-col items-center space-y-1">
                         <GraduationCap className={`h-4 w-4 ${
-                          formData.userType === "student" ? "text-indigo-300" : "text-gray-400"
+                          formData.userType === "student" ? "text-indigo-600" : "text-gray-500"
                         }`} />
                         <span className={`text-xs font-medium ${
-                          formData.userType === "student" ? "text-indigo-200" : "text-gray-300"
+                          formData.userType === "student" ? "text-indigo-700" : "text-gray-600"
                         }`}>Student</span>
                       </div>
                       {formData.userType === "student" && (
@@ -372,20 +372,20 @@ export default function RegisterPage() {
                       onClick={() => handleSelectChange("faculty")}
                       className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
                         formData.userType === "faculty" 
-                          ? "border-purple-500 bg-purple-500/20 shadow-md" 
-                          : "border-white/20 bg-white/5 hover:border-white/30"
+                          ? "border-blue-500 bg-blue-50 shadow-md" 
+                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
                       }`}
                     >
                       <div className="flex flex-col items-center space-y-1">
                         <Users className={`h-4 w-4 ${
-                          formData.userType === "faculty" ? "text-purple-300" : "text-gray-400"
+                          formData.userType === "faculty" ? "text-blue-600" : "text-gray-500"
                         }`} />
                         <span className={`text-xs font-medium ${
-                          formData.userType === "faculty" ? "text-purple-200" : "text-gray-300"
+                          formData.userType === "faculty" ? "text-blue-700" : "text-gray-600"
                         }`}>Faculty</span>
                       </div>
                       {formData.userType === "faculty" && (
-                        <div className="absolute -top-1 -right-1 bg-purple-500 text-white rounded-full p-0.5">
+                        <div className="absolute -top-1 -right-1 bg-blue-500 text-white rounded-full p-0.5">
                           <CheckCircle2 className="h-2.5 w-2.5" />
                         </div>
                       )}
@@ -396,16 +396,16 @@ export default function RegisterPage() {
                       onClick={() => handleSelectChange("architect")}
                       className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
                         formData.userType === "architect" 
-                          ? "border-green-500 bg-green-500/20 shadow-md" 
-                          : "border-white/20 bg-white/5 hover:border-white/30"
+                          ? "border-green-500 bg-green-50 shadow-md" 
+                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
                       }`}
                     >
                       <div className="flex flex-col items-center space-y-1">
                         <Briefcase className={`h-4 w-4 ${
-                          formData.userType === "architect" ? "text-green-300" : "text-gray-400"
+                          formData.userType === "architect" ? "text-green-600" : "text-gray-500"
                         }`} />
                         <span className={`text-xs font-medium ${
-                          formData.userType === "architect" ? "text-green-200" : "text-gray-300"
+                          formData.userType === "architect" ? "text-green-700" : "text-gray-600"
                         }`}>Architect</span>
                       </div>
                       {formData.userType === "architect" && (
@@ -415,7 +415,7 @@ export default function RegisterPage() {
                       )}
                     </button>
                   </div>
-                  {errors.userType && <p className="text-xs text-red-300">{errors.userType}</p>}
+                  {errors.userType && <p className="text-xs text-red-600">{errors.userType}</p>}
                 </div>
 
                 {/* Conditional Fields */}
@@ -439,7 +439,7 @@ export default function RegisterPage() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-400"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-400"
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -462,7 +462,7 @@ export default function RegisterPage() {
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-400"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-400"
                       >
                         {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -475,35 +475,35 @@ export default function RegisterPage() {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-11 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50"
+                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 disabled:opacity-50"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-700 mr-2"></div>
                       Creating Account...
                     </div>
                   ) : (
                     <div className="flex items-center justify-center">
                       <span>Create Account</span>
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <ArrowRight className="ml-2 h-5 w-5" />
                     </div>
                   )}
                 </Button>
 
                 {/* Terms */}
-                <p className="text-xs text-gray-400 text-center">
+                <p className="text-xs text-gray-500 text-center">
                   By creating an account, you agree to our{" "}
-                  <a href="#" className="text-purple-400 hover:text-purple-300">Terms of Service</a>
+                  <a href="#" className="text-blue-600 hover:text-blue-700">Terms of Service</a>
                   {" "}and{" "}
-                  <a href="#" className="text-purple-400 hover:text-purple-300">Privacy Policy</a>
+                  <a href="#" className="text-blue-600 hover:text-blue-700">Privacy Policy</a>
                 </p>
               </form>
 
               {/* Login Link */}
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-gray-600">
                   Already have an account?{" "}
-                  <Link href="/login" className="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
+                  <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                     Sign in here →
                   </Link>
                 </p>

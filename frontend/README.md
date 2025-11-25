@@ -270,27 +270,27 @@ npx shadcn@latest add <component-name>
 <Card className="p-6 hover:shadow-lg transition-shadow">
 
 // Button (Primary)
-<Button className="bg-purple-600 hover:bg-purple-700">
+<Button className="bg-blue-600 hover:bg-blue-700">
 
 // Badge
-<Badge variant="secondary" className="bg-purple-100 text-purple-800">
+<Badge variant="secondary" className="bg-blue-100 text-blue-800">
 
 // Input
-<Input className="border-gray-300 focus:ring-purple-500">
+<Input className="border-gray-300 focus:ring-blue-500">
 
 // Gradient Background
-<div className="bg-gradient-to-r from-purple-600 to-indigo-600">
+<div className="bg-gradient-to-r from-blue-600 to-indigo-600">
 ```
 
 ### Design System
 
 **Colors:**
-- Primary: `purple-600` / `#9333EA`
+- Primary: `blue-600` / `#2563EB`
 - Secondary: `indigo-600` / `#4F46E5`
 - Success: `green-600` / `#16A34A`
 - Error: `red-600` / `#DC2626`
 - Warning: `yellow-600` / `#CA8A04`
-- Info: `blue-600` / `#2563EB`
+- Info: `cyan-600` / `#0891B2`
 
 **Typography:**
 - Headings: `font-bold text-3xl`, `text-2xl`, `text-xl`
@@ -371,7 +371,7 @@ import { Loader2 } from 'lucide-react';
 
 {loading && (
   <div className="flex justify-center py-12">
-    <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
   </div>
 )}
 ```

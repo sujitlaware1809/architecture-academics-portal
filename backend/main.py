@@ -22,7 +22,8 @@ from routes import (
     workshop_routes,
     admin_routes,
     registration_routes,
-    test_routes
+    test_routes,
+    user_routes
 )
 
 # Import middleware
@@ -80,6 +81,7 @@ app.include_router(workshop_routes.router)
 app.include_router(admin_routes.router)
 app.include_router(registration_routes.router)
 app.include_router(test_routes.router)
+app.include_router(user_routes.router)
 
 # Root endpoint
 @app.get("/")

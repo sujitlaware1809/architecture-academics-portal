@@ -193,18 +193,18 @@ export default function ExpertTalkPage() {
   const completedCount = expertTalks.filter(talk => talk.status === "completed").length
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50/30 via-white to-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/30 via-white to-white">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
         {/* Hero Section */}
         <div className="mb-12 text-center">
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/50 rounded-full shadow-sm mb-6">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/50 rounded-full shadow-sm mb-6">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/50"></div>
-            <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Expert Talk Series</span>
+            <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Expert Talk Series</span>
           </div>
           
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
             Learn from the
-            <span className="block bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Best in Architecture
             </span>
           </h1>
@@ -220,12 +220,12 @@ export default function ExpertTalkPage() {
               <div className="text-2xl font-bold text-green-600">{liveCount}</div>
               <div className="text-sm text-gray-600">Live Now</div>
             </div>
-            <div className="bg-gradient-to-br from-purple-50 to-white p-4 rounded-2xl border border-purple-100">
-              <div className="text-2xl font-bold text-purple-600">{upcomingCount}</div>
+            <div className="bg-gradient-to-br from-blue-50 to-white p-4 rounded-2xl border border-blue-100">
+              <div className="text-2xl font-bold text-blue-600">{upcomingCount}</div>
               <div className="text-sm text-gray-600">Upcoming</div>
             </div>
-            <div className="bg-gradient-to-br from-blue-50 to-white p-4 rounded-2xl border border-blue-100">
-              <div className="text-2xl font-bold text-blue-600">{completedCount}</div>
+            <div className="bg-gradient-to-br from-cyan-50 to-white p-4 rounded-2xl border border-cyan-100">
+              <div className="text-2xl font-bold text-cyan-600">{completedCount}</div>
               <div className="text-sm text-gray-600">Recorded</div>
             </div>
           </div>
@@ -250,7 +250,7 @@ export default function ExpertTalkPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-3 pr-10 text-sm font-medium focus:outline-none focus:border-purple-300 focus:ring-2 focus:ring-purple-100 min-w-[180px]"
+                className="appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-3 pr-10 text-sm font-medium focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100 min-w-[180px]"
               >
                 {categories.map(category => (
                   <option key={category.id} value={category.id}>
@@ -266,7 +266,7 @@ export default function ExpertTalkPage() {
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-3 pr-10 text-sm font-medium focus:outline-none focus:border-purple-300 focus:ring-2 focus:ring-purple-100 min-w-[140px]"
+                className="appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-3 pr-10 text-sm font-medium focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100 min-w-[140px]"
               >
                 <option value="all">All Status</option>
                 <option value="live">Live Now</option>
@@ -281,12 +281,12 @@ export default function ExpertTalkPage() {
         {/* Expert Talks Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {filteredTalks.map((talk) => (
-            <Card key={talk.id} className="border-2 border-gray-100 hover:border-purple-300 hover:shadow-xl transition-all duration-300 group overflow-hidden">
+            <Card key={talk.id} className="border-2 border-gray-100 hover:border-blue-300 hover:shadow-xl transition-all duration-300 group overflow-hidden">
               {/* Header with Status */}
               <div className="relative">
-                <div className="h-48 bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100 relative overflow-hidden">
+                <div className="h-48 bg-gradient-to-br from-blue-100 via-cyan-50 to-indigo-100 relative overflow-hidden">
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Mic className="h-20 w-20 text-purple-300 group-hover:scale-110 transition-transform duration-300" />
+                    <Mic className="h-20 w-20 text-blue-300 group-hover:scale-110 transition-transform duration-300" />
                   </div>
                   
                   {/* Status Badge */}
@@ -322,7 +322,7 @@ export default function ExpertTalkPage() {
               </div>
 
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-2">
+                <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
                   {talk.title}
                 </CardTitle>
                 <CardDescription className="text-sm text-gray-600 line-clamp-3">
@@ -333,13 +333,13 @@ export default function ExpertTalkPage() {
               <CardContent className="space-y-4">
                 {/* Expert Info */}
                 <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
                     {talk.expert.avatar}
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900">{talk.expert.name}</h4>
                     <p className="text-sm text-gray-600">{talk.expert.credentials}</p>
-                    <p className="text-xs text-purple-600">{talk.expert.experience} • {talk.expert.specialization}</p>
+                    <p className="text-xs text-blue-600">{talk.expert.experience} • {talk.expert.specialization}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 text-yellow-500 fill-current" />
@@ -352,7 +352,7 @@ export default function ExpertTalkPage() {
                   <h5 className="text-sm font-semibold text-gray-700">Key Topics:</h5>
                   <div className="flex flex-wrap gap-2">
                     {talk.topics.map((topic, index) => (
-                      <Badge key={index} variant="outline" className="text-xs border-purple-200 text-purple-700">
+                      <Badge key={index} variant="outline" className="text-xs border-blue-200 text-blue-700">
                         {topic}
                       </Badge>
                     ))}
@@ -423,18 +423,18 @@ export default function ExpertTalkPage() {
 
         {/* Call to Action */}
         <div className="mt-16">
-          <Card className="border-0 bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 text-white shadow-2xl overflow-hidden relative">
+          <Card className="border-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 text-white shadow-2xl overflow-hidden relative">
             <CardContent className="relative py-12 px-6 md:py-16 md:px-12">
               <div className="max-w-3xl mx-auto text-center">
-                <Mic className="h-16 w-16 mx-auto mb-6 text-purple-200" />
+                <Mic className="h-16 w-16 mx-auto mb-6 text-blue-200" />
                 <h3 className="text-3xl md:text-4xl font-bold mb-4">
                   Want to Be an Expert Speaker?
                 </h3>
-                <p className="text-lg text-purple-100 mb-8 max-w-2xl mx-auto">
+                <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
                   Share your expertise with our community. Apply to become a featured speaker and inspire the next generation of architects.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 text-lg rounded-xl">
+                  <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg rounded-xl">
                     Apply as Speaker
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>

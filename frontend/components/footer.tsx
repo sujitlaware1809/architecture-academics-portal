@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Building, MessageSquare, Users, Mail, Phone, MapPin } from "lucide-react"
+import { Building, MessageSquare, Users, Mail, Phone, MapPin, Facebook, Linkedin, Twitter, Instagram } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { api } from "@/lib/api"
 
@@ -30,27 +30,35 @@ export default function Footer() {
                 className="rounded-xl object-contain"
               />
               <div className="flex flex-col leading-none">
-                <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   AAO
                 </h3>
-                <span className="text-[10px] text-gray-600 font-medium -mt-1">
-                  Architecture Academics.online
+                <span className="text-[10px] text-black font-medium -mt-1">
+                  architecture-academics.online
                 </span>
               </div>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-black mb-4">
               India's premier online platform for architecture education, NATA preparation, career growth, and professional networking.
             </p>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" className="rounded-lg">
-                <MessageSquare className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="outline" className="rounded-lg">
-                <Users className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="outline" className="rounded-lg">
-                <Building className="h-4 w-4" />
-              </Button>
+            <div className="mt-4 space-y-1 text-sm text-black">
+              <p className="font-medium">Architecture Academics</p>
+              <p>IIT Madras, Chennai 600026</p>
+              <p>Toll Free: +91 (123) 456-7890</p>
+            </div>
+            <div className="flex gap-4 mt-6">
+              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">
+                <Linkedin className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">
+                <Instagram className="h-5 w-5" />
+              </a>
             </div>
           </div>
 
@@ -58,22 +66,22 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-gray-900 mb-4">Platform</h4>
             <div className="space-y-2">
-              <Link href="/courses" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/courses" className="block text-sm text-black hover:text-blue-600 transition-colors">
                 Courses
               </Link>
-              <Link href="/blogs" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/blogs" className="block text-sm text-black hover:text-blue-600 transition-colors">
                 Blogs
               </Link>
-              <Link href="/discussions" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/discussions" className="block text-sm text-black hover:text-blue-600 transition-colors">
                 Discussions
               </Link>
-              <Link href="/events" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/events" className="block text-sm text-black hover:text-blue-600 transition-colors">
                 Events
               </Link>
-              <Link href="/workshops" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/workshops" className="block text-sm text-black hover:text-blue-600 transition-colors">
                 Workshops
               </Link>
-              <Link href="/jobs-portal" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/jobs-portal" className="block text-sm text-black hover:text-blue-600 transition-colors">
                 Jobs Portal
               </Link>
             </div>
@@ -83,22 +91,22 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-gray-900 mb-4">Resources</h4>
             <div className="space-y-2">
-              <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 NATA Courses
               </a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Architecture Tours
               </a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 CoA Portal
               </a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 IIA Portal
               </a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Competitions
               </a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Publications
               </a>
             </div>
@@ -108,42 +116,24 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-gray-900 mb-4">Company</h4>
             <div className="space-y-2">
-              <Link href="/contact-us" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/contact-us" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Contact Us
               </Link>
-              <Link href="/advertise-with-us" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/advertise-with-us" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Advertise With Us
               </Link>
-              <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 About Us
               </a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Terms & Conditions
               </a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Privacy Policy
               </a>
-              <a href="#" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Feedback
               </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Contact Info */}
-        <div className="py-6 border-y border-gray-300">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-purple-600" />
-              <span>support@architectureacademics.com</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-purple-600" />
-              <span>+91 (123) 456-7890</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-purple-600" />
-              <span>India</span>
             </div>
           </div>
         </div>
@@ -151,20 +141,20 @@ export default function Footer() {
         {/* Footer Bottom */}
         <div className="pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-600 text-center md:text-left">
+            <p className="text-sm text-black text-center md:text-left">
               © 2025 Architecture Academics. All rights reserved. Empowering the next generation of architects.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <a href="#" className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="text-sm text-black hover:text-purple-600 transition-colors">
                 Privacy
               </a>
-              <a href="#" className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="text-sm text-black hover:text-purple-600 transition-colors">
                 Terms
               </a>
-              <a href="#" className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="text-sm text-black hover:text-purple-600 transition-colors">
                 Cookies
               </a>
-              <a href="#" className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a href="#" className="text-sm text-black hover:text-purple-600 transition-colors">
                 Accessibility
               </a>
             </div>

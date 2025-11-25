@@ -111,9 +111,9 @@ export default function RecruiterDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-sky-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -121,13 +121,13 @@ export default function RecruiterDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-sky-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-sky-600 bg-clip-text text-transparent">
+              <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
                 Architecture Academics
               </Link>
               <span className="text-sm text-gray-500">Recruiter Dashboard</span>
@@ -142,7 +142,7 @@ export default function RecruiterDashboard() {
               </Link>
               
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-sky-600 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-sky-600 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">
                     {user?.first_name?.[0]}{user?.last_name?.[0]}
                   </span>
@@ -179,8 +179,8 @@ export default function RecruiterDashboard() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Briefcase className="h-6 w-6 text-purple-600" />
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Briefcase className="h-6 w-6 text-blue-600" />
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Posted Jobs</p>
@@ -207,7 +207,7 @@ export default function RecruiterDashboard() {
             <CardFooter className="border-t p-4">
               <Link 
                 href="/recruiter-dashboard/applications"
-                className="text-purple-600 text-sm hover:text-purple-800 font-medium flex items-center space-x-1"
+                className="text-blue-600 text-sm hover:text-blue-800 font-medium flex items-center space-x-1"
               >
                 <span>Manage Applications</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,14 +240,14 @@ export default function RecruiterDashboard() {
           <div className="flex items-center space-x-3">
             <Link 
               href="/recruiter-dashboard/applications"
-              className="border border-purple-600 text-purple-600 px-6 py-2 rounded-lg font-medium hover:bg-purple-50 transition-all duration-200 flex items-center space-x-2"
+              className="border border-blue-600 text-blue-600 px-6 py-2 rounded-lg font-medium hover:bg-blue-50 transition-all duration-200 flex items-center space-x-2"
             >
               <Users className="h-5 w-5" />
               <span>View Applications</span>
             </Link>
             <Link 
               href="/jobs-portal/post-job"
-              className="bg-gradient-to-r from-purple-600 to-sky-600 text-white px-6 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-sky-700 transition-all duration-200 flex items-center space-x-2"
+              className="bg-gradient-to-r from-blue-600 to-sky-600 text-white px-6 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-sky-700 transition-all duration-200 flex items-center space-x-2"
             >
               <Plus className="h-5 w-5" />
               <span>Post New Job</span>
@@ -265,7 +265,7 @@ export default function RecruiterDashboard() {
                 <p className="text-gray-600 mb-6">Start by posting your first job to attract talented candidates.</p>
                 <Link 
                   href="/jobs-portal/post-job"
-                  className="bg-gradient-to-r from-purple-600 to-sky-600 text-white px-6 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-sky-700 transition-all duration-200 inline-flex items-center space-x-2"
+                  className="bg-gradient-to-r from-blue-600 to-sky-600 text-white px-6 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-sky-700 transition-all duration-200 inline-flex items-center space-x-2"
                 >
                   <Plus className="h-5 w-5" />
                   <span>Post Your First Job</span>
@@ -322,7 +322,7 @@ export default function RecruiterDashboard() {
                           .filter((tag: string) => tag.trim() !== '')
                           .slice(0, 3)
                           .map((tag: string, index: number) => (
-                            <span key={index} className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                            <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
                               {tag.trim()}
                             </span>
                           ))
@@ -354,7 +354,7 @@ export default function RecruiterDashboard() {
                   <div className="flex space-x-2">
                     <Link 
                       href="/recruiter-dashboard/applications"
-                      className="flex items-center space-x-1 px-3 py-1 text-purple-600 hover:bg-purple-50 rounded-md text-sm font-medium transition-colors duration-200"
+                      className="flex items-center space-x-1 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-md text-sm font-medium transition-colors duration-200"
                     >
                       <Eye className="h-4 w-4" />
                       <span>View Applications</span>

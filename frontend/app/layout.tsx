@@ -27,28 +27,28 @@ const syne = Syne({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://architectureacademics.online'),
-  title: "AAO - ArchitectureAcademics.online | NATA Courses & Architecture Education",
-  description: "ArchitectureAcademics.online (AAO) - Premier platform for NATA preparation, architecture courses, job portal, and educational resources",
+  metadataBase: new URL('https://architecture-academics.online'),
+  title: "AAO - Architecture-Academics.online | NATA Courses & Architecture Education",
+  description: "Architecture-Academics.online (AAO) - Premier platform for NATA preparation, architecture courses, job portal, and educational resources",
   generator: "v0.app",
-  keywords: "AAO, ArchitectureAcademics.online, NATA courses, architecture education, architecture jobs, NATA preparation",
-  authors: [{ name: "ArchitectureAcademics.online" }],
-  creator: "AAO - ArchitectureAcademics.online",
-  publisher: "ArchitectureAcademics.online",
+  keywords: "AAO, Architecture-Academics.online, NATA courses, architecture education, architecture jobs, NATA preparation",
+  authors: [{ name: "Architecture-Academics.online" }],
+  creator: "AAO - Architecture-Academics.online",
+  publisher: "Architecture-Academics.online",
   icons: {
     icon: "/logo.jpg",
     apple: "/logo.jpg",
     shortcut: "/logo.jpg",
   },
   openGraph: {
-    title: "AAO - ArchitectureAcademics.online",
+    title: "AAO - Architecture-Academics.online",
     description: "Premier platform for NATA preparation, architecture courses, job portal, and educational resources",
     images: ["/logo.jpg"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AAO - ArchitectureAcademics.online",
+    title: "AAO - Architecture-Academics.online",
     description: "Premier platform for NATA preparation, architecture courses, job portal, and educational resources",
     images: ["/logo.jpg"],
   },

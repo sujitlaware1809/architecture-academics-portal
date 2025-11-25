@@ -143,7 +143,7 @@ export default function BlogsDiscussions() {
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
       "Architecture News": "bg-blue-100 text-blue-700 border-blue-200",
-      "Design Trends": "bg-purple-100 text-purple-700 border-purple-200",
+      "Design Trends": "bg-indigo-100 text-indigo-700 border-indigo-200",
       "Sustainable Design": "bg-green-100 text-green-700 border-green-200",
       "Technology": "bg-cyan-100 text-cyan-700 border-cyan-200",
       "Career Advice": "bg-orange-100 text-orange-700 border-orange-200",
@@ -156,9 +156,9 @@ export default function BlogsDiscussions() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50/30 via-white to-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/30 via-white to-white">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white">
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-6">
@@ -169,13 +169,13 @@ export default function BlogsDiscussions() {
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Architecture Community Hub
             </h1>
-            <p className="text-lg text-purple-100 max-w-2xl mx-auto mb-8">
+            <p className="text-lg text-blue-100 max-w-2xl mx-auto mb-8">
               Explore insights, share ideas, and engage in meaningful discussions with architecture professionals worldwide
             </p>
 
             {isAuthenticated && (
               <Link href="/blogs-discussions/create">
-                <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 shadow-lg">
+                <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg">
                   <Plus className="mr-2 h-5 w-5" />
                   Write a Blog Post
                 </Button>
@@ -203,7 +203,7 @@ export default function BlogsDiscussions() {
                 </div>
                 
                 <select
-                  className="px-4 py-2 border-2 border-gray-200 rounded-lg bg-white focus:border-purple-300 focus:ring-2 focus:ring-purple-100 outline-none"
+                  className="px-4 py-2 border-2 border-gray-200 rounded-lg bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                 >
@@ -216,7 +216,7 @@ export default function BlogsDiscussions() {
 
                 <Button 
                   onClick={handleSearch}
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                 >
                   <Filter className="mr-2 h-4 w-4" />
                   Apply Filters
@@ -230,15 +230,15 @@ export default function BlogsDiscussions() {
         {featuredBlogs.length > 0 && (
           <div className="mb-16">
             <div className="flex items-center gap-2 mb-6">
-              <Sparkles className="h-6 w-6 text-purple-600" />
+              <Sparkles className="h-6 w-6 text-blue-600" />
               <h2 className="text-3xl font-bold text-gray-900">Featured Posts</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {featuredBlogs.map((blog) => (
                 <Link key={blog.id} href={`/blogs-discussions/${blog.slug}`}>
-                  <Card className="h-full border-2 border-purple-200 hover:border-purple-400 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group overflow-hidden">
-                    <div className="relative h-48 bg-gradient-to-br from-purple-400 to-indigo-500 overflow-hidden">
+                  <Card className="h-full border-2 border-blue-200 hover:border-blue-400 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group overflow-hidden">
+                    <div className="relative h-48 bg-gradient-to-br from-blue-400 to-indigo-500 overflow-hidden">
                       {blog.featured_image ? (
                         <img 
                           src={blog.featured_image} 
@@ -262,7 +262,7 @@ export default function BlogsDiscussions() {
                       <Badge className={`w-fit mb-2 ${getCategoryColor(blog.category)}`}>
                         {blog.category}
                       </Badge>
-                      <CardTitle className="text-xl group-hover:text-purple-600 transition-colors line-clamp-2">
+                      <CardTitle className="text-xl group-hover:text-blue-600 transition-colors line-clamp-2">
                         {blog.title}
                       </CardTitle>
                       <CardDescription className="line-clamp-2">
@@ -327,7 +327,7 @@ export default function BlogsDiscussions() {
                 </p>
                 {isAuthenticated && (
                   <Link href="/blogs-discussions/create">
-                    <Button className="bg-gradient-to-r from-purple-600 to-indigo-600">
+                    <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
                       <Plus className="mr-2 h-4 w-4" />
                       Create First Post
                     </Button>
@@ -339,7 +339,7 @@ export default function BlogsDiscussions() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {blogs.map((blog) => (
                 <Link key={blog.id} href={`/blogs-discussions/${blog.slug}`}>
-                  <Card className="h-full border-2 border-gray-100 hover:border-purple-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group overflow-hidden">
+                  <Card className="h-full border-2 border-gray-100 hover:border-blue-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group overflow-hidden">
                     <div className="relative h-48 bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden">
                       {blog.featured_image ? (
                         <img 
@@ -358,7 +358,7 @@ export default function BlogsDiscussions() {
                       <Badge className={`w-fit mb-2 ${getCategoryColor(blog.category)}`}>
                         {blog.category}
                       </Badge>
-                      <CardTitle className="text-lg group-hover:text-purple-600 transition-colors line-clamp-2">
+                      <CardTitle className="text-lg group-hover:text-blue-600 transition-colors line-clamp-2">
                         {blog.title}
                       </CardTitle>
                       <CardDescription className="line-clamp-3">
@@ -394,7 +394,7 @@ export default function BlogsDiscussions() {
                     <CardFooter className="pt-0">
                       <Button 
                         variant="ghost" 
-                        className="w-full text-purple-600 hover:text-purple-700 hover:bg-purple-50 group-hover:gap-2 transition-all"
+                        className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 group-hover:gap-2 transition-all"
                       >
                         Read More
                         <ArrowRight className="h-4 w-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />

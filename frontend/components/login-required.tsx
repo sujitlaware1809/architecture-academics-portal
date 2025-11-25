@@ -152,7 +152,7 @@ export const LoginRequiredCard: React.FC<LoginRequiredCardProps> = ({
       <div className="absolute inset-0 flex items-center justify-center z-20">
         <Card className="max-w-sm mx-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
           <CardContent className="p-6 text-center">
-            <Lock className="h-10 w-10 text-purple-600 mx-auto mb-3" />
+            <Lock className="h-10 w-10 text-blue-600 mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
               {title}
             </h3>

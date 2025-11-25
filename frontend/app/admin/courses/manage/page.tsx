@@ -192,7 +192,7 @@ export default function ManageCoursesAdmin() {
                 ))}
               </select>
               {selectedCourse && (
-                <Badge className="bg-purple-600 text-white">ID: {selectedCourse.id}</Badge>
+                <Badge className="bg-blue-600 text-white">ID: {selectedCourse.id}</Badge>
               )}
             </div>
           )}

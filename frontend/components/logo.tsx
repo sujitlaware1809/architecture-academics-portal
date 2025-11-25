@@ -52,7 +52,7 @@ const Logo: React.FC<LogoProps> = ({
           <span className={`font-bold ${textSizeClasses[size]} leading-tight ${
             variant === 'white' 
               ? 'text-white' 
-              : 'bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent'
+              : 'bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'
           }`}>
             AAO
           </span>
@@ -62,7 +62,7 @@ const Logo: React.FC<LogoProps> = ({
                 ? 'text-white opacity-75' 
                 : 'text-gray-500 font-medium lowercase'
             }`}>
-              architectureacademics.online
+              architecture-academics.online
             </span>
           )}
         </div>

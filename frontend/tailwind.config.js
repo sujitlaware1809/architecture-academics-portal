@@ -91,6 +91,22 @@ module.exports = {
         '9xl': '96rem',
       },
       keyframes: {
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-100%)" },
+        },
+        marquee2: {
+          from: { transform: "translateX(100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        "marquee-reverse": {
+          from: { transform: "translateX(-100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        "marquee2-reverse": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(100%)" },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -115,6 +131,10 @@ module.exports = {
         },
       },
       animation: {
+        marquee: "marquee 40s linear infinite",
+        marquee2: "marquee2 40s linear infinite",
+        "marquee-reverse": "marquee-reverse 40s linear infinite",
+        "marquee2-reverse": "marquee2-reverse 40s linear infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out",

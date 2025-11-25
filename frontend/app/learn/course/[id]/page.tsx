@@ -243,7 +243,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
   // Check if user is not enrolled
   if (isEnrolled === false) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-sky-50">
         <div className="text-center max-w-md mx-auto p-8 bg-white rounded-2xl shadow-xl">
           <div className="mb-6">
             <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -255,7 +255,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
           <div className="space-y-3">
             <Link
               href={`/courses/${courseId}`}
-              className="inline-block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all duration-300 font-semibold"
+              className="inline-block w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all duration-300 font-semibold"
             >
               Enroll Now
             </Link>
@@ -502,7 +502,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
         {showChatbot ? (
           <div className="bg-white rounded-lg shadow-2xl w-96 h-[500px] flex flex-col">
             {/* Chatbot Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-t-lg flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Bot className="h-6 w-6" />
                 <div>
@@ -574,7 +574,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
         ) : (
           <button
             onClick={() => setShowChatbot(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-shadow"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-shadow"
           >
             <MessageSquare className="h-6 w-6" />
           </button>

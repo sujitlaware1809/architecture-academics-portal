@@ -24,7 +24,7 @@ import { api } from "@/lib/api"
 const applicationStatusOptions = [
   { value: "pending", label: "Pending", className: "bg-yellow-100 text-yellow-800" },
   { value: "under_review", label: "Under Review", className: "bg-blue-100 text-blue-800" },
-  { value: "interview_scheduled", label: "Interview Scheduled", className: "bg-purple-100 text-purple-800" },
+  { value: "interview_scheduled", label: "Interview Scheduled", className: "bg-blue-100 text-blue-800" },
   { value: "accepted", label: "Accepted", className: "bg-green-100 text-green-800" },
   { value: "rejected", label: "Rejected", className: "bg-red-100 text-red-800" }
 ]
@@ -197,9 +197,9 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-sky-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading applications...</p>
         </div>
       </div>
@@ -207,7 +207,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-sky-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b px-6 py-4">
         <div className="max-w-6xl mx-auto">
@@ -215,7 +215,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
             <div className="flex items-center">
               <Link 
                 href="/recruiter-dashboard"
-                className="flex items-center text-purple-600 hover:text-purple-800 transition-colors"
+                className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 <span>Back to Dashboard</span>
@@ -256,7 +256,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
                       <div 
                         key={application.id}
                         className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
-                          selectedApplication?.id === application.id ? 'bg-purple-50 border-l-4 border-purple-500' : ''
+                          selectedApplication?.id === application.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
                         }`}
                         onClick={() => setSelectedApplication(application)}
                       >
@@ -379,7 +379,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
                                   } 
                                   target="_blank" 
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
+                                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
                                 >
                                   <FileText className="h-4 w-4" />
                                   View Resume
@@ -433,7 +433,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
                           value={message}
                           onChange={(e) => setMessage(e.target.value)}
                           placeholder="Write a message to the applicant..."
-                          className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           rows={4}
                         />
                         
@@ -455,7 +455,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
                           <button
                             onClick={sendMessage}
                             disabled={!message.trim()}
-                            className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
                           >
                             <MessageCircle className="h-4 w-4" />
                             <span>Send Message</span>

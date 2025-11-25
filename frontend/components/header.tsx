@@ -24,7 +24,13 @@ import {
   Users,
   Mic,
   FileText,
-  GraduationCap
+  GraduationCap,
+  Phone,
+  MapPin,
+  Facebook,
+  Linkedin,
+  Twitter,
+  Instagram
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -32,7 +38,7 @@ import { Button } from "@/components/ui/button"
 export default function Header() {
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState<string[]>([])
+  const [searchResults, setSearchResults] = useState<typeof searchContent>([])
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
@@ -49,35 +55,18 @@ export default function Header() {
       }
     }
     
-    // Check auth on mount
     checkAuth()
     
-    // Listen for auth changes (login/logout)
     const handleAuthChange = () => {
       checkAuth()
     }
     
     window.addEventListener('auth-change', handleAuthChange)
     
-    // Cleanup
     return () => {
       window.removeEventListener('auth-change', handleAuthChange)
     }
   }, [])
-
-  const navigationItems = [
-    { name: "Home", href: "/", icon: Building },
-    { name: "Courses", href: "/courses", icon: BookOpen },
-    { name: "NATA", href: "/nata-courses", icon: GraduationCap },
-    { name: "Jobs", href: "/jobs-portal", icon: Briefcase },
-    { name: "Blogs", href: "/blogs", icon: FileText },
-    { name: "Advertise", href: "/advertise-with-us", icon: Megaphone },
-  ]
-  
-  const mobileOnlyItems = [
-    { name: "Events", href: "/events", icon: Calendar },
-    { name: "Workshops", href: "/workshops", icon: Wrench },
-  ]
 
   const userMenuItems = isAuthenticated ? [
     { name: "Profile", href: "/profile", icon: User },
@@ -88,313 +77,356 @@ export default function Header() {
     { name: "Register", href: "/register", icon: User },
   ]
 
-  const allContent = [
-    "Courses", "Jobs", "Events", "Workshops", "Contact Us", "Advertise with Us",
-    "Architecture Tours", "NATA Courses", "Networking", "Sustainable Design",
-    "BIM Software", "CAD Training", "Portfolio Development", "Internships",
+  const searchContent = [
+    { title: "Courses", href: "/courses", description: "Browse architecture courses" },
+    { title: "NATA Courses", href: "/nata-courses", description: "Prepare for NATA exams" },
+    { title: "Jobs Portal", href: "/jobs-portal", description: "Find architecture jobs" },
+    { title: "Blogs", href: "/blogs", description: "Read architecture blogs" },
+    { title: "Events", href: "/events", description: "Upcoming architecture events" },
+    { title: "Workshops", href: "/workshops", description: "Join architecture workshops" },
+    { title: "Contact Us", href: "/contact-us", description: "Get in touch with us" },
+    { title: "Advertise with Us", href: "/advertise-with-us", description: "Promote your services" },
+    { title: "Dashboard", href: "/dashboard", description: "Your personal dashboard" },
+    { title: "Profile", href: "/profile", description: "Manage your profile" },
+    { title: "Discussions", href: "/discussions", description: "Join community discussions" },
+    { title: "Video Demo", href: "/video-demo", description: "Watch course previews" },
+    { title: "Learn", href: "/learn", description: "Start learning" },
   ]
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
     if (query.trim()) {
-      const filtered = allContent.filter((item) => 
-        item.toLowerCase().includes(query.toLowerCase())
+      const filtered = searchContent.filter((item) => 
+        item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.description.toLowerCase().includes(query.toLowerCase())
       )
-      setSearchResults(filtered.slice(0, 5))
+      setSearchResults(filtered.slice(0, 6))
     } else {
       setSearchResults([])
     }
+  }
+
+  const handleSearchSelect = (item: typeof searchContent[0]) => {
+    setSearchQuery("")
+    setSearchResults([])
+    window.location.href = item.href
   }
 
   const handleLogout = () => {
     api.logout()
     setIsAuthenticated(false)
     setUser(null)
-    // Dispatch auth change event
     window.dispatchEvent(new Event('auth-change'))
     window.location.href = "/"
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg shadow-sm border-b border-gray-200 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16">
-          {/* Logo */}
-          <Logo 
-            size="md" 
-            variant="default" 
-            className="flex-shrink-0 group hover:scale-105 transition-transform"
-          />
-
-          {/* Quick Access for Very Small Screens */}
-          <div className="flex sm:hidden items-center space-x-1 flex-1 justify-center">
-            <Link
-              href="/nata-courses"
-              className="px-1.5 py-1 text-[10px] font-medium text-purple-600 bg-purple-50 rounded"
-            >
-              NATA
-            </Link>
-            <Link
-              href="/courses"
-              className="px-1.5 py-1 text-[10px] font-medium text-gray-600 hover:text-purple-600"
-            >
-              Courses
-            </Link>
-          </div>
-
-          {/* Mobile Navigation - Key Items Always Visible */}
-          <nav className="hidden sm:flex lg:hidden items-center space-x-1 flex-1 justify-center max-w-xs">
-            <Link
-              href="/nata-courses"
-              className={`px-2 py-1 text-xs font-medium transition-all duration-200 rounded-md ${
-                pathname === "/nata-courses"
-                  ? "text-white bg-gradient-to-r from-purple-600 to-indigo-600"
-                  : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-              }`}
-            >
-              NATA
-            </Link>
-            <Link
-              href="/courses"
-              className={`px-2 py-1 text-xs font-medium transition-all duration-200 rounded-md ${
-                pathname === "/courses"
-                  ? "text-white bg-gradient-to-r from-purple-600 to-indigo-600"
-                  : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-              }`}
-            >
-              Courses
-            </Link>
-            <Link
-              href="/jobs-portal"
-              className={`px-2 py-1 text-xs font-medium transition-all duration-200 rounded-md ${
-                pathname === "/jobs-portal"
-                  ? "text-white bg-gradient-to-r from-purple-600 to-indigo-600"
-                  : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-              }`}
-            >
-              Jobs
-            </Link>
-          </nav>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
-            {navigationItems.map((item) => {
-              const isActive = pathname === item.href
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`relative px-3 py-2 text-sm font-medium transition-all duration-200 rounded-lg flex items-center gap-2 ${
-                    isActive
-                      ? "text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-md"
-                      : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.name}</span>
-                </Link>
-              )
-            })}
-          </nav>
-
-          {/* Desktop Search & User Menu */}
-          <div className="hidden lg:flex items-center gap-3">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search..."
-                className="pl-9 w-48 h-9 text-sm bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:bg-white focus:border-purple-300 focus:ring-2 focus:ring-purple-100"
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
+    <div className="sticky top-0 z-50 flex flex-col transition-all duration-300">
+      {/* Main Navigation Header with Integrated Search */}
+      <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <Logo 
+                size="md" 
+                variant="white" 
+                className="hover:scale-105 transition-transform duration-200"
               />
-              {searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden">
-                  {searchResults.map((result, index) => (
-                    <div
-                      key={index}
-                      className="px-4 py-3 hover:bg-purple-50 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-b-0 transition-colors flex items-center justify-between group"
-                      onClick={() => {
-                        setSearchQuery(result)
-                        setSearchResults([])
-                      }}
-                    >
-                      <span>{result}</span>
-                      <ArrowRight className="h-4 w-4 text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* User Menu */}
-            <div className="flex items-center gap-2">
+            {/* Main Navigation with Search - Desktop */}
+            <div className="hidden lg:flex items-center space-x-6 flex-1 justify-center">
+              <nav className="flex items-center space-x-1">
+                <Link href="/" className="px-3 py-2 text-sm font-medium text-white hover:text-white/80 hover:bg-white/10 rounded-md transition-all duration-200">
+                  Home
+                </Link>
+              
               {isAuthenticated ? (
                 <>
-                  {userMenuItems.map((item) => {
-                    const Icon = item.icon
-                    return (
-                      <Link key={item.name} href={item.href}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-                        >
-                          <Icon className="h-4 w-4 mr-1" />
-                          {item.name}
-                        </Button>
-                      </Link>
-                    )
-                  })}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleLogout}
-                    className="text-gray-700 hover:text-red-600 hover:bg-red-50"
-                  >
-                    <LogOut className="h-4 w-4 mr-1" />
-                    Logout
-                  </Button>
+                  <Link href="/courses" className="px-3 py-2 text-sm font-medium text-white hover:text-white/80 hover:bg-white/10 rounded-md transition-all duration-200 flex items-center gap-1">
+                    <BookOpen className="h-4 w-4" />
+                    Courses
+                  </Link>
+                  <Link href="/nata-courses" className="px-3 py-2 text-sm font-medium text-white hover:text-yellow-200 hover:bg-yellow-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
+                    <GraduationCap className="h-4 w-4" />
+                    NATA
+                  </Link>
+                  <Link href="/jobs-portal" className="px-3 py-2 text-sm font-medium text-white hover:text-green-200 hover:bg-green-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
+                    <Briefcase className="h-4 w-4" />
+                    Jobs
+                  </Link>
+                  <Link href="/blogs" className="px-3 py-2 text-sm font-medium text-white hover:text-purple-200 hover:bg-purple-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
+                    <FileText className="h-4 w-4" />
+                    Blogs
+                  </Link>
                 </>
               ) : (
                 <>
+                  <div className="flex items-center gap-3 text-xs text-white border-l border-r border-white/20 px-4 mx-4">
+                    <span className="flex items-center gap-1 hover:text-white/80 transition-colors cursor-pointer">
+                      <Phone className="h-3 w-3" />
+                      +91 98765 43210
+                    </span>
+                    <span className="flex items-center gap-1 hover:text-white/80 transition-colors cursor-pointer">
+                      <Mail className="h-3 w-3" />
+                      info@architecture-academics.online
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <a href="#" className="p-1.5 text-white hover:text-white/80 hover:bg-white/10 rounded transition-all duration-200" title="Facebook">
+                      <Facebook className="h-4 w-4" />
+                    </a>
+                    <a href="#" className="p-1.5 text-white hover:text-white/80 hover:bg-white/10 rounded transition-all duration-200" title="LinkedIn">
+                      <Linkedin className="h-4 w-4" />
+                    </a>
+                    <a href="#" className="p-1.5 text-white hover:text-white/80 hover:bg-white/10 rounded transition-all duration-200" title="Twitter">
+                      <Twitter className="h-4 w-4" />
+                    </a>
+                    <a href="#" className="p-1.5 text-white hover:text-white/80 hover:bg-white/10 rounded transition-all duration-200" title="Instagram">
+                      <Instagram className="h-4 w-4" />
+                    </a>
+                  </div>
+                </>
+              )}
+              </nav>
+              
+              {/* Integrated Search Bar */}
+              <div className="relative ml-4">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-white/70 h-3.5 w-3.5" />
+                  <Input
+                    placeholder="Search courses, jobs, blogs..."
+                    className="pl-8 pr-3 w-56 h-7 text-xs bg-white/15 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/20 focus:border-white/50 focus:ring-0 focus:outline-none rounded-md"
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                  />
+                </div>
+                {searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 overflow-hidden">
+                    {searchResults.map((result, index) => (
+                      <div
+                        key={index}
+                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm text-gray-800 border-b border-gray-100 last:border-b-0 transition-colors duration-200 flex items-center justify-between group"
+                        onClick={() => handleSearchSelect(result)}
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900">{result.title}</span>
+                          <span className="text-xs text-gray-500">{result.description}</span>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Auth Buttons - Desktop */}
+            <div className="hidden lg:flex items-center gap-2">
+              {isAuthenticated ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="text-white hover:text-white/80 hover:bg-red-500/20 border border-white/20 backdrop-blur-sm text-sm"
+                >
+                  <LogOut className="h-4 w-4 mr-1" />
+                  Logout
+                </Button>
+              ) : (
+                <>
                   <Link href="/login">
-                    <Button variant="ghost" size="sm" className="text-gray-700 hover:text-purple-600 hover:bg-purple-50">
+                    <Button variant="ghost" size="sm" className="text-white hover:text-white/80 hover:bg-white/10 border border-white/20 backdrop-blur-sm text-sm">
                       Login
                     </Button>
                   </Link>
                   <Link href="/register">
-                    <Button size="sm" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+                    <Button size="sm" className="bg-white text-blue-600 hover:bg-gray-50 hover:text-blue-700 text-sm font-medium">
                       Sign Up
                     </Button>
                   </Link>
                 </>
               )}
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors duration-200"
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors flex-shrink-0"
-            aria-label="Toggle mobile menu"
-          >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
+          {/* Mobile Menu */}
+          {isMobileMenuOpen && (
+            <div className="lg:hidden absolute top-full left-0 right-0 bg-white border border-gray-200 shadow-xl mx-4 mt-1 rounded-lg max-h-[80vh] overflow-y-auto z-50">
+              <div className="px-3 py-3 space-y-1">
+                {/* Mobile Search */}
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search courses, jobs, blogs..."
+                      className="pl-10 pr-4 w-full h-10 text-sm bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:bg-white focus:border-blue-500 focus:ring-0 focus:outline-none rounded-lg"
+                      value={searchQuery}
+                      onChange={(e) => handleSearch(e.target.value)}
+                    />
+                  </div>
+                  {searchResults.length > 0 && (
+                    <div className="mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                      {searchResults.map((result, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm text-gray-800 border-b border-gray-100 last:border-b-0 transition-colors duration-200"
+                          onClick={() => {
+                            handleSearchSelect(result)
+                            setIsMobileMenuOpen(false)
+                          }}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium text-gray-900">{result.title}</span>
+                            <span className="text-xs text-gray-500">{result.description}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden bg-white rounded-xl mt-2 mb-3 border border-gray-200 shadow-lg max-h-[80vh] overflow-y-auto">
-            <div className="px-3 py-3 space-y-2">
-              {/* Mobile Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search courses, jobs..."
-                  className="pl-9 h-9 text-sm w-full bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500"
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                />
-              </div>
-
-              {/* Mobile Navigation Links */}
-              <div className="space-y-1 pt-1 border-t border-gray-200">
-                {navigationItems.map((item) => {
-                  const isActive = pathname === item.href
-                  const Icon = item.icon
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                        isActive
-                          ? "text-white bg-gradient-to-r from-purple-600 to-indigo-600"
-                          : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-                      }`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {item.name}
-                    </Link>
-                  )
-                })}
-                
-                {/* Mobile-Only Links (Events, Workshops) */}
-                <div className="pt-2 border-t border-gray-100">
-                  <div className="text-xs font-semibold text-gray-500 px-3 pb-1">More</div>
-                  {mobileOnlyItems.map((item) => {
-                    const Icon = item.icon
-                    return (
+                {/* Mobile Navigation Links */}
+                <div className="space-y-1">
+                  <Link
+                    href="/"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Building className="h-4 w-4" />
+                    Home
+                  </Link>
+                  
+                  {isAuthenticated ? (
+                    <>
                       <Link
-                        key={item.name}
-                        href={item.href}
-                        className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200"
+                        href="/courses"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <Icon className="h-4 w-4" />
-                        {item.name}
+                        <BookOpen className="h-4 w-4" />
+                        Courses
                       </Link>
-                    )
-                  })}
-                </div>
-              </div>
+                      <Link
+                        href="/nata-courses"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-orange-600 hover:bg-orange-50 transition-colors duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <GraduationCap className="h-4 w-4" />
+                        NATA
+                      </Link>
+                      <Link
+                        href="/jobs-portal"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-green-600 hover:bg-green-50 transition-colors duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Briefcase className="h-4 w-4" />
+                        Jobs
+                      </Link>
+                      <Link
+                        href="/blogs"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-colors duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <FileText className="h-4 w-4" />
+                        Blogs
+                      </Link>
 
-              {/* Mobile User Menu */}
-              <div className="space-y-1 pt-1 border-t border-gray-200">
-                {isAuthenticated ? (
-                  <>
-                    <div className="text-xs font-semibold text-gray-500 px-3 pb-1">Account</div>
-                    {userMenuItems.map((item) => {
-                      const Icon = item.icon
-                      return (
+                      {/* Mobile User Menu for authenticated users */}
+                      <div className="pt-2 border-t border-gray-200 space-y-1">
+                        <div className="text-xs font-medium text-gray-500 px-3 pb-1">Account</div>
+                        {userMenuItems.map((item) => {
+                          const Icon = item.icon
+                          return (
+                            <Link
+                              key={item.name}
+                              href={item.href}
+                              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <Icon className="h-4 w-4" />
+                              {item.name}
+                            </Link>
+                          )
+                        })}
+                        <button
+                          onClick={() => {
+                            handleLogout()
+                            setIsMobileMenuOpen(false)
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-red-600 hover:bg-red-50 transition-colors duration-200 w-full text-left"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Logout
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Contact Information for non-authenticated users */}
+                      <div className="px-3 py-3 space-y-2 bg-gray-50 rounded-md border border-gray-200">
+                        <div className="text-xs font-medium text-gray-500 pb-1">Contact Info</div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Phone className="h-3 w-3 text-gray-500" />
+                          <span>+91 98765 43210</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Mail className="h-3 w-3 text-white-500" />
+                          <span>info@architecture-academics.online</span>
+                        </div>
+                        <div className="flex items-center gap-2 pt-1">
+                          <a href="#" className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors duration-200" title="Facebook">
+                            <Facebook className="h-4 w-4" />
+                          </a>
+                          <a href="#" className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors duration-200" title="LinkedIn">
+                            <Linkedin className="h-4 w-4" />
+                          </a>
+                          <a href="#" className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors duration-200" title="Twitter">
+                            <Twitter className="h-4 w-4" />
+                          </a>
+                          <a href="#" className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors duration-200" title="Instagram">
+                            <Instagram className="h-4 w-4" />
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Auth buttons for non-authenticated users */}
+                      <div className="pt-2 border-t border-gray-200 space-y-1">
+                        <div className="text-xs font-medium text-gray-500 px-3 pb-1">Account</div>
                         <Link
-                          key={item.name}
-                          href={item.href}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all"
+                          href="/login"
+                          className="flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
-                          <Icon className="h-4 w-4" />
-                          {item.name}
+                          Login
                         </Link>
-                      )
-                    })}
-                    <button
-                      onClick={() => {
-                        handleLogout()
-                        setIsMobileMenuOpen(false)
-                      }}
-                      className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all w-full text-left"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-xs font-semibold text-gray-500 px-3 pb-1">Account</div>
-                    <Link
-                      href="/login"
-                      className="flex items-center justify-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href="/register"
-                      className="flex items-center justify-center px-3 py-2.5 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Sign Up
-                    </Link>
-                  </>
-                )}
+                        <Link
+                          href="/register"
+                          className="flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Sign Up
+                        </Link>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    </header>
+          )}
+        </div>
+      </header>
+    </div>
   )
 }

@@ -1938,3 +1938,29 @@ def delete_nata_course(db: Session, course_id: int) -> bool:
         return True
     
     return False
+
+# User Dashboard CRUD operations
+def get_user_enrollments(db: Session, user_id: int):
+    """Get all course enrollments for a user"""
+    return db.query(CourseEnrollment).filter(
+        CourseEnrollment.student_id == user_id
+    ).options(joinedload(CourseEnrollment.course)).all()
+
+def get_user_event_registrations(db: Session, user_id: int):
+    """Get all event registrations for a user"""
+    return db.query(EventRegistration).filter(
+        EventRegistration.participant_id == user_id
+    ).options(joinedload(EventRegistration.event)).all()
+
+def get_user_workshop_registrations(db: Session, user_id: int):
+    """Get all workshop registrations for a user"""
+    return db.query(WorkshopRegistration).filter(
+        WorkshopRegistration.participant_id == user_id
+    ).options(joinedload(WorkshopRegistration.workshop)).all()
+
+def get_user_job_applications(db: Session, user_id: int):
+    """Get all job applications for a user"""
+    return db.query(JobApplication).filter(
+        JobApplication.applicant_id == user_id
+    ).options(joinedload(JobApplication.job)).all()
+

@@ -200,9 +200,9 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen pb-16">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen pb-16">
       {/* Course Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 pt-16 pb-8">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 pt-16 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center text-blue-100 mb-6">
             <Link href="/courses" className="flex items-center hover:text-white transition-colors gap-2 bg-white/10 px-4 py-2 rounded-full">
@@ -241,7 +241,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                   <Badge className="bg-blue-500 hover:bg-blue-600">New</Badge>
                 )}
                 {course.isTrending && (
-                  <Badge className="bg-purple-500 hover:bg-purple-600">Trending</Badge>
+                  <Badge className="bg-blue-500 hover:bg-blue-600">Trending</Badge>
                 )}
               </div>
 
@@ -275,7 +275,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
               </p>
 
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 flex items-center justify-center">
                   <span className="text-white font-bold text-sm">AI</span>
                 </div>
                 <div>
@@ -312,7 +312,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                 {course.isFree ? (
                   <span className="text-2xl font-bold text-green-600 mr-3">FREE COURSE</span>
                 ) : (
-                  <span className="text-2xl font-bold text-purple-600 mr-3">
+                  <span className="text-2xl font-bold text-blue-600 mr-3">
                     {course.freeLessons || 1} Free Lessons + Premium Access
                   </span>
                 )}
@@ -330,7 +330,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                 className={`px-8 py-3 rounded-md font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2 ${
                   isEnrolled 
                     ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white' 
-                    : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-105 text-white'
+                    : 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:scale-105 text-white'
                 } ${isEnrolling ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isEnrolling ? (
@@ -530,7 +530,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
             </div>
 
             {/* AI Course Info */}
-            <div className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg shadow-md p-6 mb-8 text-white">
+            <div className="bg-gradient-to-r from-indigo-500 to-blue-500 rounded-lg shadow-md p-6 mb-8 text-white">
               <h2 className="text-xl font-bold mb-4">AI-Powered Architecture Course</h2>
               <div className="flex items-start gap-4 mb-4">
                 <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
@@ -646,7 +646,7 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
                     className={`w-full py-3 rounded-md font-semibold shadow-md hover:shadow-lg transition-shadow ${
                       isEnrolled 
                         ? 'bg-green-600 hover:bg-green-700 text-white' 
-                        : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                        : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
                     } ${isEnrolling ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {isEnrolling ? 'Enrolling...' : isEnrolled ? '✓ Enrolled - Continue' : 'Enroll Now'}

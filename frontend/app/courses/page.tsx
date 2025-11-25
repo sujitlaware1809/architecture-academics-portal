@@ -257,9 +257,9 @@ export default function CoursesPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 pt-16 pb-20">
+      <section className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 pt-16 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-4 font-serif">
@@ -400,9 +400,9 @@ export default function CoursesPortal() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCourses.map((course) => (
               <article key={course.id} className="group cursor-pointer h-full">
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 h-full flex flex-col">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 h-full flex flex-col">
                   {/* Course Image */}
-                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-purple-100 via-indigo-100 to-pink-100">
+                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-100 via-indigo-100 to-cyan-100">
                     <Image
                       src={course.thumbnail}
                       alt={course.title}
@@ -420,7 +420,7 @@ export default function CoursesPortal() {
                         <Badge className="bg-blue-500 text-white hover:bg-blue-600">✨ New</Badge>
                       )}
                       {course.isTrending && (
-                        <Badge className="bg-purple-500 text-white hover:bg-purple-600">🔥 Trending</Badge>
+                        <Badge className="bg-blue-500 text-white hover:bg-blue-600">🔥 Trending</Badge>
                       )}
                     </div>
 
@@ -434,7 +434,7 @@ export default function CoursesPortal() {
                   {/* Content */}
                   <div className="p-6 flex-1 flex flex-col">
                     {/* Title */}
-                    <h3 className="text-lg font-bold text-gray-900 mb-3 leading-tight group-hover:text-purple-600 transition-colors line-clamp-2">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
                       {course.title}
                     </h3>
 
@@ -488,7 +488,7 @@ export default function CoursesPortal() {
                           </button>
                           <Link 
                             href={`/courses/${course.id}`}
-                            className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-colors text-center text-sm flex items-center justify-center gap-2"
+                            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors text-center text-sm flex items-center justify-center gap-2"
                           >
                             <PlayCircle className="h-4 w-4" />
                             Get Free Trial
@@ -505,7 +505,7 @@ export default function CoursesPortal() {
       </section>
 
       {/* Faculty/Instructor Section */}
-      <section className="bg-gradient-to-r from-blue-100 to-purple-100 py-16">
+      <section className="bg-gradient-to-r from-blue-100 to-indigo-100 py-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-6 font-serif">
             Are You an Architecture Instructor?
@@ -516,7 +516,7 @@ export default function CoursesPortal() {
           <LoginRequiredButton
             onClick={() => window.location.href = "/create-course"}
             action="create courses"
-            className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
+            className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
           >
             Create a Course
           </LoginRequiredButton>
@@ -565,7 +565,7 @@ export default function CoursesPortal() {
                 </div>
                 <div className="flex-grow"></div>
                 <div className="font-bold text-lg">
-                  <span className="text-purple-600">{selectedCourse.totalLessons} Total Lessons</span>
+                  <span className="text-blue-600">{selectedCourse.totalLessons} Total Lessons</span>
                 </div>
               </div>
 
@@ -593,7 +593,7 @@ export default function CoursesPortal() {
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-2">Course Type</h3>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
                     <span className="text-white font-bold text-lg">AI</span>
                   </div>
                   <div>
@@ -604,7 +604,7 @@ export default function CoursesPortal() {
               </div>
 
               <div className="flex flex-wrap gap-2 mt-8">
-                <button className="flex-grow bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-md font-bold hover:from-purple-700 hover:to-blue-700 transition-colors">
+                <button className="flex-grow bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-md font-bold hover:from-blue-700 hover:to-cyan-700 transition-colors">
                   Enroll in Course
                 </button>
                 <button className="bg-white border border-gray-300 px-4 py-3 rounded-md hover:bg-gray-50 transition-colors">

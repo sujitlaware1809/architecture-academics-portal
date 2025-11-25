@@ -222,7 +222,7 @@ export default function EventsManagement() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading events...</p>
         </div>
       </div>
@@ -234,12 +234,12 @@ export default function EventsManagement() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Events Management
           </h1>
           <p className="text-gray-500 mt-1">Manage your events and registrations</p>
         </div>
-        <Button onClick={handleCreate} className="mt-4 md:mt-0 bg-gradient-to-r from-purple-600 to-indigo-600">
+        <Button onClick={handleCreate} className="mt-4 md:mt-0 bg-gradient-to-r from-blue-600 to-indigo-600">
           <Plus className="h-4 w-4 mr-2" />
           Create Event
         </Button>
@@ -277,7 +277,7 @@ export default function EventsManagement() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Status</option>
                 <option value="upcoming">Upcoming</option>
@@ -299,7 +299,7 @@ export default function EventsManagement() {
                 <p className="text-sm text-gray-600">Total Events</p>
                 <p className="text-2xl font-bold text-gray-900">{events.length}</p>
               </div>
-              <Calendar className="h-8 w-8 text-purple-600" />
+              <Calendar className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -410,7 +410,7 @@ export default function EventsManagement() {
                       <select
                         value={event.status}
                         onChange={(e) => handleStatusChange(event.id, e.target.value)}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="upcoming">Upcoming</option>
                         <option value="ongoing">Ongoing</option>
@@ -570,7 +570,7 @@ export default function EventsManagement() {
                   id="is_online"
                   checked={formData.is_online}
                   onChange={(e) => setFormData({ ...formData, is_online: e.target.checked })}
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="is_online" className="text-sm font-medium text-gray-700">
                   This is an online event
@@ -625,7 +625,7 @@ export default function EventsManagement() {
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600"
                 >
                   {submitting ? "Saving..." : editingEvent ? "Update Event" : "Create Event"}
                 </Button>
@@ -666,12 +666,12 @@ export default function EventsManagement() {
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
               {loadingRegistrations ? (
                 <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 </div>
               ) : selectedEventRegistrations?.registrations?.length > 0 ? (
                 <div>
-                  <div className="mb-4 p-4 bg-purple-50 rounded-lg">
-                    <p className="text-sm text-purple-900">
+                  <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-blue-900">
                       <span className="font-semibold">Total Registrations:</span>{" "}
                       {selectedEventRegistrations.total_registrations}
                     </p>

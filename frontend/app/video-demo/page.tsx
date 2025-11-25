@@ -42,7 +42,7 @@ export default function VideoDemo() {
                   <Badge className="bg-green-500 hover:bg-green-600">
                     FREE PREVIEW
                   </Badge>
-                  <Badge className="bg-purple-500 hover:bg-purple-600">
+                  <Badge className="bg-blue-500 hover:bg-blue-600">
                     AI-Powered Course
                   </Badge>
                 </div>
@@ -79,8 +79,8 @@ export default function VideoDemo() {
               <h3 className="text-xl font-bold text-gray-900 mb-4">Video Player Features</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <Play className="h-4 w-4 text-purple-600" />
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Play className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900">Custom Controls</h4>
@@ -156,7 +156,7 @@ export default function VideoDemo() {
               <div className="space-y-3">
                 <Link
                   href="/courses"
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md font-medium transition-colors text-center block"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium transition-colors text-center block"
                 >
                   View All Courses
                 </Link>

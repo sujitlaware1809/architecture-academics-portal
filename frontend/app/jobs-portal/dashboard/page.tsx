@@ -38,7 +38,7 @@ const getStatusStyle = (status: string) => {
     case 'under_review':
       return 'bg-blue-100 text-blue-800';
     case 'interview_scheduled':
-      return 'bg-purple-100 text-purple-800';
+      return 'bg-indigo-100 text-indigo-800';
     case 'accepted':
       return 'bg-green-100 text-green-800';
     case 'rejected':
@@ -225,14 +225,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-purple-50 to-mint-50">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-mint-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/jobs-portal" className="flex items-center space-x-3">
-              <div className="bg-gradient-to-r from-sky-500 to-purple-600 p-2 rounded-xl">
+              <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-2 rounded-xl">
                 <Briefcase className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -243,10 +243,10 @@ export default function DashboardPage() {
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/jobs-portal" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
+              <Link href="/jobs-portal" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
                 Browse Jobs
               </Link>
-              <Link href="/jobs-portal/post-job" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
+              <Link href="/jobs-portal/post-job" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
                 Post Job
               </Link>
             </nav>
@@ -254,7 +254,7 @@ export default function DashboardPage() {
             {/* User Section */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-sky-500 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-sky-500 rounded-full flex items-center justify-center">
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <span className="text-sm font-medium text-gray-700">
@@ -287,14 +287,14 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100 text-sm">Applications</p>
+                  <p className="text-blue-100 text-sm">Applications</p>
                   <p className="text-2xl font-bold">{applications.length}</p>
                 </div>
-                <FileText className="h-8 w-8 text-purple-200" />
+                <FileText className="h-8 w-8 text-blue-200" />
               </div>
             </CardContent>
           </Card>
@@ -355,7 +355,7 @@ export default function DashboardPage() {
               onClick={() => setActiveTab("applications")}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === "applications"
-                  ? "border-purple-500 text-purple-600"
+                  ? "border-blue-600 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
@@ -365,7 +365,7 @@ export default function DashboardPage() {
               onClick={() => setActiveTab("saved")}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === "saved"
-                  ? "border-purple-500 text-purple-600"
+                  ? "border-blue-600 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
@@ -375,7 +375,7 @@ export default function DashboardPage() {
               onClick={() => setActiveTab("profile")}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === "profile"
-                  ? "border-purple-500 text-purple-600"
+                  ? "border-blue-600 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
@@ -409,7 +409,7 @@ export default function DashboardPage() {
                   <p className="text-gray-600 mb-6">Start applying to jobs to see them here</p>
                   <Link
                     href="/jobs-portal"
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-sky-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 transition-all duration-200"
+                    className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-sky-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-sky-700 transition-all duration-200"
                   >
                     <Search className="h-4 w-4" />
                     <span>Browse Jobs</span>
@@ -469,7 +469,7 @@ export default function DashboardPage() {
                             </div>
                           </div>
                           {(application.job?.salary_min || application.job?.salary_max) && (
-                            <p className="text-sm font-medium text-purple-600">
+                              <p className="text-sm font-medium text-blue-600">
                               {application.job.currency === 'INR' ? '₹' : '$'}
                               {application.job.salary_min && application.job.salary_min.toLocaleString()} 
                               {application.job.salary_min && application.job.salary_max && ' - '} 
@@ -490,7 +490,7 @@ export default function DashboardPage() {
                           )}
                           <Link 
                             href={`/jobs-portal/job/${application.job?.id}`} 
-                            className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
+                            className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
                           >
                             <Eye className="h-4 w-4" />
                           </Link>
@@ -516,7 +516,7 @@ export default function DashboardPage() {
               <h2 className="text-xl font-semibold text-gray-900">Saved Jobs</h2>
               <Link
                 href="/jobs-portal"
-                className="flex items-center space-x-2 px-4 py-2 text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 <span>Find More Jobs</span>
@@ -531,7 +531,7 @@ export default function DashboardPage() {
                   <p className="text-gray-600 mb-6">Save interesting jobs to apply later</p>
                   <Link
                     href="/jobs-portal"
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-sky-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 transition-all duration-200"
+                    className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-sky-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-sky-700 transition-all duration-200"
                   >
                     <Search className="h-4 w-4" />
                     <span>Browse Jobs</span>
@@ -563,7 +563,7 @@ export default function DashboardPage() {
                             </div>
                           </div>
                           {(job.job?.salary_min || job.job?.salary_max) && (
-                            <p className="text-sm font-medium text-purple-600">
+                            <p className="text-sm font-medium text-blue-600">
                               {job.job.currency === 'INR' ? '₹' : '$'}
                               {job.job.salary_min && job.job.salary_min.toLocaleString()} 
                               {job.job.salary_min && job.job.salary_max && ' - '} 
@@ -575,7 +575,7 @@ export default function DashboardPage() {
                         <div className="flex items-center space-x-2">
                           <Link
                             href={`/jobs-portal/job/${job.job?.id}`}
-                            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-sky-600 text-white text-sm font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 transition-all duration-200"
+                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-sky-700 transition-all duration-200"
                           >
                             Apply Now
                           </Link>
@@ -599,7 +599,7 @@ export default function DashboardPage() {
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Settings className="h-5 w-5 text-purple-600" />
+                <Settings className="h-5 w-5 text-blue-600" />
                 <span>Profile Settings</span>
               </CardTitle>
             </CardHeader>
@@ -607,7 +607,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-center">
                 <Link
                   href="/profile"
-                  className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-sky-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 transition-all duration-200"
+                  className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-sky-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-sky-700 transition-all duration-200"
                 >
                   <Edit className="h-4 w-4" />
                   <span>Edit Profile</span>

@@ -549,7 +549,7 @@ export default function CourseDetailPage() {
           <div className="p-4">
             <p className="text-sm text-gray-700">It looks like you don't have access to this course yet. To access full videos and materials you need to purchase the NATA course or schedule an appointment.</p>
             <div className="mt-4 flex gap-2">
-              <Button onClick={() => { setShowPurchasePrompt(false); router.push(`/nata-courses/${params.id}/buy`) }} className="bg-purple-600 text-white">Buy NATA course</Button>
+              <Button onClick={() => { setShowPurchasePrompt(false); router.push(`/nata-courses/${params.id}/buy`) }} className="bg-blue-600 text-white">Buy NATA course</Button>
               <Button variant="outline" onClick={() => { setShowPurchasePrompt(false); router.push('/contact-us') }}>Contact / Appointment</Button>
               <Button variant="ghost" onClick={() => setShowPurchasePrompt(false)}>Close</Button>
             </div>

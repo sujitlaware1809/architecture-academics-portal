@@ -121,9 +121,9 @@ export default function VerifyOTPPage() {
         // Trigger auth change event
         window.dispatchEvent(new Event('auth-change'));
         
-        // Redirect to profile or dashboard
+        // Redirect to dashboard after verification
         setTimeout(() => {
-          router.replace("/profile");
+          router.replace("/dashboard");
         }, 2000);
       }
 
@@ -176,7 +176,7 @@ export default function VerifyOTPPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-sky-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-2 text-center">
           <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">

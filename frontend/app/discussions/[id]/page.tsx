@@ -168,7 +168,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-600 border-r-transparent"></div>
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
         </div>
       </div>
     )
@@ -203,12 +203,12 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Question Card */}
-        <Card className="mb-6 shadow-lg border-l-4 border-purple-600">
+        <Card className="mb-6 shadow-lg border-l-4 border-blue-600">
           <CardHeader className="pb-4">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-3">
-                  <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
+                  <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
                     {discussion.category}
                   </Badge>
                   {discussion.is_solved && (
@@ -227,7 +227,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
             {/* Author Info */}
             <div className="flex items-center justify-between pb-4 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg">
                   {discussion.author.first_name[0]}{discussion.author.last_name[0]}
                 </div>
                 <div>
@@ -247,7 +247,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
                   size="sm"
                   onClick={handleLike}
                   disabled={!isAuthenticated}
-                  className={liked ? "text-purple-600" : ""}
+                  className={liked ? "text-blue-600" : ""}
                 >
                   <ThumbsUp className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
                   <span className="ml-1">{discussion.likes_count}</span>
@@ -301,7 +301,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
                   <Button
                     onClick={handleReplySubmit}
                     disabled={!newReply.trim() || submittingReply}
-                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                   >
                     {submittingReply ? "Posting..." : "Post Reply"}
                   </Button>
@@ -311,7 +311,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
               <div className="mb-8 p-6 bg-gray-50 rounded-lg text-center">
                 <p className="text-gray-600 mb-4">Sign in to reply to this discussion</p>
                 <Link href="/login">
-                  <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700">
+                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
                     Sign In
                   </Button>
                 </Link>
@@ -343,7 +343,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
                     )}
                     
                     <div className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
                         {reply.author.first_name[0]}{reply.author.last_name[0]}
                       </div>
                       <div className="flex-1">
@@ -375,7 +375,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
                           {reply.content}
                         </p>
                         <div className="flex items-center gap-4">
-                          <Button variant="ghost" size="sm" className="text-gray-500 hover:text-purple-600 gap-1">
+                          <Button variant="ghost" size="sm" className="text-gray-500 hover:text-blue-600 gap-1">
                             <ThumbsUp className="h-4 w-4" />
                             {reply.likes_count}
                           </Button>

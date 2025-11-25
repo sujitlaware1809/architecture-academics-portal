@@ -160,16 +160,16 @@ export default function NATACoursesPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading NATA courses...</p>
+          <p className="mt-4 text-black">Loading NATA courses...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-purple-600 pt-16 pb-20">
+      <section className="relative bg-gradient-to-r from-blue-600 to-indigo-600 pt-16 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-4 font-serif">
@@ -227,7 +227,7 @@ export default function NATACoursesPage() {
           <div className="flex flex-wrap gap-2 items-center">
             {/* Category Filter */}
             <div className="relative">
-              <button className={`flex items-center px-4 py-2 rounded-full text-sm ${selectedCategory === "" ? 'bg-gray-100 text-gray-700' : 'bg-blue-100 text-blue-800'} hover:bg-blue-100 hover:text-blue-800 transition-colors`}>
+              <button className={`flex items-center px-4 py-2 rounded-full text-sm ${selectedCategory === "" ? 'bg-gray-100 text-black' : 'bg-blue-100 text-blue-800'} hover:bg-blue-100 hover:text-blue-800 transition-colors`}>
                 <span className="mr-1">Category:</span>
                 <span className="font-medium">{selectedCategory || 'All'}</span>
                 <ChevronDown className="ml-1 h-4 w-4" />
@@ -241,7 +241,7 @@ export default function NATACoursesPage() {
                   setSelectedCategory("")
                   setSearchQuery("")
                 }}
-                className="flex items-center px-4 py-2 rounded-full text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+                className="flex items-center px-4 py-2 rounded-full text-sm bg-gray-200 text-black hover:bg-gray-300 transition-colors"
               >
                 <X className="mr-1 h-4 w-4" />
                 Reset
@@ -259,7 +259,7 @@ export default function NATACoursesPage() {
 
         {filteredCourses.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-lg text-gray-600 mb-4">No courses match your search criteria.</p>
+            <p className="text-lg text-black mb-4">No courses match your search criteria.</p>
             <button
               onClick={() => {
                 setSelectedCategory("")
@@ -274,9 +274,9 @@ export default function NATACoursesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCourses.map((course) => (
               <article key={course.id} className="group cursor-pointer h-full">
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 h-full flex flex-col">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 h-full flex flex-col">
                   {/* Course Image */}
-                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-purple-100 via-indigo-100 to-pink-100">
+                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-100 via-indigo-100 to-cyan-100">
                     <img
                       src={course.thumbnail}
                       alt={course.title}
@@ -307,11 +307,11 @@ export default function NATACoursesPage() {
 
                   {/* Content */}
                   <div className="p-6 flex-1 flex flex-col">
-                    <h3 className="text-lg font-bold text-gray-900 mb-3 leading-tight group-hover:text-purple-600 transition-colors line-clamp-2">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
                       {course.title}
                     </h3>
 
-                    <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-2 flex-1">
+                    <p className="text-sm text-black mb-4 leading-relaxed line-clamp-2 flex-1">
                       {course.description}
                     </p>
 
@@ -347,7 +347,7 @@ export default function NATACoursesPage() {
                       <LoginRequiredButton
                         onClick={() => handleEnrollCourse(course)}
                         action="enroll in course"
-                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-colors text-sm flex items-center justify-center gap-2"
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors text-sm flex items-center justify-center gap-2"
                       >
                         <Play className="h-4 w-4" />
                         View Course Player

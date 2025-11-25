@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Mail, Phone, MapPin, Send, ArrowLeft } from "lucide-react"
+import { Send, ArrowLeft } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -70,71 +70,9 @@ export default function ContactUsPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Contact Information */}
-            <div className="md:col-span-1 space-y-6">
-              <Card className="slide-in-left">
-                <CardHeader>
-                  <CardTitle>Get in Touch</CardTitle>
-                  <CardDescription>We're here to help</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start">
-                    <Mail className="h-5 w-5 mt-1 mr-3 text-primary" />
-                    <div>
-                      <h3 className="font-medium">Email Us</h3>
-                      <p className="text-sm text-muted-foreground">contact@architectureacademics.com</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Phone className="h-5 w-5 mt-1 mr-3 text-primary" />
-                    <div>
-                      <h3 className="font-medium">Call Us</h3>
-                      <p className="text-sm text-muted-foreground">+91 98765 43210</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <MapPin className="h-5 w-5 mt-1 mr-3 text-primary" />
-                    <div>
-                      <h3 className="font-medium">Visit Us</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Architecture Academics<br />
-                        123 Design Street<br />
-                        Mumbai, Maharashtra 400001<br />
-                        India
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="slide-in-left">
-                <CardHeader>
-                  <CardTitle>Office Hours</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    <li className="flex justify-between">
-                      <span>Monday - Friday:</span>
-                      <span>9:00 AM - 6:00 PM</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Saturday:</span>
-                      <span>10:00 AM - 4:00 PM</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Sunday:</span>
-                      <span>Closed</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-
+          <div className="max-w-3xl mx-auto">
             {/* Contact Form */}
-            <div className="md:col-span-2">
+            <div>
               <Card className="slide-in-right">
                 <CardHeader>
                   <CardTitle>Send us a Message</CardTitle>

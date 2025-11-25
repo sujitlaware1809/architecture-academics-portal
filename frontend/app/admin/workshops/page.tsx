@@ -573,12 +573,12 @@ export default function AdminWorkshopsPage() {
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
               {loadingRegistrations ? (
                 <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 </div>
               ) : selectedWorkshopRegistrations?.registrations?.length > 0 ? (
                 <div>
-                  <div className="mb-4 p-4 bg-purple-50 rounded-lg">
-                    <p className="text-sm text-purple-900">
+                  <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-blue-900">
                       <span className="font-semibold">Total Registrations:</span>{" "}
                       {selectedWorkshopRegistrations.total_registrations}
                     </p>

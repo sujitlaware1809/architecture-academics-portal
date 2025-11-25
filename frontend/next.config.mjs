@@ -8,7 +8,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'architectureacademics.local',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'architecture-academics.local',
       },
       {
         protocol: 'https',
@@ -16,11 +20,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'architectureacademics.online',
+        hostname: 'architecture-academics.online',
       },
       {
         protocol: 'https',
-        hostname: '*.architectureacademics.online',
+        hostname: '*.architecture-academics.online',
       },
       {
         protocol: 'http',
@@ -37,7 +41,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'courses.architectureacademics.online',
+              value: 'courses.architecture-academics.online',
             },
           ],
           destination: '/courses/:path*',
@@ -47,7 +51,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'jobs.architectureacademics.online',
+              value: 'jobs.architecture-academics.online',
             },
           ],
           destination: '/jobs-portal/:path*',
@@ -57,7 +61,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'events.architectureacademics.online',
+              value: 'events.architecture-academics.online',
             },
           ],
           destination: '/events/:path*',
@@ -67,7 +71,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'workshops.architectureacademics.online',
+              value: 'workshops.architecture-academics.online',
             },
           ],
           destination: '/workshops/:path*',
@@ -77,7 +81,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'blogs.architectureacademics.online',
+              value: 'blogs.architecture-academics.online',
             },
           ],
           destination: '/blogs/:path*',
@@ -87,7 +91,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'discussions.architectureacademics.online',
+              value: 'discussions.architecture-academics.online',
             },
           ],
           destination: '/discussions/:path*',
@@ -99,7 +103,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'courses.architectureacademics.local',
+              value: 'courses.architecture-academics.local',
             },
           ],
           destination: '/courses/:path*',
@@ -109,7 +113,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'jobs.architectureacademics.local',
+              value: 'jobs.architecture-academics.local',
             },
           ],
           destination: '/jobs-portal/:path*',
@@ -119,7 +123,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'events.architectureacademics.local',
+              value: 'events.architecture-academics.local',
             },
           ],
           destination: '/events/:path*',
@@ -129,7 +133,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'workshops.architectureacademics.local',
+              value: 'workshops.architecture-academics.local',
             },
           ],
           destination: '/workshops/:path*',
@@ -139,7 +143,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'blogs.architectureacademics.local',
+              value: 'blogs.architecture-academics.local',
             },
           ],
           destination: '/blogs/:path*',
@@ -149,7 +153,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: 'discussions.architectureacademics.local',
+              value: 'discussions.architecture-academics.local',
             },
           ],
           destination: '/discussions/:path*',

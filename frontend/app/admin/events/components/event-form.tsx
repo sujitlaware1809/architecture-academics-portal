@@ -106,7 +106,7 @@ export default function EventForm({ isEditing = false, eventId }: EventFormProps
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     )
   }
@@ -248,7 +248,7 @@ export default function EventForm({ isEditing = false, eventId }: EventFormProps
                       name="category"
                       value={formData.category}
                       onChange={handleInputChange}
-                      className="w-full h-10 pl-10 pr-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full h-10 pl-10 pr-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     >
                       <option value="">Select a category</option>
@@ -354,7 +354,7 @@ export default function EventForm({ isEditing = false, eventId }: EventFormProps
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
@@ -365,7 +365,7 @@ export default function EventForm({ isEditing = false, eventId }: EventFormProps
                 <div className="pt-4 border-t border-gray-200">
                   <Button 
                     type="submit" 
-                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
                     disabled={isSaving}
                   >
                     {isSaving ? (
@@ -409,7 +409,7 @@ export default function EventForm({ isEditing = false, eventId }: EventFormProps
                       <div className="mt-2">
                         <label
                           htmlFor="file-upload"
-                          className="cursor-pointer text-sm font-medium text-purple-600 hover:text-purple-800"
+                          className="cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800"
                         >
                           <span>Upload a file</span>
                           <input

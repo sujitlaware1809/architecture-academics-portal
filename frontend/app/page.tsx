@@ -24,6 +24,10 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { HeroSlider } from "@/components/hero-slider"
+import { DiscussionMarquee } from "@/components/discussion-marquee"
+import { FeatureCards } from "@/components/feature-cards"
+import { ArticleMarquee } from "@/components/article-marquee"
 
 export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -43,11 +47,11 @@ export default function HomePage() {
 
   const mainSections = [
     { title: "COURSES", icon: BookOpen, description: "Explore architecture courses", color: "bg-slate-800", href: "/courses" },
-    { title: "JOBS", icon: Briefcase, description: "Find career opportunities", color: "bg-purple-500", href: "/jobs-portal" },
-    { title: "EVENTS", icon: Calendar, description: "Upcoming architecture events", color: "bg-purple-500", href: "/events" },
+    { title: "JOBS", icon: Briefcase, description: "Find career opportunities", color: "bg-blue-500", href: "/jobs-portal" },
+    { title: "EVENTS", icon: Calendar, description: "Upcoming architecture events", color: "bg-blue-500", href: "/events" },
     { title: "EXPERT TALK", icon: Mic, description: "Learn from industry experts", color: "bg-blue-500", href: "/expert-talk" },
     { title: "DISCUSSIONS", icon: MessageSquare, description: "Community Q&A forum", color: "bg-red-500", href: "/discussions" },
-    { title: "WORKSHOPS & FDPs", icon: Wrench, description: "Professional development", color: "bg-purple-500", href: "/workshops" },
+    { title: "WORKSHOPS & FDPs", icon: Wrench, description: "Professional development", color: "bg-blue-500", href: "/workshops" },
   ]
 
   const recruiterSections = isAuthenticated && user && user.role === 'RECRUITER' ? [
@@ -88,7 +92,7 @@ export default function HomePage() {
               created_at: new Date(Date.now() - 2*24*60*60*1000).toISOString(),
               category: "Sustainability",
               estimated_read_time: 8,
-              featured_image: "sustainable",
+              featured_image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&h=300&fit=crop&auto=format&q=80",
               slug: "sustainable-architecture-building-tomorrow"
             },
             {
@@ -99,8 +103,30 @@ export default function HomePage() {
               created_at: new Date(Date.now() - 5*24*60*60*1000).toISOString(),
               category: "Technology",
               estimated_read_time: 10,
-              featured_image: "parametric",
+              featured_image: "https://images.unsplash.com/photo-1518780664697-55e3ad13c0c6?w=400&h=300&fit=crop&auto=format&q=80",
               slug: "rise-parametric-design-modern-architecture"
+            },
+            {
+              id: 3,
+              title: "Biophilic Design: Bringing Nature Into Architecture",
+              excerpt: "Understanding how architects are incorporating natural elements and patterns into built environments for enhanced well-being.",
+              author: "Dr. Meera Singh",
+              created_at: new Date(Date.now() - 7*24*60*60*1000).toISOString(),
+              category: "Design Trends",
+              estimated_read_time: 7,
+              featured_image: "https://images.unsplash.com/photo-1511818966892-d5d671fb5ffe?w=400&h=300&fit=crop&auto=format&q=80",
+              slug: "biophilic-design-bringing-nature-architecture"
+            },
+            {
+              id: 4,
+              title: "Smart Buildings: The Future of Urban Development",
+              excerpt: "Exploring IoT integration and intelligent systems that are transforming how we design and manage modern buildings.",
+              author: "Arjun Patel",
+              created_at: new Date(Date.now() - 10*24*60*60*1000).toISOString(),
+              category: "Technology",
+              estimated_read_time: 9,
+              featured_image: "https://images.unsplash.com/photo-1486406146700-532a9ca61417?w=400&h=300&fit=crop&auto=format&q=80",
+              slug: "smart-buildings-future-urban-development"
             }
           ])
         }
@@ -119,7 +145,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchPopularDiscussions = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/discussions?limit=4`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/discussions?limit=10`)
         if (response.ok) {
           const data = await response.json()
           setPopularDiscussions(data)
@@ -150,6 +176,42 @@ export default function HomePage() {
               category: "Career",
               tags: ["Portfolio", "Jobs", "Career"],
               is_solved: true
+            },
+            {
+              id: 3,
+              title: "Sustainable materials for tropical climates",
+              content: "Working on a project in Kerala. Need suggestions for sustainable materials that can withstand high humidity and heavy rainfall.",
+              author: "Rahul Menon",
+              reply_count: 12,
+              view_count: 560,
+              updated_at: new Date(Date.now() - 24*60*60*1000).toISOString(),
+              category: "Materials",
+              tags: ["Sustainability", "Materials", "Tropical"],
+              is_solved: false
+            },
+            {
+              id: 4,
+              title: "Thesis topic ideas for final year",
+              content: "Struggling to finalize my thesis topic. Interested in urban planning and adaptive reuse. Any suggestions?",
+              author: "Priya Patel",
+              reply_count: 35,
+              view_count: 1500,
+              updated_at: new Date(Date.now() - 48*60*60*1000).toISOString(),
+              category: "Academics",
+              tags: ["Thesis", "Urban Planning", "Student"],
+              is_solved: false
+            },
+            {
+              id: 5,
+              title: "Experience with Zaha Hadid Architects internship?",
+              content: "Has anyone here interned at ZHA? How was the interview process and what is the work culture like?",
+              author: "Arjun Kapoor",
+              reply_count: 8,
+              view_count: 2100,
+              updated_at: new Date(Date.now() - 72*60*60*1000).toISOString(),
+              category: "Career",
+              tags: ["Internship", "ZHA", "Career"],
+              is_solved: true
             }
           ])
         }
@@ -165,122 +227,16 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50/30 via-white to-white">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
-        {/* Hero Section - Ultra Modern Design */}
-        <div className="mb-12 md:mb-16 relative overflow-hidden">
-          <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
-            {/* Left Content */}
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/50 rounded-full shadow-sm hover:shadow-md transition-shadow backdrop-blur-sm">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50"></div>
-                <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">India's Leading Architecture Platform</span>
-              </div>
-              
-              <div className="space-y-4">
-                <h1 className="font-poppins text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 leading-[1.1] tracking-tight">
-                  Build Your
-                  <br />
-                  <span className="relative inline-block">
-                    <span className="relative z-10 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 bg-clip-text text-transparent animate-gradient">
-                      Future Today
-                    </span>
-                    <div className="absolute -bottom-2 left-0 w-full h-4 bg-gradient-to-r from-purple-400/30 via-indigo-400/30 to-purple-400/30 blur-xl"></div>
-                  </span>
-                </h1>
-                <div className="w-24 h-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full"></div>
-              </div>
-              
-              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed max-w-xl font-medium">
-                Join the <span className="font-bold text-purple-600">architectural fraternity</span> and shape the world. 
-                Access courses, connect with professionals, and unlock opportunities.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link href="/courses">
-                  <Button size="lg" className="group bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-700 hover:via-indigo-700 hover:to-purple-700 text-white px-10 h-14 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 w-full sm:w-auto text-lg font-bold hover:scale-105 bg-[length:200%_100%] hover:bg-right">
-                    <BookOpen className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
-                    Start Learning
-                  </Button>
-                </Link>
-                <Link href="/blogs">
-                  <Button size="lg" variant="outline" className="group border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white px-10 h-14 rounded-2xl transition-all duration-300 w-full sm:w-auto text-lg font-bold hover:scale-105">
-                    <FileText className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
-                    Explore Content
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Stats - Modern Cards */}
-              <div className="grid grid-cols-3 gap-4 pt-8">
-                <div className="bg-gradient-to-br from-purple-50 to-white p-4 rounded-2xl border border-purple-100 hover:shadow-lg transition-all hover:-translate-y-1">
-                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">0</div>
-                  <div className="text-xs md:text-sm text-gray-600 font-semibold mt-1">Students</div>
-                </div>
-                <div className="bg-gradient-to-br from-indigo-50 to-white p-4 rounded-2xl border border-indigo-100 hover:shadow-lg transition-all hover:-translate-y-1">
-                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">0</div>
-                  <div className="text-xs md:text-sm text-gray-600 font-semibold mt-1">Courses</div>
-                </div>
-                <div className="bg-gradient-to-br from-pink-50 to-white p-4 rounded-2xl border border-pink-100 hover:shadow-lg transition-all hover:-translate-y-1">
-                  <div className="font-poppins text-3xl md:text-4xl font-black bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">0</div>
-                  <div className="text-xs md:text-sm text-gray-600 font-semibold mt-1">Jobs</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Content - Feature Highlights */}
-            <div className="relative">
-              <div className="grid grid-cols-2 gap-4">
-                {/* Feature Card 1 */}
-                <Card className="border-2 border-purple-100 bg-gradient-to-br from-purple-50 to-white p-6 hover:shadow-lg transition-shadow">
-                  <div className="bg-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-                    <GraduationCap className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-2">Expert-Led Courses</h3>
-                  <p className="text-sm text-gray-600">Learn from industry professionals with years of experience</p>
-                </Card>
-
-                {/* Feature Card 2 */}
-                <Card className="border-2 border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-6 hover:shadow-lg transition-shadow mt-8">
-                  <div className="bg-indigo-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-                    <Briefcase className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-2">Career Opportunities</h3>
-                  <p className="text-sm text-gray-600">Connect with top firms and find your dream job</p>
-                </Card>
-
-                {/* Feature Card 3 */}
-                <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white p-6 hover:shadow-lg transition-shadow">
-                  <div className="bg-blue-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-                    <Users className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-2">Active Community</h3>
-                  <p className="text-sm text-gray-600">Engage with peers and expand your network</p>
-                </Card>
-
-                {/* Feature Card 4 */}
-                <Card className="border-2 border-pink-100 bg-gradient-to-br from-pink-50 to-white p-6 hover:shadow-lg transition-shadow mt-8">
-                  <div className="bg-pink-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-                    <Award className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-2">Certifications</h3>
-                  <p className="text-sm text-gray-600">Earn recognized certificates to boost your profile</p>
-                </Card>
-              </div>
-
-              {/* Decorative Elements */}
-              <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-200/20 to-indigo-200/20 rounded-full blur-3xl"></div>
-            </div>
-          </div>
-        </div>
-
+    <div className="min-h-screen bg-white">
+      <HeroSlider />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         {/* Core Features Section */}
         <div className="mb-16">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Comprehensive Platform for Architectural Fraternity
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-black max-w-2xl mx-auto">
               A holistic platform for the architectural fraternity - Access all the tools and resources you need to thrive in your architecture career
             </p>
           </div>
@@ -290,11 +246,10 @@ export default function HomePage() {
               const IconComponent = section.icon
               const colorClasses = {
                 'bg-slate-800': { bg: 'bg-slate-800', hover: 'hover:bg-slate-700', text: 'text-slate-600', border: 'border-slate-200' },
-                'bg-purple-500': { bg: 'bg-purple-600', hover: 'hover:bg-purple-700', text: 'text-purple-600', border: 'border-purple-200' },
                 'bg-blue-500': { bg: 'bg-blue-600', hover: 'hover:bg-blue-700', text: 'text-blue-600', border: 'border-blue-200' },
                 'bg-red-500': { bg: 'bg-red-600', hover: 'hover:bg-red-700', text: 'text-red-600', border: 'border-red-200' },
               }
-              const colors = colorClasses[section.color as keyof typeof colorClasses] || colorClasses['bg-purple-500']
+              const colors = colorClasses[section.color as keyof typeof colorClasses] || colorClasses['bg-blue-500']
               
               return (
                 <Link 
@@ -315,7 +270,7 @@ export default function HomePage() {
                         </div>
                         <ArrowRight className={`h-5 w-5 ${colors.text} opacity-0 group-hover:opacity-100 transition-opacity`} />
                       </div>
-                      <CardDescription className="text-sm text-gray-600 leading-relaxed">
+                      <CardDescription className="text-sm text-black leading-relaxed">
                         {section.description}
                       </CardDescription>
                     </CardHeader>
@@ -329,6 +284,11 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Feature Cards (Roadmap, Stats, etc.) */}
+        <div className="mb-16 -mx-4 sm:-mx-6 lg:-mx-8">
+          <FeatureCards />
+        </div>
+
         {/* Recruiter Sections (only shown to recruiters) */}
         {recruiterSections.length > 0 && (
           <div className="mb-16">
@@ -340,7 +300,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">Recruiter Actions</h3>
-                    <p className="text-sm text-gray-600">Post and manage job opportunities</p>
+                    <p className="text-sm text-black">Post and manage job opportunities</p>
                   </div>
                 </div>
               </div>
@@ -360,7 +320,7 @@ export default function HomePage() {
                               <CardTitle className="text-base font-bold text-gray-900 group-hover:text-green-600 transition-colors">
                                 {section.title}
                               </CardTitle>
-                              <CardDescription className="text-sm text-gray-600 mt-1">
+                              <CardDescription className="text-sm text-black mt-1">
                                 {section.description}
                               </CardDescription>
                             </div>
@@ -383,7 +343,7 @@ export default function HomePage() {
               <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                 More Features
               </h3>
-              <p className="text-gray-600">Additional resources to enhance your learning</p>
+              <p className="text-black">Additional resources to enhance your learning</p>
             </div>
           </div>
           
@@ -414,15 +374,9 @@ export default function HomePage() {
                       <CardTitle className="text-sm font-bold text-gray-900 group-hover:text-gray-700 transition-colors">
                         {section.title}
                       </CardTitle>
-                      {/* Show count badge */}
-                      <div className="mt-2">
-                        <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
-                          {section.count || "0"} items
-                        </Badge>
-                      </div>
                     </CardHeader>
                     <CardContent className="pt-0 pb-4">
-                      <CardDescription className="text-xs text-center text-gray-600">
+                      <CardDescription className="text-xs text-center text-black">
                         {section.description}
                       </CardDescription>
                     </CardContent>
@@ -430,7 +384,7 @@ export default function HomePage() {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium text-xs group-hover:gap-1 transition-all"
+                        className="text-black hover:text-gray-900 hover:bg-gray-50 font-medium text-xs group-hover:gap-1 transition-all"
                       >
                         {section.href === "#" ? "Coming Soon" : "Explore"}
                         <ArrowRight className="h-3 w-3 opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all" />
@@ -443,128 +397,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Featured Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          <Card className="lg:col-span-2 border-2 border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-purple-50 to-indigo-50">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <TrendingUp className="h-6 w-6 text-purple-600" />
-                  Latest Updates
-                </CardTitle>
-                <Badge className="bg-purple-600 text-white">New</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-6">
-                <div className="group flex items-start space-x-4 p-4 rounded-xl hover:bg-purple-50 transition-colors cursor-pointer">
-                  <div className="relative w-24 h-24 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-xl flex-shrink-0 overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Award className="h-10 w-10 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
-                      Sustainable Architecture Trends 2025
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      Exploring the latest innovations in eco-friendly building design and green construction practices...
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                        <Star className="h-3 w-3 mr-1" />
-                        Featured
-                      </Badge>
-                      <span className="text-xs text-gray-500">2 hours ago</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
-                
-                <div className="group flex items-start space-x-4 p-4 rounded-xl hover:bg-purple-50 transition-colors cursor-pointer">
-                  <div className="relative w-24 h-24 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl flex-shrink-0 overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Wrench className="h-10 w-10 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
-                      Digital Design Tools Workshop
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      Coming soon - Master the latest CAD and BIM software in our intensive hands-on workshop...
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs border-blue-300 text-blue-700">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        Coming Soon
-                      </Badge>
-                      <span className="text-xs text-gray-500">5 hours ago</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card className="border-2 border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="border-b border-gray-100 bg-gradient-to-br from-purple-50 to-indigo-50">
-              <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
-                Platform Stats
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-6">
-                <Link href="/courses" className="group block">
-                  <div className="flex justify-between items-center p-4 rounded-xl hover:bg-purple-50 transition-all duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                        <BookOpen className="h-6 w-6 text-white" />
-                      </div>
-                      <span className="text-sm font-semibold text-gray-700">Active Courses</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-3xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">0</span>
-                      <ArrowRight className="h-4 w-4 text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  </div>
-                </Link>
-
-                <div className="flex justify-between items-center p-4 rounded-xl hover:bg-purple-50 transition-all duration-300">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                      <Briefcase className="h-6 w-6 text-white" />
-                    </div>
-                    <span className="text-sm font-semibold text-gray-700">Job Listings</span>
-                  </div>
-                  <span className="font-bold text-3xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">0</span>
-                </div>
-
-                <div className="flex justify-between items-center p-4 rounded-xl hover:bg-purple-50 transition-all duration-300">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
-                      <Calendar className="h-6 w-6 text-white" />
-                    </div>
-                    <span className="text-sm font-semibold text-gray-700">Events</span>
-                  </div>
-                  <span className="font-bold text-3xl bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">0</span>
-                </div>
-
-                <div className="flex justify-between items-center p-4 rounded-xl hover:bg-purple-50 transition-all duration-300">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-                      <Users className="h-6 w-6 text-white" />
-                    </div>
-                    <span className="text-sm font-semibold text-gray-700">Members</span>
-                  </div>
-                  <span className="font-bold text-3xl bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">0</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Featured Articles Section */}
         <div className="mb-16">
@@ -573,20 +406,19 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
                 Featured Articles
               </h2>
-              <p className="text-lg text-gray-600">Latest insights from architecture experts</p>
+              <p className="text-lg text-black">Latest insights from architecture experts</p>
             </div>
             <Link href="/blogs">
-              <Button variant="outline" className="border-2 border-purple-600 text-purple-600 hover:bg-purple-50">
+              <Button variant="outline" className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50">
                 View All Articles
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {loadingBlogs ? (
-              // Loading skeleton
-              Array.from({ length: 4 }).map((_, i) => (
+          {loadingBlogs ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Array.from({ length: 2 }).map((_, i) => (
                 <Card key={i} className="h-full border-2 border-gray-100">
                   <div className="h-48 bg-gray-200 animate-pulse"></div>
                   <CardHeader className="pb-3">
@@ -601,81 +433,18 @@ export default function HomePage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))
-            ) : featuredArticles.length > 0 ? featuredArticles.map((article) => (
-              <Link key={article.id} href={`/blogs/${article.slug}`}>
-                <Card className="h-full border-2 border-gray-100 hover:border-purple-300 hover:shadow-xl transition-all duration-300 group overflow-hidden">
-                  <div className="relative h-48 bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100 overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <FileText className="h-20 w-20 text-purple-300 group-hover:scale-110 transition-transform duration-300" />
-                    </div>
-                    <div className="absolute top-4 right-4">
-                      <Badge className="bg-white text-purple-700 border border-purple-200">
-                        {article.category}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-2">
-                      {article.title}
-                    </CardTitle>
-                  </CardHeader>
-
-                  <CardContent className="pb-4">
-                    <CardDescription className="text-sm text-gray-600 line-clamp-3 mb-4">
-                      {article.excerpt || article.description || ''}
-                    </CardDescription>
-                    
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">
-                            {(() => {
-                              // Handle both string and object author formats
-                              const authorName = typeof article.author === 'string' 
-                                ? article.author 
-                                : article.author?.first_name 
-                                  ? `${article.author.first_name} ${article.author.last_name || ''}`.trim()
-                                  : article.author?.email?.split('@')[0] || 'Author';
-                              return authorName.split(' ').map((n: string) => n[0]).slice(0, 2).join('');
-                            })()}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-gray-900">
-                            {(() => {
-                              // Handle both string and object author formats
-                              if (typeof article.author === 'string') {
-                                return article.author;
-                              } else if (article.author) {
-                                return article.author.first_name 
-                                  ? `${article.author.first_name} ${article.author.last_name || ''}`.trim()
-                                  : article.author.email?.split('@')[0] || 'Unknown Author';
-                              }
-                              return 'Unknown Author';
-                            })()}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {article.date || (article.created_at ? new Date(article.created_at).toLocaleDateString() : 'Unknown date')}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <BookOpen className="h-3 w-3" />
-                        {article.readTime || `${article.estimated_read_time || 5} min read`}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            )) : (
-              <div className="col-span-full text-center py-12">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No featured articles available</p>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : featuredArticles.length > 0 ? (
+            <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+              <ArticleMarquee articles={featuredArticles} speed={50} direction="right" />
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-black">No featured articles available</p>
+            </div>
+          )}
         </div>
 
         {/* Popular Discussions Section */}
@@ -685,21 +454,20 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
                 Popular Discussions
               </h2>
-              <p className="text-lg text-gray-600">Join the conversation with fellow architects</p>
+              <p className="text-lg text-black">Join the conversation with fellow architects</p>
             </div>
             <Link href="/discussions">
-              <Button variant="outline" className="border-2 border-purple-600 text-purple-600 hover:bg-purple-50">
+              <Button variant="outline" className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50">
                 View All Discussions
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
 
-          <div className="space-y-4">
-            {loadingDiscussions ? (
-              // Loading skeleton
-              Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="border-2 border-gray-100">
+          {loadingDiscussions ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="border-2 border-gray-100 h-64">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 bg-gray-200 rounded-xl animate-pulse"></div>
@@ -709,230 +477,27 @@ export default function HomePage() {
                           <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
                           <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
                         </div>
-                        <div className="flex gap-2 mb-3">
-                          <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
-                          <div className="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
-                        </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-              ))
-            ) : popularDiscussions.length > 0 ? popularDiscussions.map((discussion) => (
-              <Link key={discussion.id} href={`/discussions/${discussion.id}`}>
-                <Card className="border-2 border-gray-100 hover:border-purple-300 hover:shadow-lg transition-all duration-300 group">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      {/* Discussion Icon */}
-                      <div className="flex-shrink-0">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          discussion.solved || discussion.is_solved
-                            ? 'bg-green-100 text-green-600' 
-                            : 'bg-purple-100 text-purple-600'
-                        }`}>
-                          <MessageSquare className="h-6 w-6" />
-                        </div>
-                      </div>
+              ))}
+            </div>
+          ) : popularDiscussions.length > 0 ? (
+            <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+              <DiscussionMarquee discussions={popularDiscussions} speed={60} singleRow={true} direction="left" />
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-black">No discussions available</p>
+            </div>
+          )}
 
-                      {/* Discussion Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4 mb-2">
-                          <h3 className="font-bold text-lg text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">
-                            {discussion.title}
-                          </h3>
-                          {(discussion.solved || discussion.is_solved) && (
-                            <Badge className="bg-green-100 text-green-700 border border-green-200 flex-shrink-0">
-                              ✓ Solved
-                            </Badge>
-                          )}
-                        </div>
 
-                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                          {discussion.excerpt || discussion.content || ''}
-                        </p>
-
-                        {/* Tags */}
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {(() => {
-                            // Handle different tag formats from backend
-                            let tags = discussion.tags;
-                            
-                            // If tags is a string, try to parse it
-                            if (typeof tags === 'string') {
-                              try {
-                                tags = JSON.parse(tags);
-                              } catch {
-                                // If it's not JSON, split by comma
-                                tags = tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0);
-                              }
-                            }
-                            
-                            // Ensure it's an array
-                            const tagsArray = Array.isArray(tags) ? tags : [];
-                            
-                            return tagsArray.map((tag: string, index: number) => (
-                              <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-700">
-                                {tag}
-                              </Badge>
-                            ));
-                          })()}
-                        </div>
-
-                        {/* Meta Information */}
-                        <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
-                              <span className="text-white text-[10px] font-bold">
-                                {(() => {
-                                  // Handle both string and object author formats
-                                  const authorName = typeof discussion.author === 'string' 
-                                    ? discussion.author 
-                                    : discussion.author?.first_name 
-                                      ? `${discussion.author.first_name} ${discussion.author.last_name || ''}`.trim()
-                                      : discussion.author?.email?.split('@')[0] || 'Unknown';
-                                  return authorName.split(' ').map((n: string) => n[0] || '').join('').slice(0, 2);
-                                })()}
-                              </span>
-                            </div>
-                            <span className="font-medium text-gray-700">
-                              {(() => {
-                                // Handle both string and object author formats
-                                if (typeof discussion.author === 'string') {
-                                  return discussion.author;
-                                } else if (discussion.author) {
-                                  return discussion.author.first_name 
-                                    ? `${discussion.author.first_name} ${discussion.author.last_name || ''}`.trim()
-                                    : discussion.author.email?.split('@')[0] || 'Unknown User';
-                                }
-                                return 'Unknown User';
-                              })()}
-                            </span>
-                          </div>
-                          
-                          <div className="flex items-center gap-1">
-                            <MessageSquare className="h-3 w-3" />
-                            <span>{discussion.replies || discussion.reply_count || 0} replies</span>
-                          </div>
-                          
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            <span>{(discussion.views || discussion.view_count || 0).toLocaleString()} views</span>
-                          </div>
-                          
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>
-                              {discussion.lastActivity || 
-                               (discussion.updated_at ? new Date(discussion.updated_at).toLocaleDateString() : 'Unknown')}
-                            </span>
-                          </div>
-
-                          <Badge variant="outline" className="text-xs border-purple-200 text-purple-700">
-                            {discussion.category || 'General'}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Arrow Icon */}
-                      <div className="flex-shrink-0">
-                        <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            )) : (
-              <div className="text-center py-12">
-                <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No discussions available</p>
-              </div>
-            )}
-          </div>
-
-          {/* Community Stats */}
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="border-2 border-purple-100 bg-gradient-to-br from-purple-50 to-white">
-              <CardContent className="p-6 text-center">
-                <MessageSquare className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">0</div>
-                <div className="text-sm text-gray-600">Discussions</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white">
-              <CardContent className="p-6 text-center">
-                <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">0</div>
-                <div className="text-sm text-gray-600">Members</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-2 border-green-100 bg-gradient-to-br from-green-50 to-white">
-              <CardContent className="p-6 text-center">
-                <FileText className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">0</div>
-                <div className="text-sm text-gray-600">Articles</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-2 border-orange-100 bg-gradient-to-br from-orange-50 to-white">
-              <CardContent className="p-6 text-center">
-                <Star className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">Coming Soon</div>
-                <div className="text-sm text-gray-600">Features</div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
 
-        {/* Call to Action Section */}
-        <div className="mb-16">
-          <Card className="border-0 bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 text-white shadow-2xl overflow-hidden relative">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30"></div>
-            <CardContent className="relative py-12 px-6 md:py-16 md:px-12">
-              <div className="max-w-3xl mx-auto text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-6">
-                  <GraduationCap className="h-5 w-5" />
-                  <span className="text-sm font-medium">Join Our Community</span>
-                </div>
-                
-                <h3 className="text-3xl md:text-4xl font-bold mb-4">
-                  Ready to Start Your Journey?
-                </h3>
-                <p className="text-lg text-purple-100 mb-8 max-w-2xl mx-auto">
-                  Join the architectural fraternity and connect with professionals, students, and enthusiasts who are shaping the future of architecture
-                </p>
-                
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  {!isAuthenticated ? (
-                    <>
-                      <Link href="/register">
-                        <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                          <Users className="mr-2 h-5 w-5" />
-                          Get Started Free
-                        </Button>
-                      </Link>
-                      <Link href="/login">
-                        <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-lg rounded-xl transition-all duration-300">
-                          Sign In
-                          <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                      </Link>
-                    </>
-                  ) : (
-                    <Link href="/profile">
-                      <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                        <Users className="mr-2 h-5 w-5" />
-                        View Your Profile
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+
       </main>
     </div>
   )

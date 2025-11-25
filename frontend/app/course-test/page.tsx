@@ -53,7 +53,7 @@ export default function CourseTestPage() {
 
         <Card>
           <CardHeader>
-            <BookOpen className="h-8 w-8 text-purple-500 mb-2" />
+            <BookOpen className="h-8 w-8 text-indigo-500 mb-2" />
             <CardTitle>Course Management</CardTitle>
             <CardDescription>
               Complete course administration with detailed analytics
@@ -207,7 +207,7 @@ export default function CourseTestPage() {
                 <div className="text-sm text-muted-foreground">Course Materials</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-purple-600">2h</div>
+                <div className="text-2xl font-bold text-indigo-600">2h</div>
                 <div className="text-sm text-muted-foreground">Total Duration</div>
               </div>
             </div>

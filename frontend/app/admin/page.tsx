@@ -110,7 +110,7 @@ export default function AdminDashboard() {
       value: stats.total_events, 
       subtitle: `${stats.upcoming_events} upcoming`,
       icon: Calendar,
-      color: "from-purple-500 to-purple-600",
+      color: "from-indigo-500 to-indigo-600",
       href: "/admin/events"
     },
     { 
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
       value: stats.total_workshops, 
       subtitle: `${stats.upcoming_workshops} upcoming`,
       icon: Wrench,
-      color: "from-indigo-500 to-indigo-600",
+      color: "from-cyan-500 to-cyan-600",
       href: "/admin/workshops"
     },
     { 
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
   ] : []
 
   const quickActions = [
-    { name: "Manage Events", href: "/admin/events", icon: Calendar, color: "bg-purple-100 text-purple-600 hover:bg-purple-200" },
+    { name: "Manage Events", href: "/admin/events", icon: Calendar, color: "bg-indigo-100 text-indigo-600 hover:bg-indigo-200" },
     { name: "Manage Workshops", href: "/admin/workshops", icon: Wrench, color: "bg-blue-100 text-blue-600 hover:bg-blue-200" },
     { name: "Manage Courses", href: "/admin/courses", icon: BookOpen, color: "bg-green-100 text-green-600 hover:bg-green-200" },
     { name: "Manage Jobs", href: "/admin/jobs", icon: Briefcase, color: "bg-yellow-100 text-yellow-600 hover:bg-yellow-200" },
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -197,7 +197,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Admin Dashboard
           </h1>
           <p className="text-gray-500 mt-1">{formattedDate}</p>
@@ -245,7 +245,7 @@ export default function AdminDashboard() {
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <PlusCircle className="h-5 w-5 text-purple-600" />
+            <PlusCircle className="h-5 w-5 text-blue-600" />
             <span>Quick Actions</span>
           </CardTitle>
           <CardDescription>Manage your platform content</CardDescription>
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Activity className="h-5 w-5 text-purple-600" />
+              <Activity className="h-5 w-5 text-blue-600" />
               <span>Platform Overview</span>
             </CardTitle>
           </CardHeader>
@@ -305,9 +305,9 @@ export default function AdminDashboard() {
                 </Link>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <Calendar className="h-5 w-5 text-purple-600" />
+                  <Calendar className="h-5 w-5 text-indigo-600" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">Upcoming Events</p>
                     <p className="text-xs text-gray-500">{stats?.upcoming_events} events scheduled</p>
@@ -325,7 +325,7 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <BarChart2 className="h-5 w-5 text-purple-600" />
+              <BarChart2 className="h-5 w-5 text-blue-600" />
               <span>Content Status</span>
             </CardTitle>
           </CardHeader>

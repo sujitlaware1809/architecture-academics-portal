@@ -334,14 +334,14 @@ export default function JobsPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-purple-50 to-mint-50">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-mint-50">
       {/* Header/Navbar */}
       <header className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/jobs-portal" className="flex items-center space-x-3">
-              <div className="bg-gradient-to-r from-sky-500 to-purple-600 p-2 rounded-xl">
+              <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-2 rounded-xl">
                 <Briefcase className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -352,16 +352,16 @@ export default function JobsPortal() {
 
             {/* Combined Navigation Links */}
             <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/jobs-portal" className="flex items-center space-x-1.5 text-gray-700 hover:text-purple-600 font-medium transition-colors group">
+              <Link href="/jobs-portal" className="flex items-center space-x-1.5 text-gray-700 hover:text-blue-600 font-medium transition-colors group">
                 <Search className="h-4 w-4 group-hover:scale-110 transition-transform" />
                 <span>Jobs</span>
               </Link>
-              <Link href="/jobs-portal/post-job" className="flex items-center space-x-1.5 text-gray-700 hover:text-purple-600 font-medium transition-colors group">
+              <Link href="/jobs-portal/post-job" className="flex items-center space-x-1.5 text-gray-700 hover:text-blue-600 font-medium transition-colors group">
                 <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
                 <span>Post Job</span>
               </Link>
               {isAuthenticated && (
-                <Link href="/jobs-portal/dashboard" className="flex items-center space-x-1.5 text-gray-700 hover:text-purple-600 font-medium transition-colors group">
+                <Link href="/jobs-portal/dashboard" className="flex items-center space-x-1.5 text-gray-700 hover:text-blue-600 font-medium transition-colors group">
                   <Briefcase className="h-4 w-4 group-hover:scale-110 transition-transform" />
                   <span>Dashboard</span>
                 </Link>
@@ -376,7 +376,7 @@ export default function JobsPortal() {
                     href="/profile"
                     className="flex items-center space-x-2 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-sky-500 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-sky-500 rounded-full flex items-center justify-center">
                       <User className="h-4 w-4 text-white" />
                     </div>
                     <span className="hidden sm:block text-sm font-medium text-gray-700">
@@ -395,13 +395,13 @@ export default function JobsPortal() {
                 <div className="flex items-center space-x-2">
                   <Link
                     href="/login"
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-purple-600 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
                   >
                     Login
                   </Link>
                   <Link
                     href="/register"
-                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-sky-600 text-white text-sm font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 transition-all duration-200"
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-sky-700 transition-all duration-200"
                   >
                     Sign Up
                   </Link>
@@ -413,7 +413,7 @@ export default function JobsPortal() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-purple-600 via-sky-600 to-purple-700 text-white py-20">
+      <section className="bg-gradient-to-r from-blue-600 via-sky-600 to-blue-700 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
             Find Your Dream
@@ -421,20 +421,20 @@ export default function JobsPortal() {
               Architecture Job in India
             </span>
           </h1>
-          <p className="text-xl text-purple-100 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
             Discover amazing opportunities in architecture, design, and construction across India. 
             Connect with top companies and build your dream career.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button 
               onClick={() => document.getElementById('search-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 bg-white text-purple-700 font-semibold rounded-full hover:bg-gray-50 transition-colors shadow-lg"
+              className="px-8 py-4 bg-white text-blue-700 font-semibold rounded-full hover:bg-gray-50 transition-colors shadow-lg"
             >
               Search Jobs
             </button>
             <Link
               href="/jobs-portal/post-job"
-              className="px-8 py-4 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-purple-700 transition-colors"
+              className="px-8 py-4 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-blue-700 transition-colors"
             >
               Post a Job
             </Link>
@@ -455,7 +455,7 @@ export default function JobsPortal() {
                   placeholder="Search jobs, companies, or skills..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-14 text-lg border-gray-200 focus:border-purple-500 focus:ring-purple-500 rounded-xl"
+                  className="pl-12 h-14 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl"
                 />
               </div>
               <button
@@ -476,7 +476,7 @@ export default function JobsPortal() {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-purple-500"
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
                   >
                     {jobCategories.map(category => (
                       <option key={category} value={category}>{category}</option>
@@ -488,7 +488,7 @@ export default function JobsPortal() {
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-purple-500"
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
                   >
                     {jobTypes.map(type => (
                       <option key={type} value={type}>{type}</option>
@@ -500,7 +500,7 @@ export default function JobsPortal() {
                   <select
                     value={selectedLocation}
                     onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-purple-500"
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
                   >
                     {locations.map(location => (
                       <option key={location} value={location}>{location}</option>
@@ -529,16 +529,16 @@ export default function JobsPortal() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredJobs.map((job) => (
               <article key={job.id} className="group cursor-pointer h-full">
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 h-full flex flex-col">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 h-full flex flex-col">
                   {/* Header with Gradient */}
-                  <div className="relative p-6 bg-gradient-to-br from-purple-50 via-indigo-50 to-sky-50 border-b border-gray-100">
+                  <div className="relative p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-sky-50 border-b border-gray-100">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-lg bg-white shadow-md flex items-center justify-center text-2xl">
                           {job.logo}
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-bold text-lg text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">
+                          <h3 className="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
                             {job.title}
                           </h3>
                           <p className="text-sm text-gray-600 font-medium line-clamp-1">{job.company}</p>
@@ -549,14 +549,14 @@ export default function JobsPortal() {
                         className="p-2 hover:bg-white/80 rounded-lg transition-colors flex-shrink-0"
                       >
                         <Bookmark 
-                          className={`h-5 w-5 ${savedJobs.includes(job.id) ? 'fill-purple-600 text-purple-600' : 'text-gray-400'}`}
+                          className={`h-5 w-5 ${savedJobs.includes(job.id) ? 'fill-blue-600 text-blue-600' : 'text-gray-400'}`}
                         />
                       </button>
                     </div>
 
                     {/* Job Type & Remote Badge */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
                         {job.type}
                       </span>
                       {job.remote && (
@@ -572,10 +572,10 @@ export default function JobsPortal() {
                     {/* Location & Salary */}
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <MapPin className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                        <MapPin className="h-4 w-4 text-blue-500 flex-shrink-0" />
                         <span className="line-clamp-1">{job.location}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-lg font-bold text-purple-600">
+                      <div className="flex items-center gap-2 text-lg font-bold text-blue-600">
                         <DollarSign className="h-5 w-5 flex-shrink-0" />
                         <span>{formatSalary(job)}</span>
                       </div>
@@ -626,7 +626,7 @@ export default function JobsPortal() {
                         onClick={() => openApplyModal(job.id)}
                         action="apply to jobs"
                         disabled={applying === job.id}
-                        className="px-4 py-2 bg-gradient-to-r from-purple-600 to-sky-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-sky-700 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                       >
                         <span>
                           {applying === job.id 
@@ -671,7 +671,7 @@ export default function JobsPortal() {
       {applyModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
           <div className="bg-white p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-sky-600 bg-clip-text text-transparent">
+            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
               Apply for Job
             </h3>
             
@@ -683,7 +683,7 @@ export default function JobsPortal() {
               <textarea
                 value={coverLetterInput}
                 onChange={(e) => setCoverLetterInput(e.target.value)}
-                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={5}
                 placeholder="Tell us why you're a great fit for this position..."
                 required
@@ -695,7 +695,7 @@ export default function JobsPortal() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Upload Resume (PDF) <span className="text-red-500">*</span>
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-purple-500 transition-colors">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-500 transition-colors">
                 <input
                   type="file"
                   accept=".pdf,application/pdf"
@@ -704,8 +704,8 @@ export default function JobsPortal() {
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-lg file:border-0
                     file:text-sm file:font-semibold
-                    file:bg-purple-50 file:text-purple-700
-                    hover:file:bg-purple-100
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100
                     cursor-pointer"
                   required
                 />
@@ -730,7 +730,7 @@ export default function JobsPortal() {
                 type="url"
                 value={resumeUrlInput}
                 onChange={(e) => setResumeUrlInput(e.target.value)}
-                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="https://drive.google.com/your-resume"
               />
               <p className="mt-1 text-xs text-gray-500">
@@ -752,7 +752,7 @@ export default function JobsPortal() {
                 Cancel
               </button>
               <button 
-                className="px-5 py-2 bg-gradient-to-r from-purple-600 to-sky-600 hover:from-purple-700 hover:to-sky-700 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
+                className="px-5 py-2 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
                 onClick={handleApplySubmit}
                 disabled={!coverLetterInput.trim() || (!resumeFile && !resumeUrlInput)}
               >
@@ -765,7 +765,7 @@ export default function JobsPortal() {
       {/* Floating Post Job Button (Mobile) */}
       <Link
         href="/jobs-portal/post-job"
-        className="fixed bottom-6 right-6 md:hidden w-14 h-14 bg-gradient-to-r from-purple-600 to-sky-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:shadow-3xl transition-all duration-200 z-40"
+        className="fixed bottom-6 right-6 md:hidden w-14 h-14 bg-gradient-to-r from-blue-600 to-sky-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:shadow-3xl transition-all duration-200 z-40"
       >
         <Plus className="h-6 w-6" />
       </Link>
@@ -776,7 +776,7 @@ export default function JobsPortal() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="bg-gradient-to-r from-sky-500 to-purple-600 p-2 rounded-xl">
+                <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-2 rounded-xl">
                   <Briefcase className="h-6 w-6 text-white" />
                 </div>
                 <div>
@@ -812,7 +812,7 @@ export default function JobsPortal() {
             <div>
               <h3 className="font-semibold mb-4">Connect</h3>
               <div className="flex space-x-4">
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors">
+                <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors">
                   <span className="text-sm">f</span>
                 </a>
                 <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-sky-600 transition-colors">

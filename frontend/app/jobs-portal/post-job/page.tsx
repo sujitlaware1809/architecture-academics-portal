@@ -178,14 +178,14 @@ export default function PostJobPage() {
   // Show error message if user is not a recruiter
   if (user && user.role !== 'RECRUITER') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-purple-50 to-mint-50">
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-mint-50">
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-md shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Logo */}
               <Link href="/jobs-portal" className="flex items-center space-x-3">
-                <div className="bg-gradient-to-r from-sky-500 to-purple-600 p-2 rounded-xl">
+                <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-2 rounded-xl">
                   <Briefcase className="h-6 w-6 text-white" />
                 </div>
                 <div>
@@ -197,7 +197,7 @@ export default function PostJobPage() {
               {/* User Section */}
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-sky-500 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-sky-500 rounded-full flex items-center justify-center">
                     <User className="h-4 w-4 text-white" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">
@@ -221,7 +221,7 @@ export default function PostJobPage() {
           {/* Back Button */}
           <Link
             href="/jobs-portal"
-            className="inline-flex items-center space-x-2 text-purple-600 hover:text-purple-700 mb-6 font-medium"
+            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 mb-6 font-medium"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Jobs</span>
@@ -241,7 +241,7 @@ export default function PostJobPage() {
               </p>
               <Link 
                 href="/jobs-portal"
-                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-sky-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 transition-all duration-200"
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-sky-700 transition-all duration-200"
               >
                 Back to Jobs Portal
               </Link>
@@ -253,14 +253,14 @@ export default function PostJobPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-purple-50 to-mint-50">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-mint-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/jobs-portal" className="flex items-center space-x-3">
-              <div className="bg-gradient-to-r from-sky-500 to-purple-600 p-2 rounded-xl">
+              <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-2 rounded-xl">
                 <Briefcase className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -272,7 +272,7 @@ export default function PostJobPage() {
             {/* User Section */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-sky-500 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-sky-500 rounded-full flex items-center justify-center">
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <span className="text-sm font-medium text-gray-700">
@@ -296,7 +296,7 @@ export default function PostJobPage() {
         {/* Back Button */}
         <Link
           href="/jobs-portal"
-          className="inline-flex items-center space-x-2 text-purple-600 hover:text-purple-700 mb-6 font-medium"
+          className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 mb-6 font-medium"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Jobs</span>
@@ -334,7 +334,7 @@ export default function PostJobPage() {
           <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Briefcase className="h-5 w-5 text-purple-600" />
+                <Briefcase className="h-5 w-5 text-blue-600" />
                 <span>Job Information</span>
               </CardTitle>
             </CardHeader>
@@ -362,7 +362,7 @@ export default function PostJobPage() {
                   name="jobType"
                   value={formData.jobType}
                   onChange={handleInputChange}
-                  className="w-full h-12 px-3 border border-gray-300 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                  className="w-full h-12 px-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                   required
                 >
                   {jobTypes.map(type => (
@@ -379,7 +379,7 @@ export default function PostJobPage() {
                   name="experienceLevel"
                   value={formData.experienceLevel}
                   onChange={handleInputChange}
-                  className="w-full h-12 px-3 border border-gray-300 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                  className="w-full h-12 px-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                   required
                 >
                   {experienceLevels.map(level => (
@@ -396,7 +396,7 @@ export default function PostJobPage() {
                   name="workMode"
                   value={formData.workMode}
                   onChange={handleInputChange}
-                  className="w-full h-12 px-3 border border-gray-300 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                  className="w-full h-12 px-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                   required
                 >
                   {workModes.map(mode => (
@@ -429,7 +429,7 @@ export default function PostJobPage() {
           <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Building className="h-5 w-5 text-purple-600" />
+                <Building className="h-5 w-5 text-blue-600" />
                 <span>Company Information</span>
               </CardTitle>
             </CardHeader>
@@ -476,7 +476,7 @@ export default function PostJobPage() {
                   onChange={handleInputChange}
                   placeholder="Brief description of your company..."
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
             </CardContent>
@@ -486,7 +486,7 @@ export default function PostJobPage() {
           <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <DollarSign className="h-5 w-5 text-purple-600" />
+                <DollarSign className="h-5 w-5 text-blue-600" />
                 <span>Salary & Benefits</span>
               </CardTitle>
             </CardHeader>
@@ -529,7 +529,7 @@ export default function PostJobPage() {
                   onChange={handleInputChange}
                   placeholder="Health insurance, 401k, flexible hours..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
             </CardContent>
@@ -539,7 +539,7 @@ export default function PostJobPage() {
           <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <FileText className="h-5 w-5 text-purple-600" />
+                <FileText className="h-5 w-5 text-blue-600" />
                 <span>Job Details</span>
               </CardTitle>
             </CardHeader>
@@ -554,7 +554,7 @@ export default function PostJobPage() {
                   onChange={handleInputChange}
                   placeholder="Detailed description of the role, responsibilities, and what makes this opportunity special..."
                   rows={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                   required
                 />
               </div>
@@ -569,7 +569,7 @@ export default function PostJobPage() {
                   onChange={handleInputChange}
                   placeholder="Required skills, education, experience, and qualifications..."
                   rows={5}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
                   required
                 />
               </div>
@@ -597,7 +597,7 @@ export default function PostJobPage() {
           <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5 text-purple-600" />
+                <Calendar className="h-5 w-5 text-blue-600" />
                 <span>Application Details</span>
               </CardTitle>
             </CardHeader>
@@ -643,7 +643,7 @@ export default function PostJobPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-sky-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-sky-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-sky-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-sky-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="flex items-center space-x-2">

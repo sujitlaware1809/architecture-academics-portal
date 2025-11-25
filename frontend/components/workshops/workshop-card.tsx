@@ -127,7 +127,7 @@ export function WorkshopCard({ workshop, onViewDetails }: WorkshopCardProps) {
   
   return (
     <article className="group cursor-pointer h-full">
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 h-full flex flex-col">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 h-full flex flex-col">
         {/* Workshop Image/Header */}
         <div className="relative h-48 overflow-hidden">
           {displayImage ? (
@@ -138,9 +138,9 @@ export function WorkshopCard({ workshop, onViewDetails }: WorkshopCardProps) {
               className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-100 via-indigo-100 to-blue-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-indigo-100 to-cyan-100">
               <div className="absolute inset-0 flex items-center justify-center">
-                <BookOpen className="h-20 w-20 text-purple-300 group-hover:text-purple-400 transition-colors" />
+                <BookOpen className="h-20 w-20 text-blue-300 group-hover:text-blue-400 transition-colors" />
               </div>
             </div>
           )}
@@ -148,7 +148,7 @@ export function WorkshopCard({ workshop, onViewDetails }: WorkshopCardProps) {
           
           {/* Date Badge */}
           <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg overflow-hidden w-16">
-            <div className={`${workshop.isFDP ? 'bg-indigo-500' : 'bg-purple-500'} text-white text-xs font-bold py-1 text-center uppercase`}>
+            <div className={`${workshop.isFDP ? 'bg-indigo-500' : 'bg-blue-500'} text-white text-xs font-bold py-1 text-center uppercase`}>
               {month}
             </div>
             <div className="text-2xl font-bold text-gray-900 py-2 text-center">
@@ -194,7 +194,7 @@ export function WorkshopCard({ workshop, onViewDetails }: WorkshopCardProps) {
                 </span>
               )}
               {workshop.category && (
-                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">
                   {workshop.category}
                 </span>
               )}
@@ -202,7 +202,7 @@ export function WorkshopCard({ workshop, onViewDetails }: WorkshopCardProps) {
           )}
 
           {/* Title */}
-          <h3 className="text-lg font-bold text-gray-900 mb-3 leading-tight group-hover:text-purple-600 transition-colors line-clamp-2">
+          <h3 className="text-lg font-bold text-gray-900 mb-3 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
             {workshop.title}
           </h3>
 
@@ -214,26 +214,26 @@ export function WorkshopCard({ workshop, onViewDetails }: WorkshopCardProps) {
           {/* Workshop Details */}
           <div className="space-y-2 text-xs text-gray-500 mb-4 pb-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
-              <User className="h-3.5 w-3.5 text-purple-500 flex-shrink-0" />
+              <User className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
               <span className="line-clamp-1">{trainerName}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="h-3.5 w-3.5 text-purple-500 flex-shrink-0" />
+              <Clock className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
               <span>{workshop.duration}h duration</span>
             </div>
             <div className="flex items-center gap-2">
-              <MapPin className="h-3.5 w-3.5 text-purple-500 flex-shrink-0" />
+              <MapPin className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
               <span className="line-clamp-1">{workshopMode} {displayLocation !== 'TBD' ? `- ${displayLocation}` : ''}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Award className="h-3.5 w-3.5 text-purple-500 flex-shrink-0" />
+              <Award className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
               <span>{workshop.registered_count || 0} / {workshop.max_participants} registered</span>
             </div>
           </div>
 
           {/* Price & Mode Badge */}
           <div className="flex items-center justify-between mb-3">
-            <span className="text-lg font-bold text-purple-600">
+            <span className="text-lg font-bold text-blue-600">
               {displayPrice}
             </span>
             {workshopMode === 'Online' && (
@@ -255,8 +255,8 @@ export function WorkshopCard({ workshop, onViewDetails }: WorkshopCardProps) {
                 isRegistered 
                   ? 'bg-green-500 cursor-default'
                   : workshop.isFDP 
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700' 
-                    : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
+                    ? 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700' 
+                    : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
               } ${isRegistering ? 'opacity-50 cursor-wait' : ''}`}
               onClick={handleRegister}
               disabled={isRegistering || isRegistered}

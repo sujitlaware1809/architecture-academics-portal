@@ -99,9 +99,9 @@ export default function MyWorkshopsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link 
             href="/profile" 
@@ -216,7 +216,7 @@ export default function MyWorkshopsPage() {
             </p>
             <Link
               href="/workshops"
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-md font-semibold hover:shadow-lg transition-shadow"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-md font-semibold hover:shadow-lg transition-shadow"
             >
               Browse Workshops
             </Link>
@@ -277,7 +277,7 @@ export default function MyWorkshopsPage() {
 
                   <Link
                     href={`/workshops/${registration.workshop_id}`}
-                    className="block w-full py-2 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-md font-semibold hover:shadow-lg transition-shadow"
+                    className="block w-full py-2 text-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-md font-semibold hover:shadow-lg transition-shadow"
                   >
                     View Workshop Details
                   </Link>

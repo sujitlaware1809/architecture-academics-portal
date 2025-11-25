@@ -10,7 +10,9 @@ import {
   MessageSquare,
   Share2,
   MoreHorizontal,
-  Bookmark
+  Bookmark,
+  Calendar,
+  User
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -329,6 +331,31 @@ The question is not whether to learn parametric design, but when to start. The a
   ]
 
   // Hardcoded comments
+  // Architecture-related Unsplash image IDs for thumbnails
+  const architectureImages = [
+    '1487958449943-2429e8be8625', // Modern building
+    '1518780664697-55e3ad13c0c6', // Geometric architecture
+    '1511818966892-d5d671fb5ffe', // Glass building
+    '1486406146700-532a9ca61417', // Modern office
+    '1545324418-cc1a3fa10b86', // Contemporary design
+    '1449824913935-59a10b8d2000', // Urban architecture
+    '1558618047-3c8da1c04d0a', // Building facade
+    '1513475382585-d06e58bcb0e6', // Modern structure
+    '1495433167890-4c28362e931e', // Glass architecture
+    '1520637836862-4d197d17c82a', // Contemporary building
+    '1506905925346-21bda4d32df4', // Architectural detail
+    '1486390227850-391b14cc8ac6', // Modern design
+    '1516156008625-3a99de2a904a', // Building interior
+    '1497366216548-37526070297c', // Architecture photography
+    '1526628953301-3e589a6a8b74'  // Urban design
+  ]
+
+  const getArchitectureImageId = (blogId: number, category?: string): string => {
+    // Create a more varied distribution based on blog ID and category
+    const hash = (blogId * 31 + (category?.length || 0) * 7) % architectureImages.length
+    return architectureImages[hash]
+  }
+
   const hardcodedComments: Comment[] = [
     {
       id: 1,
@@ -493,258 +520,105 @@ The question is not whether to learn parametric design, but when to start. The a
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Top Bar */}
-      <div className="border-b border-gray-200 sticky top-0 bg-white z-10">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/blogs">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon">
-                <Bookmark className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Share2 className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-5 w-5" />
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-br from-blue-500 to-indigo-700 py-20 text-white">
+        <div className="container mx-auto px-4 relative z-10">
+          <Link
+            href="/blogs"
+            className="inline-flex items-center text-blue-100 hover:text-white mb-6 transition-colors"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Blogs
+          </Link>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{blog.title}</h1>
+          <div className="flex flex-wrap items-center gap-4 text-blue-100">
+            <div className="flex items-center">
+              <Calendar className="mr-2 h-4 w-4" />
+              {new Date(blog.created_at).toLocaleDateString()}
+            </div>
+            <div className="flex items-center">
+              <User className="mr-2 h-4 w-4" />
+              {blog.author.first_name} {blog.author.last_name}
+            </div>
+            <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30 border-none">
+              {blog.category}
+            </Badge>
+          </div>
+        </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+      </div>
+
+      {/* Content Section */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 -mt-20 relative z-20 border border-blue-100">
+            {/* Featured Image */}
+            <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-8 overflow-hidden shadow-2xl relative">
+              <img 
+                src={`https://images.unsplash.com/photo-${getArchitectureImageId(blog.id, blog.category)}?w=800&h=450&fit=crop&crop=entropy&auto=format&q=80&saturation=-10&brightness=5`}
+                alt={blog.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = `https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&h=450&fit=crop&crop=entropy&auto=format&q=80`;
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+            </div>
+
+            <div className="prose prose-lg prose-blue max-w-none">
+              {/* We'll render markdown content here. For now, just displaying raw content or simple paragraphs */}
+              <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                {blog.content}
+              </div>
+              
+              {/* Example of rich content structure that would come from markdown */}
+              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Key Takeaways</h2>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-6">
+                <li>Understanding the core concepts of architectural design</li>
+                <li>Mastering the tools and techniques for modern visualization</li>
+                <li>Building a strong portfolio for career advancement</li>
+              </ul>
+
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-6 my-8 rounded-r-lg">
+                <p className="text-blue-800 font-medium italic m-0">
+                  "Architecture is not just about buildings; it's about creating spaces that inspire and elevate the human spirit."
+                </p>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div className="mt-12 pt-8 border-t border-gray-100">
+              <div className="flex flex-wrap gap-2">
+                {["Architecture", "Design", "NATA", "JEE Paper 2"].map((tag) => (
+                  <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Author Bio */}
+          <div className="mt-12 bg-white rounded-xl p-8 border border-gray-200 flex items-start gap-6">
+            <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <User className="h-8 w-8 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">About the Author</h3>
+              <p className="text-gray-600 mb-4">
+                {blog.author.first_name} {blog.author.last_name} is a senior architect and educator with over 10 years of experience in guiding students for NATA and JEE architecture exams.
+              </p>
+              <Button variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                View Profile
               </Button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Article */}
-      <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Title */}
-        <h1 className="text-5xl font-bold text-gray-900 mb-4 leading-tight">
-          {blog.title}
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-          {blog.excerpt}
-        </p>
-
-        {/* Author Info */}
-        <div className="flex items-center justify-between mb-8 pb-8 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg">
-              {blog.author.first_name[0]}{blog.author.last_name[0]}
-            </div>
-            <div>
-              <div className="font-semibold text-gray-900">
-                {blog.author.first_name} {blog.author.last_name}
-              </div>
-              <div className="text-sm text-gray-500 flex items-center gap-2">
-                <span>{formatDate(blog.created_at)}</span>
-                <span>·</span>
-                <span>{getReadingTime(blog.content)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLike}
-              disabled={!isAuthenticated}
-              className={liked ? "text-red-600" : ""}
-            >
-              <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
-              <span className="ml-1">{blog.likes_count}</span>
-            </Button>
-            <Button variant="ghost" size="sm">
-              <MessageSquare className="h-5 w-5" />
-              <span className="ml-1">{blog.comments_count}</span>
-            </Button>
-          </div>
-        </div>
-
-        {/* Category Badge */}
-        <div className="mb-8">
-          <Badge variant="secondary" className="text-sm px-3 py-1">
-            {blog.category}
-          </Badge>
-        </div>
-
-        {/* Content */}
-        <div className="prose prose-lg prose-purple max-w-none mb-16">
-          <div className="article-content text-gray-800 leading-relaxed space-y-6">
-            {blog.content.split('\n').map((line, idx) => {
-              const trimmedLine = line.trim()
-              
-              // H1 Headers
-              if (trimmedLine.startsWith('# ') && !trimmedLine.startsWith('## ')) {
-                return (
-                  <h1 key={idx} className="text-4xl font-bold text-gray-900 mt-16 mb-6 pb-3 border-b-2 border-purple-200">
-                    {trimmedLine.replace(/^#\s*/, '')}
-                  </h1>
-                )
-              }
-              
-              // H2 Headers
-              if (trimmedLine.startsWith('## ')) {
-                return (
-                  <h2 key={idx} className="text-3xl font-bold text-gray-900 mt-12 mb-4">
-                    {trimmedLine.replace(/^##\s*/, '')}
-                  </h2>
-                )
-              }
-              
-              // H3 Headers
-              if (trimmedLine.startsWith('### ')) {
-                return (
-                  <h3 key={idx} className="text-2xl font-bold text-gray-900 mt-8 mb-3">
-                    {trimmedLine.replace(/^###\s*/, '')}
-                  </h3>
-                )
-              }
-              
-              // List items
-              if (trimmedLine.startsWith('- ')) {
-                const content = trimmedLine.replace(/^-\s*/, '')
-                // Check if it contains bold text
-                if (content.includes('**')) {
-                  const parts = content.split('**')
-                  return (
-                    <li key={idx} className="text-lg text-gray-700 mb-2 ml-6 leading-relaxed list-disc">
-                      {parts.map((part, i) => (
-                        i % 2 === 1 ? <strong key={i} className="font-semibold text-gray-900">{part}</strong> : part
-                      ))}
-                    </li>
-                  )
-                }
-                return (
-                  <li key={idx} className="text-lg text-gray-700 mb-2 ml-6 leading-relaxed list-disc">
-                    {content}
-                  </li>
-                )
-              }
-              
-              // Regular paragraphs
-              if (trimmedLine) {
-                // Handle bold text
-                if (trimmedLine.includes('**')) {
-                  const parts = trimmedLine.split('**')
-                  return (
-                    <p key={idx} className="text-lg text-gray-700 mb-6 leading-relaxed">
-                      {parts.map((part, i) => (
-                        i % 2 === 1 ? <strong key={i} className="font-semibold text-gray-900">{part}</strong> : part
-                      ))}
-                    </p>
-                  )
-                }
-                return (
-                  <p key={idx} className="text-lg text-gray-700 mb-6 leading-relaxed">
-                    {trimmedLine}
-                  </p>
-                )
-              }
-              
-              // Empty lines
-              return <div key={idx} className="h-2"></div>
-            })}
-          </div>
-        </div>
-
-        {/* Tags */}
-        {blog.tags && (
-          <div className="mb-12 pb-12 border-b border-gray-200">
-            <div className="flex flex-wrap gap-2">
-              {blog.tags.split(',').map((tag, idx) => (
-                <Badge key={idx} variant="outline" className="text-sm px-3 py-1">
-                  {tag.trim()}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Comments Section */}
-        <div className="mt-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Responses ({blog.comments_count})
-          </h2>
-
-          {/* Comment Form */}
-          {isAuthenticated ? (
-            <div className="mb-12">
-              <Textarea
-                placeholder="What are your thoughts?"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="min-h-[120px] text-lg border-gray-300 focus:border-gray-900 focus:ring-gray-900 resize-none"
-              />
-              <div className="flex justify-end mt-3">
-                <Button
-                  onClick={handleCommentSubmit}
-                  disabled={!newComment.trim() || submittingComment}
-                  className="bg-gray-900 hover:bg-gray-800 text-white rounded-full px-6"
-                >
-                  {submittingComment ? "Publishing..." : "Respond"}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-12 p-6 bg-gray-50 rounded-lg text-center">
-              <p className="text-gray-600 mb-4">Sign in to leave a response</p>
-              <Link href="/login">
-                <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-full">
-                  Sign In
-                </Button>
-              </Link>
-            </div>
-          )}
-
-          {/* Comments List */}
-          <div className="space-y-8">
-            {comments.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
-                No responses yet. Be the first to share your thoughts!
-              </p>
-            ) : (
-              comments.map((comment) => (
-                <div key={comment.id} className="border-b border-gray-200 pb-8">
-                  <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                      {comment.author.first_name[0]}{comment.author.last_name[0]}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-gray-900">
-                          {comment.author.first_name} {comment.author.last_name}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {formatDate(comment.created_at)}
-                        </span>
-                      </div>
-                      <p className="text-gray-700 leading-relaxed mb-3">
-                        {comment.content}
-                      </p>
-                      <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-900 gap-1">
-                          <Heart className="h-4 w-4" />
-                          {comment.likes_count}
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-900">
-                          Reply
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </article>
     </div>
   )
 }

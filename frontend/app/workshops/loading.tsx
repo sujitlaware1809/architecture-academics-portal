@@ -4,7 +4,7 @@ import { BookOpen, GraduationCap } from "lucide-react"
 
 export default function WorkshopsLoading() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Hero Section Skeleton */}
       <section className="relative py-20 px-4 md:px-6 lg:px-8 text-center hero-section">
         <div className="relative max-w-5xl mx-auto">
@@ -37,7 +37,7 @@ export default function WorkshopsLoading() {
         <div className="flex justify-between items-center mb-8">
           <div className="h-8 bg-gray-200 rounded-md w-48 animate-pulse"></div>
           <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-purple-300" />
+            <BookOpen className="h-5 w-5 text-blue-300" />
             <div className="h-5 bg-gray-200 rounded-md w-36 animate-pulse"></div>
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function WorkshopsLoading() {
                 <div className="h-4 bg-gray-100 rounded-md w-full"></div>
                 <div className="flex justify-between items-center pt-4">
                   <div className="h-8 bg-gray-200 rounded-md w-24"></div>
-                  <div className="h-8 bg-purple-100 rounded-md w-24"></div>
+                  <div className="h-8 bg-blue-100 rounded-md w-24"></div>
                 </div>
               </div>
             </div>

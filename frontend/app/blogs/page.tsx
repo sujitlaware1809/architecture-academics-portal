@@ -31,6 +31,54 @@ const categories = [
   { value: "Industry Insights", label: "Industry Insights" }, { value: "General", label: "General" }
 ]
 
+// Simplified image URLs for direct use
+const getArchitectureImageUrl = (blogId: number, category?: string): string => {
+  const imageIds = [
+    "1487958449943-2429e8be8625", // Modern glass building
+    "1518780664697-55e3ad13c0c6", // White geometric architecture
+    "1511818966892-d5d671fb5ffe", // Glass tower
+    "1486406146700-532a9ca61417", // Curved office building
+    "1545324418-cc1a3fa10b86", // Contemporary design
+    "1449824913935-59a10b8d2000", // Urban architecture
+    "1558618047-3c8da1c04d0a", // Building facade
+    "1513475382585-d06e58bcb0e6", // Modern structure
+    "1495433167890-4c28362e931e", // Glass and steel
+    "1520637836862-4d197d17c82a", // Residential building
+    "1506905925346-21bda4d32df4", // Architectural detail
+    "1486390227850-391b14cc8ac6", // Industrial design
+    "1571055107559-3e67626fa8be", // Sustainable building
+    "1493119554163-2e4e03da1aec", // Wooden architecture
+    "1600607734281-634b740be46c", // Traditional architecture
+    "1512917774080-9991f1c4c750", // Cultural center
+    "1551818014-4dc9c99475ab", // Stadium architecture
+    "1589808146437-c6bb1d9e2e72", // Library architecture
+    "1485518882345-15d48910d58b", // Art deco building
+    "1567016526031-7a47b28e34e8", // Concrete architecture
+    "1497366858526-0766cadbe8fa", // Bridge design
+    "1605106900945-4b7a2a02e7ae", // Minimalist design
+    "1604167915706-c89e5686fe1e", // Contemporary facade
+    "1545259580-152b08a2b1b0", // Artistic building
+  ];
+  // Create unique hash using multiple factors for better distribution
+  const titleFactor = category ? category.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : 0;
+  const hash = (blogId * 1973 + titleFactor * 47 + Date.now() % 100) % imageIds.length;
+  const imageId = imageIds[hash];
+  return `https://images.unsplash.com/photo-${imageId}?w=400&h=300&fit=crop&auto=format&q=75`;
+}
+
+// Get random color overlay for variety
+const getImageOverlay = (blogId: number): string => {
+  const overlays = [
+    'bg-gradient-to-br from-blue-500/20 to-transparent',
+    'bg-gradient-to-br from-green-500/20 to-transparent', 
+    'bg-gradient-to-br from-purple-500/20 to-transparent',
+    'bg-gradient-to-br from-orange-500/20 to-transparent',
+    'bg-gradient-to-br from-pink-500/20 to-transparent',
+    ''
+  ]
+  return overlays[blogId % overlays.length]
+}
+
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([])
   const [featuredBlog, setFeaturedBlog] = useState<Blog | null>(null)
@@ -308,7 +356,7 @@ export default function BlogsPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Loading blogs...</p>
+          <p className="text-black">Loading blogs...</p>
         </div>
       </div>
     )
@@ -372,13 +420,13 @@ export default function BlogsPage() {
             <div className="flex items-center justify-between max-w-7xl mx-auto">
               <div>
                 <h1 className="text-4xl font-bold text-gray-900">Blog</h1>
-                <p className="text-gray-600 mt-2">Discover architecture stories and insights</p>
+                <p className="text-black mt-2">Discover architecture stories and insights</p>
               </div>
               
               {currentUser && (
                 <Button 
                   onClick={handleCreateBlog}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg shadow-lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg"
                 >
                   <Plus className="h-5 w-5 mr-2" />
                   Write Article
@@ -412,8 +460,8 @@ export default function BlogsPage() {
                       onClick={() => setSelectedCategory(category.value)} 
                       className={`whitespace-nowrap px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                         selectedCategory === category.value 
-                          ? 'bg-purple-600 text-white shadow-md' 
-                          : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                          ? 'bg-blue-600 text-white shadow-md' 
+                          : 'bg-white text-black hover:bg-gray-100 border border-gray-200'
                       }`}
                     >
                       {category.label}
@@ -436,7 +484,7 @@ export default function BlogsPage() {
             {currentUser && (
               <Button 
                 onClick={handleCreateBlog}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Write New Article
@@ -461,7 +509,7 @@ export default function BlogsPage() {
                   }
                 </h1>
                 
-                <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto">
+                <p className="text-xl text-black mb-8 leading-relaxed max-w-lg mx-auto">
                   {searchQuery || selectedCategory !== "all" 
                     ? "Try adjusting your search or explore different topics to discover amazing architectural insights."
                     : "Read, write and connect with great minds in architecture. Share your ideas with millions of readers."
@@ -486,7 +534,7 @@ export default function BlogsPage() {
                   {/* Sign Up CTA - Primary */}
                   <div className="bg-white rounded-2xl border-2 border-gray-100 p-8 shadow-xl">
                     <h3 className="text-2xl font-bold text-gray-900 mb-4">Join our community</h3>
-                    <p className="text-gray-600 mb-6">Discover stories, thinking, and expertise from writers on any topic.</p>
+                    <p className="text-black mb-6">Discover stories, thinking, and expertise from writers on any topic.</p>
                     
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Button 
@@ -514,15 +562,15 @@ export default function BlogsPage() {
                         <FileText className="h-8 w-8 text-blue-600" />
                       </div>
                       <h4 className="font-semibold text-gray-900 mb-2">Write Stories</h4>
-                      <p className="text-gray-600 text-sm">Share your architectural knowledge and experiences</p>
+                      <p className="text-black text-sm">Share your architectural knowledge and experiences</p>
                     </div>
                     
                     <div className="text-center p-6">
-                      <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Heart className="h-8 w-8 text-purple-600" />
+                      <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Heart className="h-8 w-8 text-indigo-600" />
                       </div>
                       <h4 className="font-semibold text-gray-900 mb-2">Connect</h4>
-                      <p className="text-gray-600 text-sm">Engage with fellow architects and designers</p>
+                      <p className="text-black text-sm">Engage with fellow architects and designers</p>
                     </div>
                     
                     <div className="text-center p-6">
@@ -530,7 +578,7 @@ export default function BlogsPage() {
                         <TrendingUp className="h-8 w-8 text-green-600" />
                       </div>
                       <h4 className="font-semibold text-gray-900 mb-2">Grow</h4>
-                      <p className="text-gray-600 text-sm">Build your reputation in the architecture community</p>
+                      <p className="text-black text-sm">Build your reputation in the architecture community</p>
                     </div>
                   </div>
                 </div>
@@ -567,60 +615,78 @@ export default function BlogsPage() {
                 {filteredBlogs.map((blog) => (
                   <article 
                     key={blog.id} 
-                    className="group cursor-pointer bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-purple-300"
+                    className="group cursor-pointer bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-300 hover:border-blue-400 hover:-translate-y-1"
                     onClick={() => window.location.href = `/blogs/${blog.slug}`}
                   >
                     {/* Image */}
-                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-purple-100 to-blue-100">
+                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                       <img 
-                        src={blog.featured_image || '/api/placeholder/400/300'} 
+                        src={blog.featured_image || getArchitectureImageUrl(blog.id, blog.category)}
                         alt={blog.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          // Fallback to a different image if the first one fails
+                          if (!target.src.includes('fallback')) {
+                            target.src = `https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&h=300&fit=crop&auto=format&q=75&fallback=true`;
+                          }
+                        }}
                       />
+                      {/* Dynamic overlay for visual variety */}
+                      <div className={`absolute inset-0 ${getImageOverlay(blog.id)}`}></div>
                       <div className="absolute top-3 right-3">
-                        <Badge className="bg-purple-600 text-white">
+                        <Badge className={`text-white shadow-lg border-2 backdrop-blur-sm ${
+                          blog.category === 'Sustainable Design' ? 'bg-green-600 border-green-700' :
+                          blog.category === 'Technology' ? 'bg-purple-600 border-purple-700' :
+                          blog.category === 'Design Trends' ? 'bg-pink-600 border-pink-700' :
+                          blog.category === 'Career Advice' ? 'bg-orange-600 border-orange-700' :
+                          blog.category === 'Architecture News' ? 'bg-red-600 border-red-700' :
+                          blog.category === 'Education' ? 'bg-indigo-600 border-indigo-700' :
+                          'bg-blue-600 border-blue-700'
+                        }`}>
                           {blog.category}
                         </Badge>
                       </div>
                     </div>
                     
                     {/* Content */}
-                    <div className="p-5 space-y-3">
+                    <div className="p-5 space-y-3 border-t-2 border-gray-200">
                       {/* Author */}
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
                           <UserIcon className="h-4 w-4 text-white" />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">
                             {typeof blog.author === 'string' ? blog.author : `${blog.author?.first_name || ''} ${blog.author?.last_name || ''}`}
                           </p>
-                          <p className="text-xs text-gray-500">{formatDate(blog.created_at)}</p>
+                          <p className="text-xs text-black">{formatDate(blog.created_at)}</p>
                         </div>
                       </div>
                       
                       {/* Title */}
-                      <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors">
+                      <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
                         {blog.title}
                       </h3>
                       
                       {/* Excerpt */}
-                      <p className="text-sm text-gray-600 line-clamp-3">
+                      <p className="text-sm text-black line-clamp-3">
                         {blog.excerpt || (blog.content ? blog.content.substring(0, 120) + "..." : "")}
                       </p>
                       
                       {/* Stats */}
-                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                        <div className="flex items-center gap-3 text-sm text-gray-500">
-                          <span className="flex items-center gap-1">
+                      <div className="flex items-center justify-between pt-3 border-t-2 border-gray-200">
+                        <div className="flex items-center gap-4 text-sm text-black">
+                          <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full border border-gray-300">
                             <Eye className="h-4 w-4" />
                             {blog.views_count || 0}
                           </span>
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full border border-gray-300">
                             <Heart className="h-4 w-4" />
                             {blog.likes_count || 0}
                           </span>
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full border border-gray-300">
                             <MessageSquare className="h-4 w-4" />
                             {blog.comments_count || 0}
                           </span>
@@ -664,13 +730,13 @@ export default function BlogsPage() {
             <DialogTitle className="text-2xl font-bold text-gray-900">
               {editingBlog ? "Edit Article" : "Write New Article"}
             </DialogTitle>
-            <DialogDescription className="text-gray-600">
+            <DialogDescription className="text-black">
               {editingBlog ? "Update your article details below" : "Share your knowledge and insights with the community"}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
             <div>
-              <Label htmlFor="title" className="text-sm font-semibold text-gray-700">Article Title *</Label>
+              <Label htmlFor="title" className="text-sm font-semibold text-black">Article Title *</Label>
               <Input 
                 id="title" 
                 value={blogForm.title} 
@@ -681,7 +747,7 @@ export default function BlogsPage() {
             </div>
             
             <div>
-              <Label htmlFor="excerpt" className="text-sm font-semibold text-gray-700">Excerpt</Label>
+              <Label htmlFor="excerpt" className="text-sm font-semibold text-black">Excerpt</Label>
               <Textarea 
                 id="excerpt" 
                 value={blogForm.excerpt} 
@@ -694,7 +760,7 @@ export default function BlogsPage() {
             </div>
             
             <div>
-              <Label htmlFor="content" className="text-sm font-semibold text-gray-700">Article Content *</Label>
+              <Label htmlFor="content" className="text-sm font-semibold text-black">Article Content *</Label>
               <Textarea 
                 id="content" 
                 value={blogForm.content} 
@@ -708,7 +774,7 @@ export default function BlogsPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="category" className="text-sm font-semibold text-gray-700">Category</Label>
+                <Label htmlFor="category" className="text-sm font-semibold text-black">Category</Label>
                 <Select value={blogForm.category} onValueChange={(value: string) => setBlogForm({ ...blogForm, category: value })}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -722,7 +788,7 @@ export default function BlogsPage() {
               </div>
               
               <div>
-                <Label htmlFor="status" className="text-sm font-semibold text-gray-700">Publication Status</Label>
+                <Label htmlFor="status" className="text-sm font-semibold text-black">Publication Status</Label>
                 <Select value={blogForm.status} onValueChange={(value: string) => setBlogForm({ ...blogForm, status: value })}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -746,7 +812,7 @@ export default function BlogsPage() {
             </div>
             
             <div>
-              <Label htmlFor="tags" className="text-sm font-semibold text-gray-700">Tags</Label>
+              <Label htmlFor="tags" className="text-sm font-semibold text-black">Tags</Label>
               <Input 
                 id="tags" 
                 value={blogForm.tags} 

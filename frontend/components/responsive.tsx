@@ -222,7 +222,7 @@ export const ResponsiveButton: React.FC<ResponsiveButtonProps> = ({
   }
 
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-sm',
+    primary: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm',
     secondary: 'bg-gray-100 hover:bg-gray-200 text-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100',
     outline: 'border border-gray-300 hover:bg-gray-50 text-gray-700 dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-300',
     ghost: 'hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-300'
@@ -235,7 +235,7 @@ export const ResponsiveButton: React.FC<ResponsiveButtonProps> = ({
       disabled={disabled}
       className={cn(
         'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200',
-        'focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2',
+        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         sizeClasses[size],
         variantClasses[variant],

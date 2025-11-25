@@ -61,7 +61,7 @@ const getStatusInfo = (status: string) => {
     },
     interview_scheduled: { 
       label: "Interview Scheduled", 
-      className: "bg-purple-100 text-purple-800 border-purple-300",
+      className: "bg-blue-100 text-blue-800 border-blue-300",
       icon: Calendar
     },
     accepted: { 
@@ -174,9 +174,9 @@ export default function MyApplicationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-sky-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your applications...</p>
         </div>
       </div>
@@ -184,9 +184,9 @@ export default function MyApplicationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-sky-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50">
       {/* Header */}
-      <header className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-600 shadow-lg">
+      <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <Link href="/profile" className="flex items-center space-x-3">
@@ -195,13 +195,13 @@ export default function MyApplicationsPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-serif font-bold text-white">My Applications</h1>
-                <span className="text-sm text-purple-200 font-medium">Track your job applications</span>
+                <span className="text-sm text-blue-200 font-medium">Track your job applications</span>
               </div>
             </Link>
             
             <Link 
               href="/profile"
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-purple-100 hover:text-white transition-colors rounded-full hover:bg-white/20"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-blue-100 hover:text-white transition-colors rounded-full hover:bg-white/20"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Profile</span>
@@ -220,7 +220,7 @@ export default function MyApplicationsPage() {
               <p className="text-gray-600 mb-6">You haven't applied to any jobs yet.</p>
               <Link 
                 href="/jobs-portal"
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all"
               >
                 Browse Jobs
               </Link>
@@ -230,7 +230,7 @@ export default function MyApplicationsPage() {
           <>
             {/* Messages Summary Banner */}
             {totalMessages > 0 && (
-              <div className="mb-6 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg shadow-lg p-6 text-white">
+              <div className="mb-6 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg shadow-lg p-6 text-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="bg-white/20 p-3 rounded-full">
@@ -238,10 +238,10 @@ export default function MyApplicationsPage() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold">You have {totalMessages} new message{totalMessages > 1 ? 's' : ''}</h3>
-                      <p className="text-purple-100">Recruiters have sent you messages about your applications</p>
+                      <p className="text-blue-100">Recruiters have sent you messages about your applications</p>
                     </div>
                   </div>
-                  <Badge className="bg-white text-purple-600 text-lg px-4 py-2 font-bold">
+                  <Badge className="bg-white text-blue-600 text-lg px-4 py-2 font-bold">
                     {totalMessages}
                   </Badge>
                 </div>
@@ -277,8 +277,8 @@ export default function MyApplicationsPage() {
                         <div
                           key={application.id}
                           onClick={() => selectApplication(application)}
-                          className={`p-4 cursor-pointer transition-all hover:bg-purple-50 ${
-                            selectedApplication?.id === application.id ? 'bg-purple-50 border-l-4 border-purple-600' : ''
+                          className={`p-4 cursor-pointer transition-all hover:bg-blue-50 ${
+                            selectedApplication?.id === application.id ? 'bg-blue-50 border-l-4 border-blue-600' : ''
                           }`}
                         >
                           <div className="flex items-start justify-between mb-2">
@@ -299,7 +299,7 @@ export default function MyApplicationsPage() {
                             </span>
                           </div>
                           {messageCount > 0 && (
-                            <div className="mt-2 flex items-center text-xs text-purple-600 font-medium">
+                            <div className="mt-2 flex items-center text-xs text-blue-600 font-medium">
                               <MessageCircle className="h-3 w-3 mr-1" />
                               {messageCount} message{messageCount > 1 ? 's' : ''} from recruiter
                             </div>
@@ -368,7 +368,7 @@ export default function MyApplicationsPage() {
                               href={getResumeUrl(selectedApplication.resume_url) || '#'}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
                               <Eye className="h-4 w-4" />
                               <span>View Resume</span>
@@ -388,20 +388,20 @@ export default function MyApplicationsPage() {
                   </Card>
 
                   {/* Messages Card - Enhanced */}
-                  <Card className={`shadow-xl border-2 ${messages.length > 0 ? 'border-purple-300 bg-gradient-to-br from-purple-50 to-white' : 'border-gray-200 bg-white/80'} backdrop-blur-sm`}>
-                    <CardHeader className={messages.length > 0 ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg' : ''}>
+                  <Card className={`shadow-xl border-2 ${messages.length > 0 ? 'border-blue-300 bg-gradient-to-br from-blue-50 to-white' : 'border-gray-200 bg-white/80'} backdrop-blur-sm`}>
+                    <CardHeader className={messages.length > 0 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg' : ''}>
                       <CardTitle className={`flex items-center justify-between text-xl font-serif ${messages.length > 0 ? 'text-white' : ''}`}>
                         <div className="flex items-center">
-                          <MessageCircle className={`h-5 w-5 mr-2 ${messages.length > 0 ? 'text-white' : 'text-purple-600'}`} />
+                          <MessageCircle className={`h-5 w-5 mr-2 ${messages.length > 0 ? 'text-white' : 'text-blue-600'}`} />
                           Messages from Recruiter
                         </div>
                         {messages.length > 0 && (
-                          <Badge className="bg-white text-purple-600 font-bold">
+                          <Badge className="bg-white text-blue-600 font-bold">
                             {messages.length} message{messages.length > 1 ? 's' : ''}
                           </Badge>
                         )}
                       </CardTitle>
-                      <CardDescription className={messages.length > 0 ? 'text-purple-100' : ''}>
+                      <CardDescription className={messages.length > 0 ? 'text-blue-100' : ''}>
                         {messages.length > 0 ? 'Read your messages from the recruiter below' : 'Communication history for this application'}
                       </CardDescription>
                     </CardHeader>
@@ -422,21 +422,21 @@ export default function MyApplicationsPage() {
                               key={index}
                               className={`p-5 rounded-xl shadow-md ${
                                 msg.sender === 'recruiter' 
-                                  ? 'bg-gradient-to-r from-purple-100 to-purple-50 border-l-4 border-purple-500' 
+                                  ? 'bg-gradient-to-r from-indigo-100 to-indigo-50 border-l-4 border-indigo-500' 
                                   : 'bg-gradient-to-r from-blue-100 to-blue-50 border-l-4 border-blue-500'
                               }`}
                             >
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center space-x-2">
                                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                    msg.sender === 'recruiter' ? 'bg-purple-600' : 'bg-blue-600'
+                                    msg.sender === 'recruiter' ? 'bg-indigo-600' : 'bg-blue-600'
                                   }`}>
                                     <span className="text-white text-sm font-bold">
                                       {msg.sender === 'recruiter' ? 'R' : 'Y'}
                                     </span>
                                   </div>
                                   <span className={`text-sm font-bold ${
-                                    msg.sender === 'recruiter' ? 'text-purple-700' : 'text-blue-700'
+                                    msg.sender === 'recruiter' ? 'text-indigo-700' : 'text-blue-700'
                                   }`}>
                                     {msg.sender === 'recruiter' ? 'Recruiter' : 'You'}
                                   </span>

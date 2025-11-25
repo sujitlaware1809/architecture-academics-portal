@@ -181,22 +181,22 @@ export default function ProfileSetupPage() {
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
       <div className="flex items-center space-x-4">
-        <div className={`flex items-center ${step >= 1 ? 'text-purple-600' : 'text-gray-400'}`}>
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-purple-600 text-white' : 'bg-gray-200'}`}>
+        <div className={`flex items-center ${step >= 1 ? 'text-blue-600' : 'text-gray-400'}`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
             1
           </div>
           <span className="ml-2 text-sm font-medium">User Type</span>
         </div>
         <div className="w-12 h-0.5 bg-gray-300"></div>
-        <div className={`flex items-center ${step >= 2 ? 'text-purple-600' : 'text-gray-400'}`}>
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-purple-600 text-white' : 'bg-gray-200'}`}>
+        <div className={`flex items-center ${step >= 2 ? 'text-blue-600' : 'text-gray-400'}`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
             2
           </div>
           <span className="ml-2 text-sm font-medium">Basic Info</span>
         </div>
         <div className="w-12 h-0.5 bg-gray-300"></div>
-        <div className={`flex items-center ${step >= 3 ? 'text-purple-600' : 'text-gray-400'}`}>
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-purple-600 text-white' : 'bg-gray-200'}`}>
+        <div className={`flex items-center ${step >= 3 ? 'text-blue-600' : 'text-gray-400'}`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
             3
           </div>
           <span className="ml-2 text-sm font-medium">Details</span>
@@ -216,10 +216,10 @@ export default function ProfileSetupPage() {
         {/* Student Option */}
         <button
           onClick={() => handleUserTypeSelect("student")}
-          className="group relative p-8 border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:shadow-lg transition-all duration-300 text-left"
+          className="group relative p-8 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-lg transition-all duration-300 text-left"
         >
           <div className="flex flex-col items-center text-center space-y-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
               <GraduationCap className="h-10 w-10 text-white" />
             </div>
             <div>
@@ -234,10 +234,10 @@ export default function ProfileSetupPage() {
         {/* Professional Option */}
         <button
           onClick={() => handleUserTypeSelect("professional")}
-          className="group relative p-8 border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:shadow-lg transition-all duration-300 text-left"
+          className="group relative p-8 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-lg transition-all duration-300 text-left"
         >
           <div className="flex flex-col items-center text-center space-y-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
               <Briefcase className="h-10 w-10 text-white" />
             </div>
             <div>
@@ -366,7 +366,7 @@ export default function ProfileSetupPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Button onClick={handleNext} className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600">
+        <Button onClick={handleNext} className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600">
           Next
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
@@ -377,7 +377,7 @@ export default function ProfileSetupPage() {
   const renderStep3Student = () => (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <GraduationCap className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+        <GraduationCap className="h-12 w-12 text-blue-600 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Student Details</h2>
         <p className="text-gray-600">Tell us about your academic journey</p>
       </div>
@@ -457,7 +457,7 @@ export default function ProfileSetupPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Button onClick={handleSubmit} disabled={isLoading} className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600">
+        <Button onClick={handleSubmit} disabled={isLoading} className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600">
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -477,7 +477,7 @@ export default function ProfileSetupPage() {
   const renderStep3Professional = () => (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <Briefcase className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+        <Briefcase className="h-12 w-12 text-blue-600 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Professional Details</h2>
         <p className="text-gray-600">Share your professional background</p>
       </div>
@@ -573,7 +573,7 @@ export default function ProfileSetupPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Button onClick={handleSubmit} disabled={isLoading} className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600">
+        <Button onClick={handleSubmit} disabled={isLoading} className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600">
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -591,7 +591,7 @@ export default function ProfileSetupPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4">
       <div className="max-w-3xl mx-auto">
         {renderStepIndicator()}
         

@@ -59,11 +59,11 @@ const getCategoryColor = (category: string) => {
   const colors: { [key: string]: string } = {
     "General Discussion": "bg-gray-100 text-gray-800",
     "Design Help": "bg-blue-100 text-blue-800",
-    "Technical Questions": "bg-purple-100 text-purple-800",
+    "Technical Questions": "bg-blue-100 text-blue-800",
     "Career Advice": "bg-green-100 text-green-800",
     "Software & Tools": "bg-indigo-100 text-indigo-800",
     "Education & Learning": "bg-yellow-100 text-yellow-800",
-    "Project Feedback": "bg-pink-100 text-pink-800",
+    "Project Feedback": "bg-sky-100 text-sky-800",
     "Industry News": "bg-red-100 text-red-800",
     "Networking": "bg-teal-100 text-teal-800",
   }
@@ -362,14 +362,14 @@ export default function DiscussionsPage() {
             </div>
             {isAuthenticated ? (
               <Link href="/discussions/new">
-                <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg gap-2">
+                <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg gap-2">
                   <Plus className="h-5 w-5" />
                   Ask Question
                 </Button>
               </Link>
             ) : (
               <Link href="/login">
-                <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg gap-2">
+                <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg gap-2">
                   <Plus className="h-5 w-5" />
                   Sign In to Ask
                 </Button>
@@ -387,7 +387,7 @@ export default function DiscussionsPage() {
                   placeholder="Search discussions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-full border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                  className="pl-10 w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -398,7 +398,7 @@ export default function DiscussionsPage() {
                   onClick={() => setSelectedCategory(cat.value)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                     selectedCategory === cat.value
-                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
                       : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
                   }`}
                 >
@@ -416,7 +416,7 @@ export default function DiscussionsPage() {
                 onClick={() => setSelectedCategory(cat.value)}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                   selectedCategory === cat.value
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -455,7 +455,7 @@ export default function DiscussionsPage() {
               </p>
               {isAuthenticated && (
                 <Link href="/discussions/new">
-                  <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
                     <Plus className="h-4 w-4 mr-2" />
                     Ask a Question
                   </Button>
@@ -468,13 +468,13 @@ export default function DiscussionsPage() {
             {discussions.map((discussion) => (
               <Link key={discussion.id} href={`/discussions/${discussion.id}`}>
                 <article className="group cursor-pointer h-full">
-                  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 h-full flex flex-col">
+                  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 h-full flex flex-col">
                     {/* Header with Gradient Background */}
-                    <div className="relative p-6 bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 border-b border-gray-100">
+                    <div className="relative p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-sky-50 border-b border-gray-100">
                       {/* Status Badges */}
                       <div className="flex items-center gap-2 mb-3 flex-wrap">
                         {discussion.is_pinned && (
-                          <Badge className="bg-purple-600 text-white hover:bg-purple-600 gap-1">
+                          <Badge className="bg-blue-600 text-white hover:bg-blue-600 gap-1">
                             <Pin className="h-3 w-3" />
                             Pinned
                           </Badge>
@@ -491,7 +491,7 @@ export default function DiscussionsPage() {
                       </div>
                       
                       {/* Title */}
-                      <h2 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-purple-600 transition-colors line-clamp-2 mb-3">
+                      <h2 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2 mb-3">
                         {discussion.title}
                       </h2>
 
@@ -529,7 +529,7 @@ export default function DiscussionsPage() {
 
                       {/* Author */}
                       <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-100">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                           {discussion.author.first_name[0]}{discussion.author.last_name[0]}
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
@@ -555,7 +555,7 @@ export default function DiscussionsPage() {
                             {discussion.replies_count}
                           </span>
                         </div>
-                        <span className="flex items-center gap-1 group-hover:text-purple-500 transition-colors font-medium">
+                        <span className="flex items-center gap-1 group-hover:text-blue-500 transition-colors font-medium">
                           <ThumbsUp className="h-3.5 w-3.5" />
                           {discussion.likes_count}
                         </span>

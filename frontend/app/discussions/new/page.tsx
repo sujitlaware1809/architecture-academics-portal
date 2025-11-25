@@ -75,11 +75,11 @@ export default function NewDiscussionPage() {
     const colors: { [key: string]: string } = {
       "General Discussion": "bg-gray-100 text-gray-800",
       "Design Help": "bg-blue-100 text-blue-800",
-      "Technical Questions": "bg-purple-100 text-purple-800",
+      "Technical Questions": "bg-blue-100 text-blue-800",
       "Career Advice": "bg-green-100 text-green-800",
       "Software & Tools": "bg-indigo-100 text-indigo-800",
       "Education & Learning": "bg-yellow-100 text-yellow-800",
-      "Project Feedback": "bg-pink-100 text-pink-800",
+      "Project Feedback": "bg-sky-100 text-sky-800",
       "Industry News": "bg-red-100 text-red-800",
       "Networking": "bg-teal-100 text-teal-800",
     }
@@ -104,7 +104,7 @@ export default function NewDiscussionPage() {
                 <p className="text-sm text-gray-600">Get help from the community</p>
               </div>
             </div>
-            <HelpCircle className="h-8 w-8 text-purple-600" />
+            <HelpCircle className="h-8 w-8 text-blue-600" />
           </div>
         </div>
       </div>
@@ -117,12 +117,12 @@ export default function NewDiscussionPage() {
         )}
 
         {/* Tips Card */}
-        <Card className="mb-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
+        <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <CardHeader>
-            <CardTitle className="text-lg text-purple-900">Tips for asking a good question:</CardTitle>
+            <CardTitle className="text-lg text-blue-900">Tips for asking a good question:</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2 text-sm text-purple-800">
+            <ul className="space-y-2 text-sm text-blue-800">
               <li>✓ Be specific and clear about your problem</li>
               <li>✓ Provide relevant context and details</li>
               <li>✓ Choose the right category for your question</li>
@@ -183,7 +183,7 @@ Any relevant context or background information?"
                 <select
                   value={formData.category}
                   onChange={(e) => handleChange("category", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
@@ -235,7 +235,7 @@ Any relevant context or background information?"
                 <Button
                   type="submit"
                   disabled={submitting || !formData.title.trim() || !formData.content.trim()}
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white gap-2"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white gap-2"
                 >
                   <Send className="h-4 w-4" />
                   {submitting ? "Posting..." : "Post Question"}

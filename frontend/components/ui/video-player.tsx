@@ -147,7 +147,7 @@ export function VideoPlayer({
               onChange={handleSeek}
               className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
               style={{
-                background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${(currentTime / duration) * 100}%, #4b5563 ${(currentTime / duration) * 100}%, #4b5563 100%)`
+                background: `linear-gradient(to right, #2563eb 0%, #2563eb ${(currentTime / duration) * 100}%, #4b5563 ${(currentTime / duration) * 100}%, #4b5563 100%)`
               }}
             />
           </div>
@@ -158,7 +158,7 @@ export function VideoPlayer({
               {/* Play/Pause */}
               <button
                 onClick={togglePlay}
-                className="text-white hover:text-purple-400 transition-colors"
+                className="text-white hover:text-blue-400 transition-colors"
               >
                 {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
               </button>
@@ -166,7 +166,7 @@ export function VideoPlayer({
               {/* Skip Backward */}
               <button
                 onClick={skipBackward}
-                className="text-white hover:text-purple-400 transition-colors"
+                className="text-white hover:text-blue-400 transition-colors"
               >
                 <SkipBack className="h-5 w-5" />
               </button>
@@ -174,7 +174,7 @@ export function VideoPlayer({
               {/* Skip Forward */}
               <button
                 onClick={skipForward}
-                className="text-white hover:text-purple-400 transition-colors"
+                className="text-white hover:text-blue-400 transition-colors"
               >
                 <SkipForward className="h-5 w-5" />
               </button>
@@ -183,7 +183,7 @@ export function VideoPlayer({
               <div className="flex items-center gap-2">
                 <button
                   onClick={toggleMute}
-                  className="text-white hover:text-purple-400 transition-colors"
+                  className="text-white hover:text-blue-400 transition-colors"
                 >
                   {isMuted || volume === 0 ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
                 </button>
@@ -211,7 +211,7 @@ export function VideoPlayer({
               {/* Fullscreen */}
               <button
                 onClick={toggleFullscreen}
-                className="text-white hover:text-purple-400 transition-colors"
+                className="text-white hover:text-blue-400 transition-colors"
               >
                 <Maximize className="h-5 w-5" />
               </button>

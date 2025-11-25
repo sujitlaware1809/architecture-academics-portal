@@ -260,7 +260,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
       "Architecture News": "bg-blue-100 text-blue-700 border-blue-200",
-      "Design Trends": "bg-purple-100 text-purple-700 border-purple-200",
+      "Design Trends": "bg-indigo-100 text-indigo-700 border-indigo-200",
       "Sustainable Design": "bg-green-100 text-green-700 border-green-200",
       "Technology": "bg-cyan-100 text-cyan-700 border-cyan-200",
       "Career Advice": "bg-orange-100 text-orange-700 border-orange-200",
@@ -278,11 +278,11 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
 
     return (
       <div key={comment.id} className={`${depth > 0 ? "ml-12 mt-4" : "mb-6"}`}>
-        <Card className="border-l-4 border-purple-200">
+        <Card className="border-l-4 border-blue-200">
           <CardContent className="pt-4">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-white font-bold">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold">
                   {comment.author.first_name[0]}{comment.author.last_name[0]}
                 </div>
                 <div>
@@ -314,7 +314,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-gray-600 hover:text-purple-600 hover:bg-purple-50"
+                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
               >
                 <ThumbsUp className="h-4 w-4 mr-1" />
                 {comment.likes_count}
@@ -324,7 +324,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50"
+                  className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                   onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
                 >
                   <MessageSquare className="h-4 w-4 mr-1" />
@@ -346,7 +346,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                   <Button
                     size="sm"
                     onClick={() => handleReplySubmit(comment.id)}
-                    className="bg-purple-600 hover:bg-purple-700"
+                    className="bg-blue-600 hover:bg-blue-700"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
@@ -378,7 +378,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50/30 via-white to-white">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50/30 via-white to-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
@@ -397,13 +397,13 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
 
   if (!blog) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50/30 via-white to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50/30 via-white to-white flex items-center justify-center">
         <Card className="max-w-md mx-4">
           <CardContent className="text-center py-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Blog Not Found</h2>
             <p className="text-gray-600 mb-6">The blog post you're looking for doesn't exist.</p>
             <Link href="/blogs-discussions">
-              <Button className="bg-gradient-to-r from-purple-600 to-indigo-600">
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Blogs
               </Button>
@@ -415,12 +415,12 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50/30 via-white to-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/30 via-white to-white">
       {/* Back Button */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Link href="/blogs-discussions">
-            <Button variant="ghost" className="text-gray-600 hover:text-purple-600">
+            <Button variant="ghost" className="text-gray-600 hover:text-blue-600">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Blogs
             </Button>
@@ -442,7 +442,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
 
             <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-6">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-white font-bold">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold">
                   {blog.author.first_name[0]}{blog.author.last_name[0]}
                 </div>
                 <div>
@@ -523,7 +523,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
           {blog.tags && (
             <div className="flex flex-wrap gap-2 mb-12 pb-12 border-b border-gray-200">
               {blog.tags.split(",").map((tag, index) => (
-                <Badge key={index} variant="outline" className="text-purple-600 border-purple-300">
+                <Badge key={index} variant="outline" className="text-blue-600 border-blue-300">
                   #{tag.trim()}
                 </Badge>
               ))}
@@ -534,13 +534,13 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
         {/* Comments Section */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <MessageSquare className="h-8 w-8 text-purple-600" />
+            <MessageSquare className="h-8 w-8 text-blue-600" />
             Discussion ({blog.comments_count})
           </h2>
 
           {/* New Comment Form */}
           {isAuthenticated ? (
-            <Card className="mb-8 border-2 border-purple-200">
+            <Card className="mb-8 border-2 border-blue-200">
               <CardContent className="pt-6">
                 <Textarea
                   placeholder="Join the discussion... Share your thoughts, ask questions, or provide insights."
@@ -559,7 +559,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                   <Button
                     onClick={handleCommentSubmit}
                     disabled={!newComment.trim() || submittingComment}
-                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                   >
                     <Send className="h-4 w-4 mr-2" />
                     {submittingComment ? "Posting..." : "Post Comment"}
@@ -578,7 +578,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                   Please sign in to comment and engage with the community
                 </p>
                 <Link href="/login">
-                  <Button className="bg-gradient-to-r from-purple-600 to-indigo-600">
+                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
                     Sign In to Comment
                   </Button>
                 </Link>

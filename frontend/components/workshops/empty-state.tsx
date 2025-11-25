@@ -19,7 +19,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4 bg-white/50 rounded-xl border border-gray-100 shadow-sm">
-      <div className={`p-4 rounded-full ${isForFdp ? 'bg-indigo-50' : 'bg-purple-50'} mb-4`}>
+      <div className={`p-4 rounded-full ${isForFdp ? 'bg-indigo-50' : 'bg-blue-50'} mb-4`}>
         {icon}
       </div>
       <h3 className="text-xl font-semibold text-gray-800 mb-2">{title}</h3>
@@ -29,7 +29,7 @@ export function EmptyState({
         className={`px-4 py-2 rounded-full flex items-center gap-2 text-white shadow-sm transition-all ${
           isForFdp 
             ? 'bg-indigo-500 hover:bg-indigo-600' 
-            : 'bg-purple-500 hover:bg-purple-600'
+            : 'bg-blue-500 hover:bg-blue-600'
         }`}
       >
         <RefreshCw className="h-4 w-4" />

@@ -44,7 +44,7 @@ interface Application {
 const statusConfig = {
   pending: { label: "Pending", className: "bg-yellow-100 text-yellow-800", icon: Clock },
   under_review: { label: "Under Review", className: "bg-blue-100 text-blue-800", icon: Eye },
-  interview_scheduled: { label: "Interview Scheduled", className: "bg-purple-100 text-purple-800", icon: AlertCircle },
+  interview_scheduled: { label: "Interview Scheduled", className: "bg-blue-100 text-blue-800", icon: AlertCircle },
   accepted: { label: "Accepted", className: "bg-green-100 text-green-800", icon: CheckCircle },
   rejected: { label: "Rejected", className: "bg-red-100 text-red-800", icon: XCircle }
 }
@@ -149,9 +149,9 @@ export default function ApplicationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-sky-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading applications...</p>
         </div>
       </div>
@@ -159,7 +159,7 @@ export default function ApplicationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-sky-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b px-6 py-4">
         <div className="max-w-7xl mx-auto">
@@ -167,7 +167,7 @@ export default function ApplicationsPage() {
             <div className="flex items-center space-x-4">
               <Link 
                 href="/recruiter-dashboard"
-                className="flex items-center text-purple-600 hover:text-purple-800 transition-colors"
+                className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 <span>Back to Dashboard</span>
@@ -189,8 +189,8 @@ export default function ApplicationsPage() {
             onClick={() => setSelectedStatus("all")}
             className={`p-4 rounded-lg border-2 transition-all ${
               selectedStatus === "all" 
-                ? "border-purple-500 bg-purple-50" 
-                : "border-gray-200 hover:border-purple-300"
+                ? "border-blue-500 bg-blue-50" 
+                : "border-gray-200 hover:border-blue-300"
             }`}
           >
             <div className="text-2xl font-bold text-gray-900">{statusCounts.all}</div>
@@ -205,8 +205,8 @@ export default function ApplicationsPage() {
                 onClick={() => setSelectedStatus(key)}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   selectedStatus === key 
-                    ? "border-purple-500 bg-purple-50" 
-                    : "border-gray-200 hover:border-purple-300"
+                    ? "border-blue-500 bg-blue-50" 
+                    : "border-gray-200 hover:border-blue-300"
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -279,7 +279,7 @@ export default function ApplicationsPage() {
                                 <span className="text-gray-300">|</span>
                                 <a 
                                   href={`mailto:${application.applicant.email}`}
-                                  className="text-purple-600 hover:text-purple-800"
+                                  className="text-blue-600 hover:text-blue-800"
                                 >
                                   {application.applicant.email}
                                 </a>
@@ -290,7 +290,7 @@ export default function ApplicationsPage() {
 
                         <Link 
                           href={`/recruiter-dashboard/applications/${application.job.id}`}
-                          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
                         >
                           <Eye className="h-4 w-4" />
                           View Details

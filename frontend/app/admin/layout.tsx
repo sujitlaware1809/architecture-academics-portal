@@ -57,8 +57,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           >
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center">
-                <div className="bg-purple-100 p-2 rounded-md">
-                  <Settings className="h-6 w-6 text-purple-600" />
+                <div className="bg-blue-100 p-2 rounded-md">
+                  <Settings className="h-6 w-6 text-blue-600" />
                 </div>
                 <h1 className="ml-3 text-xl font-semibold text-gray-800">Admin Panel</h1>
               </div>
@@ -71,7 +71,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-purple-50 hover:text-purple-700 text-gray-700"
+                    className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-blue-50 hover:text-blue-700 text-gray-700"
                     onClick={() => setMobileSidebarOpen(false)}
                   >
                     <IconComponent className="mr-3 h-5 w-5" />
@@ -100,8 +100,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className={`flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'} p-4 border-b border-gray-200`}>
           {sidebarOpen && (
             <div className="flex items-center">
-              <div className="bg-purple-100 p-2 rounded-md">
-                <Settings className="h-6 w-6 text-purple-600" />
+              <div className="bg-blue-100 p-2 rounded-md">
+                <Settings className="h-6 w-6 text-blue-600" />
               </div>
               <h1 className="ml-3 text-xl font-semibold text-gray-800">Admin Panel</h1>
             </div>
@@ -122,7 +122,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center ${sidebarOpen ? 'px-3' : 'justify-center'} py-2 text-sm font-medium rounded-md hover:bg-purple-50 hover:text-purple-700 text-gray-700`}
+                className={`flex items-center ${sidebarOpen ? 'px-3' : 'justify-center'} py-2 text-sm font-medium rounded-md hover:bg-blue-50 hover:text-blue-700 text-gray-700`}
               >
                 <IconComponent className={sidebarOpen ? 'mr-3 h-5 w-5' : 'h-6 w-6'} />
                 {sidebarOpen && item.name}
