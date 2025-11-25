@@ -51,7 +51,6 @@ structlog==23.2.0
 # Testing dependencies
 pytest==7.4.3
 pytest-asyncio==0.21.1
-httpx==0.25.2
 
 # Development dependencies
 black==23.11.0
@@ -65,5 +64,5 @@ markdown==3.5.1
 python-slugify==8.0.1
 
 # Email and OTP
-smtplib2==0.2.1
-random==1.0.1
+# Note: smtplib is built-in to Python, no need to install
+# Note: random is built-in to Python, no need to install
