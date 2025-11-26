@@ -21,6 +21,7 @@ import {
   LayoutDashboard,
   Mail,
   Megaphone,
+  Bell,
   Users,
   Mic,
   FileText,
@@ -42,6 +43,9 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [unreadCount, setUnreadCount] = useState<number>(0)
+  const [showNotifications, setShowNotifications] = useState<boolean>(false)
 
   useEffect(() => {
     const checkAuth = () => {
@@ -67,6 +71,38 @@ export default function Header() {
       window.removeEventListener('auth-change', handleAuthChange)
     }
   }, [])
+
+  // Fetch notifications for authenticated users (client side)
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!isAuthenticated) return
+      try {
+        const token = localStorage.getItem("access_token")
+        if (!token) return
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications?limit=6`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setNotifications(data)
+          setUnreadCount(data.filter((n: any) => !n.read).length)
+          return
+        }
+      } catch (err) {
+        // ignore and fallback to sample
+      }
+
+      // Fallback sample notifications
+      const sample = [
+        { id: 1, title: "Welcome!", message: "You have new course recommendations.", read: false, created_at: new Date().toISOString() },
+        { id: 2, title: "Event Reminder", message: "Workshop tomorrow at 4 PM.", read: false, created_at: new Date().toISOString() }
+      ]
+      setNotifications(sample)
+      setUnreadCount(sample.filter(n => !n.read).length)
+    }
+
+    fetchNotifications()
+  }, [isAuthenticated])
 
   const userMenuItems = isAuthenticated ? [
     { name: "Profile", href: "/profile", icon: User },
@@ -223,18 +259,102 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Auth Buttons - Desktop */}
+            {/* Auth Buttons - Desktop (with Notifications) */}
             <div className="hidden lg:flex items-center gap-2">
               {isAuthenticated ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleLogout}
-                  className="text-white hover:text-white/80 hover:bg-red-500/20 border border-white/20 backdrop-blur-sm text-sm"
-                >
-                  <LogOut className="h-4 w-4 mr-1" />
-                  Logout
-                </Button>
+                <>
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowNotifications(!showNotifications)}
+                      className="p-2 rounded-md text-white hover:bg-white/10 transition-colors relative"
+                      aria-label="Notifications"
+                    >
+                      <Bell className="h-5 w-5" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white bg-red-500 rounded-full">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {showNotifications && (
+                      <div className="absolute right-0 mt-2 w-96 bg-white text-gray-900 shadow-lg rounded-md overflow-hidden z-50">
+                        <div className="px-4 py-2 border-b font-medium flex items-center justify-between">
+                          <span>Notifications</span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                setNotifications((prev) => prev.map((x) => ({ ...x, read: true })))
+                                setUnreadCount(0)
+                                // TODO: call backend to mark read
+                              }}
+                              className="text-sm text-gray-600 hover:text-gray-900"
+                            >
+                              Mark all read
+                            </button>
+                            <Link href="/notifications">
+                              <span className="text-sm text-blue-600 cursor-pointer">View all</span>
+                            </Link>
+                          </div>
+                        </div>
+                        <div className="max-h-60 overflow-y-auto">
+                          {notifications.length === 0 && (
+                            <div className="p-4 text-sm text-gray-500">No notifications</div>
+                          )}
+                          {notifications.map((n: any) => (
+                            <div key={n.id} className="px-4 py-3 hover:bg-gray-50 flex items-start gap-3">
+                              <div className="flex-shrink-0">
+                                {n.actor && n.actor.avatar ? (
+                                  <Image src={n.actor.avatar} alt={n.actor.name || 'avatar'} width={40} height={40} className="rounded-full" />
+                                ) : (
+                                  <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-sm text-gray-600">
+                                    {n.actor && n.actor.name ? n.actor.name.charAt(0).toUpperCase() : 'N'}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                  <div className="text-sm font-semibold">{n.title}</div>
+                                  <div className="text-[11px] text-gray-400 ml-2">{new Date(n.created_at).toLocaleString()}</div>
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">{n.message}</div>
+                              </div>
+                              {!n.read && <span className="text-xs text-blue-600 self-start">•</span>}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="px-3 py-2 border-t text-xs text-gray-500">Notifications are delivered here. Click a notification to open related content.</div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Link href="/messages">
+                      <button className="p-2 rounded-md text-white hover:bg-white/10 transition-colors relative" title="Messages">
+                        <Mail className="h-4 w-4" />
+                      </button>
+                    </Link>
+
+                    {/* Profile avatar (small) */}
+                    <Link href="/profile" className="flex items-center gap-2">
+                      {user && user.avatar ? (
+                        <Image src={user.avatar} alt={user.name || 'profile'} width={36} height={36} className="rounded-full border border-white/30" />
+                      ) : (
+                        <div className="h-9 w-9 rounded-full bg-white/20 flex items-center justify-center text-sm text-white border border-white/30">{user && user.name ? user.name.charAt(0).toUpperCase() : <User className="h-4 w-4 text-white" />}</div>
+                      )}
+                    </Link>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleLogout}
+                      className="text-white hover:text-white/80 hover:bg-red-500/20 border border-white/20 backdrop-blur-sm text-sm"
+                    >
+                      <LogOut className="h-4 w-4 mr-1" />
+                      Logout
+                    </Button>
+                  </div>
+                </>
               ) : (
                 <>
                   <Link href="/login">

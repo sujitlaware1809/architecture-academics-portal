@@ -20,6 +20,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import NotificationBar from "./NotificationBar";
+import LineChartSimple from "@/components/charts/LineChartSimple"
+import DonutChart from "@/components/charts/DonutChart"
+import BarChartSimple from "@/components/charts/BarChartSimple"
 
 interface UserDashboardData {
   user: {
@@ -218,6 +222,42 @@ export default function UserDashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{stats.job_applications}</div>
               <p className="text-xs text-muted-foreground">Active applications</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Progress Over Time</CardTitle>
+              <CardDescription className="text-xs">Last 7 days</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LineChartSimple data={[5, 12, 18, 22, 28, 34, 40]} />
+              <p className="mt-3 text-sm text-gray-500">This line shows your learning progress over the last 7 days. Values are an aggregate progress score (higher is better).</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Course Completion</CardTitle>
+              <CardDescription className="text-xs">Completed vs In-progress</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center justify-center">
+              <DonutChart value={stats.completed_courses} total={Math.max(1, stats.enrolled_courses)} />
+              <p className="mt-3 text-sm text-gray-500">Percentage of courses you have completed out of your current enrollments. Helps track completion rate.</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Activity This Week</CardTitle>
+              <CardDescription className="text-xs">Events, Workshops, Applications</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BarChartSimple labels={["Events","Workshops","Apps"]} values={[stats.registered_events, stats.registered_workshops, stats.job_applications]} />
+              <p className="mt-3 text-sm text-gray-500">Counts of actions this week: events you registered for, workshops attended, and job applications submitted.</p>
             </CardContent>
           </Card>
         </div>
