@@ -58,6 +58,9 @@ origins = [
     "http://127.0.0.1:3000",
     "http://localhost:8000",     # Backend API
     "http://127.0.0.1:8000",
+    "http://15.206.47.135",      # Production EC2
+    "http://15.206.47.135:3000",
+    "http://15.206.47.135:8000",
 ]
 
 app.add_middleware(
@@ -68,20 +71,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register route modules
-app.include_router(auth_routes.router)
-app.include_router(job_routes.router)
-app.include_router(application_routes.router)
-app.include_router(course_routes.router)
-app.include_router(blog_routes.router)
-app.include_router(discussion_routes.router)
-app.include_router(nata_course_routes.router)
-app.include_router(event_routes.router)
-app.include_router(workshop_routes.router)
-app.include_router(admin_routes.router)
-app.include_router(registration_routes.router)
-app.include_router(test_routes.router)
-app.include_router(user_routes.router)
+# Register route modules with /api prefix
+app.include_router(auth_routes.router, prefix="/api")
+app.include_router(job_routes.router, prefix="/api")
+app.include_router(application_routes.router, prefix="/api")
+app.include_router(course_routes.router, prefix="/api")
+app.include_router(blog_routes.router, prefix="/api")
+app.include_router(discussion_routes.router, prefix="/api")
+app.include_router(nata_course_routes.router, prefix="/api")
+app.include_router(event_routes.router, prefix="/api")
+app.include_router(workshop_routes.router, prefix="/api")
+app.include_router(admin_routes.router, prefix="/api")
+app.include_router(registration_routes.router, prefix="/api")
+app.include_router(test_routes.router, prefix="/api")
+app.include_router(user_routes.router, prefix="/api")
 
 # Root endpoint
 @app.get("/")
