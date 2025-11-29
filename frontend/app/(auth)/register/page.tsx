@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Building, Eye, EyeOff, Mail, Lock, User, CheckCircle2, UserPlus, ArrowLeft, BookOpen, GraduationCap, Users, Briefcase, ArrowRight, Sparkles } from "lucide-react"
+import { Building, Eye, EyeOff, Mail, Lock, User, CheckCircle2, UserPlus, ArrowLeft, BookOpen, GraduationCap, Users, Briefcase, ArrowRight, Sparkles, Globe, Award } from "lucide-react"
 import Link from "next/link"
 import { api } from "@/lib/api"
 
@@ -13,12 +13,13 @@ export default function RegisterPage() {
   const searchParams = useSearchParams()
   const [redirectTo, setRedirectTo] = useState<string | null>(null)
   const [formData, setFormData] = useState({
+    userType: "", // STUDENT, FACULTY, ARCHITECT, GENERAL_USER, NATA_STUDENT
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
-    userType: "", // student, faculty, architect
     // Student fields
     college: "",
     year: "",
@@ -27,7 +28,10 @@ export default function RegisterPage() {
     experience: "",
     // Architect fields
     caoNumber: "",
-    company: ""
+    company: "",
+    // General User fields
+    interest: "", // industry_partner, service_provider, material_supplier, other
+    organizationName: ""
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -61,24 +65,28 @@ export default function RegisterPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
+    if (!formData.userType) newErrors.userType = "Please select user type"
     if (!formData.firstName.trim()) newErrors.firstName = "First name is required"
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required"
     if (!formData.email.trim()) newErrors.email = "Email is required"
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid"
+    if (!formData.phone.trim()) newErrors.phone = "Mobile number is required"
+    else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) newErrors.phone = "Enter valid 10-digit mobile number"
     if (!formData.password) newErrors.password = "Password is required"
     else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters"
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match"
-    if (!formData.userType) newErrors.userType = "Please select user type"
 
     // Conditional validation based on user type
-    if (formData.userType === "student") {
+    if (formData.userType === "STUDENT" || formData.userType === "NATA_STUDENT") {
       if (!formData.college.trim()) newErrors.college = "College name is required"
       if (!formData.year.trim()) newErrors.year = "Academic year is required"
-    } else if (formData.userType === "faculty") {
+    } else if (formData.userType === "FACULTY") {
       if (!formData.degree.trim()) newErrors.degree = "Highest degree is required"
       if (!formData.experience.trim()) newErrors.experience = "Teaching experience is required"
-    } else if (formData.userType === "architect") {
+    } else if (formData.userType === "ARCHITECT") {
       if (!formData.company.trim()) newErrors.company = "Company/Practice name is required"
+    } else if (formData.userType === "GENERAL_USER") {
+      if (!formData.interest) newErrors.interest = "Please select your area of interest"
     }
 
     setErrors(newErrors)
@@ -100,13 +108,14 @@ export default function RegisterPage() {
         confirm_password: formData.confirmPassword,
         first_name: formData.firstName,
         last_name: formData.lastName,
-        userType: formData.userType,
-        college: formData.college,
-        year: formData.year,
-        degree: formData.degree,
-        experience: formData.experience,
-        cao_number: formData.caoNumber,
-        company: formData.company
+        phone: formData.phone,
+        user_type: formData.userType,
+        university: formData.college || undefined,
+        graduation_year: formData.year ? parseInt(formData.year) : undefined,
+        teaching_experience: formData.experience || undefined,
+        cao_number: formData.caoNumber || undefined,
+        company: formData.company || formData.organizationName || undefined,
+        specialization: formData.interest || undefined,
       })
       
       if (result.error) {
@@ -115,15 +124,12 @@ export default function RegisterPage() {
           : 'Registration failed. Please try again.'
         setApiError(errorMessage)
       } else {
-        // Registration successful - redirect to OTP verification
-        setSuccessMessage("Registration successful! Please verify your email to continue.")
-        
-        // Store email for verification and redirect
-        localStorage.setItem('pendingVerificationEmail', formData.email)
+        // Registration successful - redirect to success page
+        setSuccessMessage("Registration successful! Please check your email for the verification link.")
         
         setTimeout(() => {
-          router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`)
-        }, 2000)
+          router.push(`/login?registered=true`)
+        }, 3000)
       }
     } catch (error) {
       console.error('Registration error:', error)
@@ -134,84 +140,115 @@ export default function RegisterPage() {
   }
 
   const renderConditionalFields = () => {
-    if (formData.userType === "student") {
+    if (formData.userType === "STUDENT" || formData.userType === "NATA_STUDENT") {
       return (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-200">College/University</label>
+            <label className="text-sm font-medium text-gray-700">College/University</label>
             <Input
               name="college"
               placeholder="e.g. IIT Delhi"
               value={formData.college}
               onChange={handleInputChange}
-              className="h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
             />
-            {errors.college && <p className="text-xs text-red-300">{errors.college}</p>}
+            {errors.college && <p className="text-xs text-red-600">{errors.college}</p>}
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-200">Academic Year</label>
+            <label className="text-sm font-medium text-gray-700">Academic Year</label>
             <Input
               name="year"
               placeholder="e.g. 3rd Year"
               value={formData.year}
               onChange={handleInputChange}
-              className="h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
             />
-            {errors.year && <p className="text-xs text-red-300">{errors.year}</p>}
+            {errors.year && <p className="text-xs text-red-600">{errors.year}</p>}
           </div>
         </div>
       )
-    } else if (formData.userType === "faculty") {
+    } else if (formData.userType === "FACULTY") {
       return (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-200">Highest Degree</label>
+            <label className="text-sm font-medium text-gray-700">Highest Degree</label>
             <Input
               name="degree"
               placeholder="e.g. M.Arch, Ph.D"
               value={formData.degree}
               onChange={handleInputChange}
-              className="h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
             />
-            {errors.degree && <p className="text-xs text-red-300">{errors.degree}</p>}
+            {errors.degree && <p className="text-xs text-red-600">{errors.degree}</p>}
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-200">Teaching Experience</label>
+            <label className="text-sm font-medium text-gray-700">Teaching Experience</label>
             <Input
               name="experience"
               placeholder="e.g. 5 years"
               value={formData.experience}
               onChange={handleInputChange}
-              className="h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
             />
-            {errors.experience && <p className="text-xs text-red-300">{errors.experience}</p>}
+            {errors.experience && <p className="text-xs text-red-600">{errors.experience}</p>}
           </div>
         </div>
       )
-    } else if (formData.userType === "architect") {
+    } else if (formData.userType === "ARCHITECT") {
       return (
         <div className="space-y-3">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-200">Company/Practice Name</label>
+            <label className="text-sm font-medium text-gray-700">Company/Practice Name</label>
             <Input
               name="company"
               placeholder="e.g. ABC Architects"
               value={formData.company}
               onChange={handleInputChange}
-              className="h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
             />
-            {errors.company && <p className="text-xs text-red-300">{errors.company}</p>}
+            {errors.company && <p className="text-xs text-red-600">{errors.company}</p>}
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-200">CAO Number (Optional)</label>
+            <label className="text-sm font-medium text-gray-700">CAO Number (Optional)</label>
             <Input
               name="caoNumber"
               placeholder="Council of Architecture registration number"
               value={formData.caoNumber}
               onChange={handleInputChange}
-              className="h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
             />
-            <p className="text-xs text-gray-400">* This information will be kept confidential</p>
+            <p className="text-xs text-gray-500">* This information will be kept confidential</p>
+          </div>
+        </div>
+      )
+    } else if (formData.userType === "GENERAL_USER") {
+      return (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Area of Interest</label>
+            <select
+              name="interest"
+              value={formData.interest}
+              onChange={(e) => handleInputChange({ target: { name: 'interest', value: e.target.value } } as any)}
+              className="h-10 w-full bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg px-3 text-sm"
+            >
+              <option value="">Select your interest</option>
+              <option value="industry_partner">Industry Partner</option>
+              <option value="service_provider">Service Provider</option>
+              <option value="material_supplier">Architectural Material Manufacturer/Supplier</option>
+              <option value="other">Other</option>
+            </select>
+            {errors.interest && <p className="text-xs text-red-600">{errors.interest}</p>}
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Organization Name (Optional)</label>
+            <Input
+              name="organizationName"
+              placeholder="e.g. XYZ Materials Pvt. Ltd."
+              value={formData.organizationName}
+              onChange={handleInputChange}
+              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+            />
           </div>
         </div>
       )
@@ -270,7 +307,7 @@ export default function RegisterPage() {
         {/* Right Side - Registration Form */}
         <div className="lg:w-1/2 flex items-center justify-center p-4 lg:p-6">
           <div className="w-full max-w-md">
-            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h3>
                 <p className="text-gray-600">Join the architecture community</p>
@@ -293,6 +330,133 @@ export default function RegisterPage() {
               )}
 
               <form onSubmit={handleRegister} className="space-y-4">
+                {/* User Type Selection - FIRST */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-gray-700">I am a <span className="text-red-500">*</span></label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectChange("STUDENT")}
+                      className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
+                        formData.userType === "STUDENT" 
+                          ? "border-indigo-500 bg-indigo-50 shadow-md" 
+                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex flex-col items-center space-y-1">
+                        <GraduationCap className={`h-4 w-4 ${
+                          formData.userType === "STUDENT" ? "text-indigo-600" : "text-gray-500"
+                        }`} />
+                        <span className={`text-xs font-medium ${
+                          formData.userType === "STUDENT" ? "text-indigo-700" : "text-gray-600"
+                        }`}>Student</span>
+                      </div>
+                      {formData.userType === "STUDENT" && (
+                        <div className="absolute -top-1 -right-1 bg-indigo-500 text-white rounded-full p-0.5">
+                          <CheckCircle2 className="h-2.5 w-2.5" />
+                        </div>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectChange("FACULTY")}
+                      className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
+                        formData.userType === "FACULTY" 
+                          ? "border-blue-500 bg-blue-50 shadow-md" 
+                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex flex-col items-center space-y-1">
+                        <Users className={`h-4 w-4 ${
+                          formData.userType === "FACULTY" ? "text-blue-600" : "text-gray-500"
+                        }`} />
+                        <span className={`text-xs font-medium ${
+                          formData.userType === "FACULTY" ? "text-blue-700" : "text-gray-600"
+                        }`}>Faculty</span>
+                      </div>
+                      {formData.userType === "FACULTY" && (
+                        <div className="absolute -top-1 -right-1 bg-blue-500 text-white rounded-full p-0.5">
+                          <CheckCircle2 className="h-2.5 w-2.5" />
+                        </div>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectChange("ARCHITECT")}
+                      className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
+                        formData.userType === "ARCHITECT" 
+                          ? "border-green-500 bg-green-50 shadow-md" 
+                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex flex-col items-center space-y-1">
+                        <Briefcase className={`h-4 w-4 ${
+                          formData.userType === "ARCHITECT" ? "text-green-600" : "text-gray-500"
+                        }`} />
+                        <span className={`text-xs font-medium ${
+                          formData.userType === "ARCHITECT" ? "text-green-700" : "text-gray-600"
+                        }`}>Architect</span>
+                      </div>
+                      {formData.userType === "ARCHITECT" && (
+                        <div className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full p-0.5">
+                          <CheckCircle2 className="h-2.5 w-2.5" />
+                        </div>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectChange("GENERAL_USER")}
+                      className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
+                        formData.userType === "GENERAL_USER" 
+                          ? "border-purple-500 bg-purple-50 shadow-md" 
+                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex flex-col items-center space-y-1">
+                        <Globe className={`h-4 w-4 ${
+                          formData.userType === "GENERAL_USER" ? "text-purple-600" : "text-gray-500"
+                        }`} />
+                        <span className={`text-xs font-medium ${
+                          formData.userType === "GENERAL_USER" ? "text-purple-700" : "text-gray-600"
+                        }`}>General</span>
+                      </div>
+                      {formData.userType === "GENERAL_USER" && (
+                        <div className="absolute -top-1 -right-1 bg-purple-500 text-white rounded-full p-0.5">
+                          <CheckCircle2 className="h-2.5 w-2.5" />
+                        </div>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectChange("NATA_STUDENT")}
+                      className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
+                        formData.userType === "NATA_STUDENT" 
+                          ? "border-orange-500 bg-orange-50 shadow-md" 
+                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex flex-col items-center space-y-1">
+                        <Award className={`h-4 w-4 ${
+                          formData.userType === "NATA_STUDENT" ? "text-orange-600" : "text-gray-500"
+                        }`} />
+                        <span className={`text-xs font-medium ${
+                          formData.userType === "NATA_STUDENT" ? "text-orange-700" : "text-gray-600"
+                        }`}>NATA</span>
+                      </div>
+                      {formData.userType === "NATA_STUDENT" && (
+                        <div className="absolute -top-1 -right-1 bg-orange-500 text-white rounded-full p-0.5">
+                          <CheckCircle2 className="h-2.5 w-2.5" />
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                  {errors.userType && <p className="text-xs text-red-600">{errors.userType}</p>}
+                </div>
+
                 {/* Name Fields */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
@@ -339,83 +503,22 @@ export default function RegisterPage() {
                   {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
                 </div>
 
-                {/* User Type Selection */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-700">I am a</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleSelectChange("student")}
-                      className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
-                        formData.userType === "student" 
-                          ? "border-indigo-500 bg-indigo-50 shadow-md" 
-                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
-                      }`}
-                    >
-                      <div className="flex flex-col items-center space-y-1">
-                        <GraduationCap className={`h-4 w-4 ${
-                          formData.userType === "student" ? "text-indigo-600" : "text-gray-500"
-                        }`} />
-                        <span className={`text-xs font-medium ${
-                          formData.userType === "student" ? "text-indigo-700" : "text-gray-600"
-                        }`}>Student</span>
-                      </div>
-                      {formData.userType === "student" && (
-                        <div className="absolute -top-1 -right-1 bg-indigo-500 text-white rounded-full p-0.5">
-                          <CheckCircle2 className="h-2.5 w-2.5" />
-                        </div>
-                      )}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleSelectChange("faculty")}
-                      className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
-                        formData.userType === "faculty" 
-                          ? "border-blue-500 bg-blue-50 shadow-md" 
-                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
-                      }`}
-                    >
-                      <div className="flex flex-col items-center space-y-1">
-                        <Users className={`h-4 w-4 ${
-                          formData.userType === "faculty" ? "text-blue-600" : "text-gray-500"
-                        }`} />
-                        <span className={`text-xs font-medium ${
-                          formData.userType === "faculty" ? "text-blue-700" : "text-gray-600"
-                        }`}>Faculty</span>
-                      </div>
-                      {formData.userType === "faculty" && (
-                        <div className="absolute -top-1 -right-1 bg-blue-500 text-white rounded-full p-0.5">
-                          <CheckCircle2 className="h-2.5 w-2.5" />
-                        </div>
-                      )}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleSelectChange("architect")}
-                      className={`relative p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
-                        formData.userType === "architect" 
-                          ? "border-green-500 bg-green-50 shadow-md" 
-                          : "border-gray-200 bg-gray-50 hover:border-gray-300"
-                      }`}
-                    >
-                      <div className="flex flex-col items-center space-y-1">
-                        <Briefcase className={`h-4 w-4 ${
-                          formData.userType === "architect" ? "text-green-600" : "text-gray-500"
-                        }`} />
-                        <span className={`text-xs font-medium ${
-                          formData.userType === "architect" ? "text-green-700" : "text-gray-600"
-                        }`}>Architect</span>
-                      </div>
-                      {formData.userType === "architect" && (
-                        <div className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full p-0.5">
-                          <CheckCircle2 className="h-2.5 w-2.5" />
-                        </div>
-                      )}
-                    </button>
+                {/* Mobile Number */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Mobile Number</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      type="tel"
+                      name="phone"
+                      placeholder="9876543210"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="pl-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+                      required
+                    />
                   </div>
-                  {errors.userType && <p className="text-xs text-red-600">{errors.userType}</p>}
+                  {errors.phone && <p className="text-xs text-red-600">{errors.phone}</p>}
                 </div>
 
                 {/* Conditional Fields */}
@@ -424,7 +527,7 @@ export default function RegisterPage() {
                 {/* Password Fields */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-200">Password</label>
+                    <label className="text-sm font-medium text-gray-700">Password</label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                       <Input
@@ -433,41 +536,41 @@ export default function RegisterPage() {
                         placeholder="Password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+                        className="pl-10 pr-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-400"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600"
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-                    {errors.password && <p className="text-xs text-red-300">{errors.password}</p>}
+                    {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-200">Confirm</label>
+                    <label className="text-sm font-medium text-gray-700">Confirm Password</label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                       <Input
                         type={showConfirmPassword ? "text" : "password"}
                         name="confirmPassword"
-                        placeholder="Confirm"
+                        placeholder="Confirm Password"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 text-sm"
+                        className="pl-10 pr-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-400"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600"
                       >
                         {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-                    {errors.confirmPassword && <p className="text-xs text-red-300">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && <p className="text-xs text-red-600">{errors.confirmPassword}</p>}
                   </div>
                 </div>
 

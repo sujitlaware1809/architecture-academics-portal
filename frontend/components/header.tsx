@@ -105,7 +105,6 @@ export default function Header() {
   }, [isAuthenticated])
 
   const userMenuItems = isAuthenticated ? [
-    { name: "Profile", href: "/profile", icon: User },
     ...(user && user.role === 'ADMIN' ? [{ name: "Admin", href: "/admin", icon: LayoutDashboard }] : []),
     ...(user && user.role === 'RECRUITER' ? [{ name: "Dashboard", href: "/recruiter-dashboard", icon: LayoutDashboard }] : []),
   ] : [
@@ -123,7 +122,6 @@ export default function Header() {
     { title: "Contact Us", href: "/contact-us", description: "Get in touch with us" },
     { title: "Advertise with Us", href: "/advertise-with-us", description: "Promote your services" },
     { title: "Dashboard", href: "/dashboard", description: "Your personal dashboard" },
-    { title: "Profile", href: "/profile", description: "Manage your profile" },
     { title: "Discussions", href: "/discussions", description: "Join community discussions" },
     { title: "Video Demo", href: "/video-demo", description: "Watch course previews" },
     { title: "Learn", href: "/learn", description: "Start learning" },
@@ -260,7 +258,7 @@ export default function Header() {
             </div>
 
             {/* Auth Buttons - Desktop (with Notifications) */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
               {isAuthenticated ? (
                 <>
                   <div className="relative">
@@ -328,32 +326,47 @@ export default function Header() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <Link href="/messages">
-                      <button className="p-2 rounded-md text-white hover:bg-white/10 transition-colors relative" title="Messages">
-                        <Mail className="h-4 w-4" />
-                      </button>
-                    </Link>
+                  {/* Dashboard quick link next to notifications */}
+                  <Link href="/dashboard">
+                    <button className="px-2 py-1.5 rounded-md text-white hover:bg-white/10 transition-colors flex items-center gap-1" title="Dashboard">
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span className="text-sm font-medium hidden xl:inline">Dashboard</span>
+                    </button>
+                  </Link>
+                  
+                  <Link href="/messages">
+                    <button className="p-2 rounded-md text-white hover:bg-white/10 transition-colors relative" title="Messages">
+                      <Mail className="h-4 w-4" />
+                    </button>
+                  </Link>
 
-                    {/* Profile avatar (small) */}
-                    <Link href="/profile" className="flex items-center gap-2">
+                  {/* User info display */}
+                  <Link href="/profile">
+                    <div className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
                       {user && user.avatar ? (
-                        <Image src={user.avatar} alt={user.name || 'profile'} width={36} height={36} className="rounded-full border border-white/30" />
+                        <Image src={user.avatar} alt={user.name || 'avatar'} width={40} height={40} className="rounded-full border-2 border-white/40" />
                       ) : (
-                        <div className="h-9 w-9 rounded-full bg-white/20 flex items-center justify-center text-sm text-white border border-white/30">{user && user.name ? user.name.charAt(0).toUpperCase() : <User className="h-4 w-4 text-white" />}</div>
+                        <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-sm text-white border-2 border-white/40 font-bold flex-shrink-0">
+                          {user && user.first_name ? user.first_name.charAt(0).toUpperCase() : (user && user.name ? user.name.charAt(0).toUpperCase() : <User className="h-4 w-4 text-white" />)}
+                        </div>
                       )}
-                    </Link>
+                      {user && (
+                        <span className="text-sm font-semibold text-white">
+                          {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : (user.name || 'User')}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleLogout}
-                      className="text-white hover:text-white/80 hover:bg-red-500/20 border border-white/20 backdrop-blur-sm text-sm"
-                    >
-                      <LogOut className="h-4 w-4 mr-1" />
-                      Logout
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLogout}
+                    className="text-white hover:text-white/80 hover:bg-red-500/20 border border-white/20 backdrop-blur-sm text-xs px-2 py-1.5 flex-shrink-0"
+                  >
+                    <LogOut className="h-3.5 w-3.5 mr-1" />
+                    Logout
+                  </Button>
                 </>
               ) : (
                 <>

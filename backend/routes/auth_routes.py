@@ -103,7 +103,7 @@ async def get_current_recruiter(current_user: User = Depends(get_current_user)) 
 
 @router.post("/register")
 async def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    """Register a new user (requires OTP verification)"""
+    """Register a new user (requires email verification via link)"""
     
     # Validate password confirmation
     if user.password != user.confirm_password:
@@ -120,11 +120,11 @@ async def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Create user with is_verified=False and generate OTP
+    # Create user with is_verified=False and generate verification link
     new_user = crud.create_user(db=db, user=user)
     
     return {
-        "message": "Registration successful! Please check your email for OTP verification.",
+        "message": "Registration successful! Please check your email for the verification link.",
         "email": new_user.email,
         "requires_verification": True
     }
@@ -146,7 +146,7 @@ async def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_d
     if not user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Please verify your email first. Check your inbox for the OTP.",
+            detail="Please verify your email first. Check your inbox for the verification link.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
@@ -162,67 +162,87 @@ async def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_d
         "user": user
     }
 
-@router.post("/verify-otp", response_model=schemas.Token)
-async def verify_otp(otp_data: schemas.OTPVerification, db: Session = Depends(get_db)):
-    """Verify email OTP and activate user account"""
+# OLD OTP ROUTE - DISABLED (now using email link verification)
+# @router.post("/verify-otp", response_model=schemas.Token)
+# async def verify_otp(otp_data: schemas.OTPVerification, db: Session = Depends(get_db)):
+#     """Verify email OTP and activate user account"""
+#     
+#     # Verify OTP
+#     is_verified = crud.verify_email_otp(db, otp_data.email, otp_data.otp)
+#     
+#     if not is_verified:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Invalid or expired OTP"
+#         )
+#     
+#     # Get the verified user
+#     user = crud.get_user_by_email(db, otp_data.email)
+#     
+#     # Create access token for the verified user
+#     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+#     access_token = create_access_token(
+#         data={"sub": user.email}, expires_delta=access_token_expires
+#     )
+#     
+#     return {
+#         "access_token": access_token,
+#         "token_type": "bearer",
+#         "user": user,
+#         "message": "Email verified successfully!"
+#     }
+
+@router.get("/verify-email/{token}")
+async def verify_email_link(token: str, db: Session = Depends(get_db)):
+    """Verify email using token from link"""
     
-    # Verify OTP
-    is_verified = crud.verify_email_otp(db, otp_data.email, otp_data.otp)
+    # Verify token
+    is_verified = crud.verify_email_token(db, token)
     
     if not is_verified:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired OTP"
+            detail="Invalid or expired verification link"
         )
     
-    # Get the verified user
-    user = crud.get_user_by_email(db, otp_data.email)
-    
-    # Create access token for the verified user
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
-    )
-    
     return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": user,
-        "message": "Email verified successfully!"
+        "message": "Email verified successfully! You can now login.",
+        "verified": True
     }
 
-@router.post("/resend-otp")
-async def resend_otp(otp_request: schemas.OTPRequest, db: Session = Depends(get_db)):
-    """Resend OTP to user email"""
-    
-    # Check if user exists
-    user = crud.get_user_by_email(db, otp_request.email)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-    
-    # Check if user is already verified
-    if user.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email is already verified"
-        )
-    
-    # Resend OTP
-    success = crud.resend_otp(db, otp_request.email)
-    
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to resend OTP"
-        )
-    
-    return {
-        "message": "OTP sent successfully! Please check your email.",
-        "email": otp_request.email
-    }
+# OLD OTP ROUTE - DISABLED (now using email link verification)
+# @router.post("/resend-otp")
+# async def resend_otp(otp_request: schemas.OTPRequest, db: Session = Depends(get_db)):
+#     """Resend OTP to user email"""
+#     
+#     # Check if user exists
+#     user = crud.get_user_by_email(db, otp_request.email)
+#     if not user:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="User not found"
+#         )
+#     
+#     # Check if user is already verified
+#     if user.is_verified:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Email is already verified"
+#         )
+#     
+#     # Resend OTP
+#     success = crud.resend_otp(db, otp_request.email)
+#     
+#     if not success:
+#         raise HTTPException(
+#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             detail="Failed to resend OTP"
+#         )
+#     
+#     return {
+#         "message": "OTP sent successfully! Please check your email.",
+#         "email": otp_request.email
+#     }
 
 @router.post("/forgot-password")
 async def forgot_password(password_reset: schemas.PasswordResetRequest, db: Session = Depends(get_db)):

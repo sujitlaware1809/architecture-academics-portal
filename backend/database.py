@@ -13,6 +13,7 @@ Base = declarative_base()
 # Reuse enum definitions from schemas so there's a single source of truth
 from schemas import (
     UserRole,
+    UserType,
     JobType,
     WorkMode,
     ExperienceLevel,
@@ -35,6 +36,7 @@ class User(Base):
     last_name = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(Enum(UserRole, values_callable=lambda x: [e.value for e in x]), default=UserRole.USER)
+    user_type = Column(Enum(UserType, values_callable=lambda x: [e.value for e in x]), default=UserType.STUDENT, nullable=True)
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -51,6 +53,10 @@ class User(Base):
     website = Column(String, nullable=True)
     linkedin = Column(String, nullable=True)
     portfolio = Column(String, nullable=True)
+    
+    # User type specific fields
+    cao_number = Column(String, nullable=True)  # For architects
+    teaching_experience = Column(String, nullable=True)  # For faculty
     
     # Company fields (for recruiters)
     company_name = Column(String, nullable=True)

@@ -145,39 +145,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                <Building className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-serif font-bold text-white">Architecture</h1>
-                <span className="text-sm text-blue-200 font-medium">Academics</span>
-              </div>
-            </Link>
-            
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/"
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-blue-100 hover:text-white transition-colors rounded-full hover:bg-white/20"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back to Home</span>
-              </Link>
-              
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors rounded-full"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+      
       {/* Quick Navigation */}
       <div className="max-w-4xl mx-auto px-4 pt-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

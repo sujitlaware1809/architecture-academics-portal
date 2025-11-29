@@ -17,29 +17,43 @@ def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
 
 def create_user(db: Session, user: schemas.UserCreate) -> User:
-    """Create a new user with email verification"""
+    """Create a new user with email verification link"""
+    import secrets
     hashed_password = get_password_hash(user.password)
     
-    # Generate OTP
-    otp = generate_otp()
-    otp_expires = datetime.utcnow() + timedelta(minutes=10)  # OTP valid for 10 minutes
+    # Generate verification token
+    verification_token = secrets.token_urlsafe(32)
+    token_expires = datetime.utcnow() + timedelta(hours=24)  # Token valid for 24 hours
     
     db_user = User(
         email=user.email,
         first_name=user.first_name,
         last_name=user.last_name,
         hashed_password=hashed_password,
+        phone=user.phone if hasattr(user, 'phone') else None,
         role=user.role if hasattr(user, 'role') else schemas.UserRole.USER,
+        user_type=user.user_type if hasattr(user, 'user_type') else schemas.UserType.STUDENT,
         is_verified=False,  # Set to False initially
-        email_otp=otp,
-        email_otp_expires_at=otp_expires
+        email_otp=verification_token,  # Reuse this field for verification token
+        email_otp_expires_at=token_expires,
+        # Profile fields
+        university=user.university if hasattr(user, 'university') else None,
+        graduation_year=user.graduation_year if hasattr(user, 'graduation_year') else None,
+        specialization=user.specialization if hasattr(user, 'specialization') else None,
+        cao_number=user.cao_number if hasattr(user, 'cao_number') else None,
+        company_name=user.company if hasattr(user, 'company') else None,
+        teaching_experience=user.teaching_experience if hasattr(user, 'teaching_experience') else None,
     )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     
-    # Send OTP via email
-    send_otp_email(user.email, otp, f"{user.first_name} {user.last_name}")
+    # Send verification email with link
+    from email_service import send_verification_email
+    try:
+        send_verification_email(user.email, verification_token, f"{user.first_name} {user.last_name}")
+    except Exception as e:
+        print(f"Failed to send verification email: {e}")
     
     return db_user
 
@@ -63,6 +77,44 @@ def verify_email_otp(db: Session, email: str, otp: str) -> bool:
         return True
     
     return False
+
+def verify_email_token(db: Session, token: str) -> bool:
+    """Verify email using token from link and activate user account"""
+    # Find user with this verification token
+    user = db.query(User).filter(
+        User.email_otp == token  # Reusing email_otp field for token
+    ).first()
+    
+    if not user:
+        print(f"❌ No user found with token: {token[:20]}...")
+        return False
+    
+    # Check if already verified
+    if user.is_verified:
+        print(f"✅ User {user.email} is already verified")
+        return True  # Return True since account is already active
+    
+    # Check if token expired
+    if user.email_otp_expires_at and user.email_otp_expires_at < datetime.utcnow():
+        print(f"⏰ Token expired for user {user.email}")
+        return False
+    
+    # Activate user account
+    user.is_verified = True
+    user.email_otp = None
+    user.email_otp_expires_at = None
+    db.commit()
+    
+    print(f"✅ User {user.email} verified successfully!")
+    
+    # Send welcome email
+    from email_service import send_welcome_email
+    try:
+        send_welcome_email(user.email, f"{user.first_name} {user.last_name}")
+    except Exception as e:
+        print(f"Failed to send welcome email: {e}")
+    
+    return True
 
 def resend_otp(db: Session, email: str) -> bool:
     """Resend OTP to user email"""

@@ -11,6 +11,13 @@ class UserRole(str, Enum):
     RECRUITER = "RECRUITER"
     ADMIN = "ADMIN"
 
+class UserType(str, Enum):
+    STUDENT = "STUDENT"
+    FACULTY = "FACULTY"
+    ARCHITECT = "ARCHITECT"
+    GENERAL_USER = "GENERAL_USER"
+    NATA_STUDENT = "NATA_STUDENT"
+
 class JobType(str, Enum):
     FULL_TIME = "Full-time"
     PART_TIME = "Part-time"
@@ -72,7 +79,17 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     confirm_password: str
+    phone: Optional[str] = None
     role: Optional[UserRole] = UserRole.USER
+    user_type: Optional[UserType] = UserType.STUDENT
+    
+    # Additional profile fields based on user type
+    university: Optional[str] = None
+    graduation_year: Optional[int] = None
+    specialization: Optional[str] = None
+    cao_number: Optional[str] = None
+    company: Optional[str] = None
+    teaching_experience: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -114,6 +131,7 @@ class UserProfileUpdate(UserProfile):
 class UserResponse(UserBase):
     id: int
     role: UserRole
+    user_type: Optional[UserType] = None
     is_active: bool
     is_verified: bool
     created_at: datetime

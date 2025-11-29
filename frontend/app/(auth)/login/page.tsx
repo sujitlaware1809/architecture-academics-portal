@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Building, Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles, Shield } from "lucide-react"
+import { Building, Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles, Shield, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { api } from "@/lib/api"
 
@@ -23,8 +23,14 @@ export default function LoginPage() {
   useEffect(() => {
     // Get redirect parameter from URL
     const redirect = searchParams.get('redirect')
-    if (redirect) {
+    if (redirect && redirect !== '/verify-email') {
       setRedirectTo(redirect)
+    }
+    
+    // Check if user just verified their email
+    const verified = searchParams.get('verified')
+    if (verified === 'true') {
+      setSuccessMessage("Email verified successfully! Please login to continue.")
     }
     
     // Check if user just registered
@@ -45,41 +51,23 @@ export default function LoginPage() {
       console.log('Login result:', result) // Debug log
       
       if (result.error) {
-        // Check if error is about email verification
+        // Show error message
         const errorMessage = typeof result.error === 'string' 
           ? result.error 
           : 'Login failed. Please try again.'
         
         console.log('Login error message:', errorMessage) // Debug log
+        setError(errorMessage)
         
-        // If error mentions email verification, redirect to OTP page
-        if (errorMessage.toLowerCase().includes('verify your email') || 
-            errorMessage.toLowerCase().includes('email verification') ||
-            errorMessage.toLowerCase().includes('check your inbox') ||
-            errorMessage.toLowerCase().includes('please verify') ||
-            errorMessage.toLowerCase().includes('otp')) {
-          
-          console.log('Detected unverified account, redirecting to OTP verification') // Debug log
-          
-          // Store email for verification and mark as coming from login
-          localStorage.setItem('pendingVerificationEmail', email)
-          localStorage.setItem('fromLogin', 'true')
-          
-          // Show helpful message and redirect immediately
-          setError("Email not verified. Redirecting to verification...")
-          
-          // Immediate redirect without delay for better UX
-          router.push(`/verify-otp?email=${encodeURIComponent(email)}&from=login`)
-          
-        } else {
-          console.log('Other login error:', errorMessage) // Debug log
-          setError(errorMessage)
-        }
       } else if (result.data) {
         // Login successful, dispatch custom event to notify other components
         window.dispatchEvent(new Event('auth-change'))
         
         const user = result.data.user
+        console.log('🔍 Login successful - Full user object:', user)
+        console.log('🔍 User role:', user.role)
+        console.log('🔍 User type:', user.user_type)
+        
         const userName = user.first_name || user.email.split('@')[0]
         
         // Show success message
@@ -89,31 +77,61 @@ export default function LoginPage() {
         setTimeout(() => {
           // Check if there's a redirect URL
           if (redirectTo) {
+            console.log('🔄 Redirecting to:', redirectTo)
             router.push(redirectTo)
             return
           }
           
-          // Check if user is a recruiter (handle both string and enum object)
+          // Get user role and user type
           let userRole = "";
           if (typeof user.role === "string") {
             userRole = user.role;
           } else if (typeof user.role === "object" && user.role !== null && "value" in user.role) {
             userRole = user.role.value;
           }
+
+          let userType = "";
+          if (typeof user.user_type === "string") {
+            userType = user.user_type;
+          } else if (typeof user.user_type === "object" && user.user_type !== null && "value" in user.user_type) {
+            userType = user.user_type.value;
+          }
           
-          if (userRole === 'RECRUITER') {
-            // Special case for the predefined recruiter
-            if (email === 'recruiter@architectureacademics.com') {
-              router.push("/recruiter-dashboard")
-            } else {
-              router.push("/dashboard")
-            }
-          } else if (userRole === 'ADMIN') {
-            // Redirect admin to admin panel
+          console.log('🔍 Extracted userRole:', userRole)
+          console.log('🔍 Extracted userType:', userType)
+          
+          // Route based on role first, then user type
+          if (userRole === 'ADMIN') {
+            console.log('🔄 Routing to /admin')
             router.push("/admin")
+          } else if (userRole === 'RECRUITER') {
+            console.log('🔄 Routing to /recruiter-dashboard')
+            router.push("/recruiter-dashboard")
           } else {
-            // For regular users, redirect to user dashboard
-            router.push("/dashboard")
+            // Route regular users based on their user_type
+            switch (userType) {
+              case 'FACULTY':
+                console.log('🔄 Routing to /faculty-dashboard')
+                router.push("/faculty-dashboard")
+                break
+              case 'ARCHITECT':
+                console.log('🔄 Routing to /architect-dashboard')
+                router.push("/architect-dashboard")
+                break
+              case 'NATA_STUDENT':
+                console.log('🔄 Routing to /nata-dashboard')
+                router.push("/nata-dashboard")
+                break
+              case 'GENERAL_USER':
+                console.log('🔄 Routing to /general-dashboard')
+                router.push("/general-dashboard")
+                break
+              case 'STUDENT':
+              default:
+                console.log('🔄 Routing to /dashboard (default)')
+                router.push("/dashboard")
+                break
+            }
           }
         }, 1500)
       }
@@ -190,7 +208,11 @@ export default function LoginPage() {
 
               {error && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-600">{error}</p>
+                  <p className="text-sm text-red-600">
+                    {error.includes('verify your email') || error.includes('verification link') 
+                      ? 'Please verify your email first. Check your inbox for the verification link and click it to activate your account.' 
+                      : error}
+                  </p>
                 </div>
               )}
 
@@ -202,11 +224,8 @@ export default function LoginPage() {
 
               {successMessage && (
                 <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-3">
-                  <Shield className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="text-sm font-semibold text-green-700">{successMessage}</p>
-                    <p className="text-xs text-green-600 mt-1">Redirecting...</p>
-                  </div>
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <p className="text-sm font-semibold text-green-700">{successMessage}</p>
                 </div>
               )}
 
@@ -322,12 +341,6 @@ export default function LoginPage() {
                   Don't have an account?{" "}
                   <Link href="/register" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                     Create one now →
-                  </Link>
-                </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Need to verify your email?{" "}
-                  <Link href="/verify-otp" className="font-medium text-blue-600 hover:text-blue-700 transition-colors">
-                    Verify now →
                   </Link>
                 </p>
               </div>

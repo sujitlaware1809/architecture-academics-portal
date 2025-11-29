@@ -130,6 +130,71 @@ def send_otp_email(to_email: str, otp: str, user_name: str = "User") -> bool:
     
     return send_email(to_email, subject, html_body, is_html=True)
 
+def send_verification_email(to_email: str, token: str, user_name: str = "User") -> bool:
+    """Send email verification link."""
+    # In production, this should be your actual frontend URL
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    verification_link = f"{frontend_url}/verify-email?token={token}"
+    
+    subject = "Verify Your Email - Architecture Academics"
+    
+    html_body = f"""
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }}
+            .container {{ max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+            .header {{ text-align: center; margin-bottom: 30px; }}
+            .logo {{ font-size: 24px; font-weight: bold; color: #6366f1; margin-bottom: 10px; }}
+            .button-box {{ text-align: center; margin: 30px 0; }}
+            .verify-button {{ background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold; display: inline-block; }}
+            .footer {{ text-align: center; margin-top: 30px; color: #666; font-size: 14px; }}
+            .warning {{ background-color: #fef3cd; border: 1px solid #fecba1; color: #b45309; padding: 15px; border-radius: 5px; margin-top: 20px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="logo">🏛️ Architecture Academics</div>
+                <h2 style="color: #333; margin: 0;">Email Verification</h2>
+            </div>
+            
+            <p>Hello <strong>{user_name}</strong>,</p>
+            
+            <p>Welcome to Architecture Academics! Please verify your email address by clicking the button below:</p>
+            
+            <div class="button-box">
+                <a href="{verification_link}" class="verify-button">Verify Email Address</a>
+            </div>
+            
+            <p>Or copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; color: #6366f1; background: #f3f4f6; padding: 10px; border-radius: 5px; font-family: monospace;">{verification_link}</p>
+            
+            <p>This link will expire in 24 hours. Once verified, you'll have access to:</p>
+            
+            <ul style="color: #555;">
+                <li>🎓 NATA Preparation Courses</li>
+                <li>💼 Exclusive Job Opportunities</li>
+                <li>📚 Educational Resources</li>
+                <li>🌐 Professional Network</li>
+            </ul>
+            
+            <div class="warning">
+                <strong>Security Note:</strong> This link is valid for 24 hours only. If you didn't request this verification, please ignore this email.
+            </div>
+            
+            <div class="footer">
+                <p>Thank you for joining our architecture community!</p>
+                <p><strong>Architecture Academics Team</strong></p>
+                <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this message.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return send_email(to_email, subject, html_body, is_html=True)
+
 def send_welcome_email(to_email: str, user_name: str) -> bool:
     """Send welcome email after successful verification."""
     subject = "Welcome to Architecture Academics! 🎉"
