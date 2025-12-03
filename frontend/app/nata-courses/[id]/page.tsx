@@ -1,561 +1,680 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { auth, type User } from "@/lib/auth"
-import { ArrowLeft, Play, Clock, Users, Star, Award, CheckCircle, Download, BookOpen, Video, FileText, Target, Calendar, User as UserIcon, Globe, X } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect, use } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { api } from "@/lib/api"
+import {
+  ArrowLeft,
+  Star,
+  StarHalf,
+  Users,
+  Clock,
+  Calendar,
+  Bookmark,
+  Share2,
+  FileText,
+  Play,
+  PlayCircle,
+  Check,
+  CheckCircle2,
+  Download,
+  MessageSquare,
+  Award,
+  Lock,
+  BookOpen,
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import EnhancedVideoPlayer from "@/components/enhanced-video-player"
 
-interface CourseDetails {
-  id: number
-  title: string
-  description: string
-  instructor: {
-    name: string
-    bio: string
-    rating: number
-    studentsCount: number
-    image: string
-  }
-  duration: string
-  difficulty: string
-  price: number
-  originalPrice?: number
-  rating: number
-  studentsEnrolled: number
-  lessonsCount: number
-  certificateIncluded: boolean
-  moodleUrl?: string
-  thumbnail: string
-  category: string
-  skills: string[]
-  syllabus: {
-    module: string
-    topics: string[]
-    duration: string
-    lessons: {
-      title: string
-      type: 'video' | 'quiz' | 'assignment' | 'reading'
-      duration: string
-      preview?: boolean
-    }[]
-  }[]
-  features: string[]
-  requirements: string[]
-  outcomes: string[]
-  reviews: {
-    id: number
-    userName: string
-    rating: number
-    comment: string
-    date: string
-  }[]
-}
-
-export default function CourseDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const [showPurchasePrompt, setShowPurchasePrompt] = useState(false)
-  const [course, setCourse] = useState<CourseDetails | null>(null)
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+export default function NATACourseDetail({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params);
+  const courseId = unwrappedParams.id;
   
-  const [showPlayer, setShowPlayer] = useState(false)
+  const [course, setCourse] = useState<any | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [enrollmentId, setEnrollmentId] = useState<number | null>(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  const [expandedModule, setExpandedModule] = useState<number | null>(0);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{text: string, isUser: boolean}>>([]);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [comments, setComments] = useState<Array<{id: number, user: string, text: string, rating: number, date: string}>>([]);
+  const [newComment, setNewComment] = useState('');
+  const [newRating, setNewRating] = useState(5);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(true);
 
-  // Sample course detail data
-  const sampleCourse: CourseDetails = {
-    id: 1,
-    title: "NATA Drawing Fundamentals",
-    description: "Master the art of architectural drawing with comprehensive techniques for NATA preparation. This course covers everything from basic sketching to advanced perspective drawing, ensuring you're fully prepared for the drawing section of NATA.",
-    instructor: {
-      name: "Prof. Arjun Mehta",
-      bio: "Renowned architect and educator with 15+ years of experience in NATA preparation. Former HOD at SPA Delhi.",
-      rating: 4.9,
-      studentsCount: 5000,
-      image: "https://placehold.co/80x80/png?text=Instructor"
-    },
-    duration: "8 weeks",
-    difficulty: "Beginner",
-    price: 4999,
-    originalPrice: 7999,
-    rating: 4.8,
-    studentsEnrolled: 1250,
-    lessonsCount: 45,
-    certificateIncluded: true,
-    moodleUrl: "https://moodle.architectureacademics.com/course/nata-drawing",
-    thumbnail: "https://placehold.co/600x400/png?text=Drawing+Course",
-    category: "Drawing",
-    skills: ["Perspective Drawing", "Sketching", "Geometric Construction", "Shading", "Composition"],
-    syllabus: [
-      {
-        module: "Basic Drawing Techniques",
-        topics: ["Line Drawing", "Basic Shapes", "Proportions", "Hand-eye Coordination"],
-        duration: "2 weeks",
-        lessons: [
-          { title: "Introduction to Drawing", type: "video", duration: "15 min", preview: true },
-          { title: "Basic Line Techniques", type: "video", duration: "20 min", preview: true },
-          { title: "Understanding Proportions", type: "video", duration: "25 min" },
-          { title: "Practice Exercise 1", type: "assignment", duration: "30 min" },
-          { title: "Week 1 Assessment", type: "quiz", duration: "15 min" }
-        ]
-      },
-      {
-        module: "Perspective Drawing",
-        topics: ["One-point Perspective", "Two-point Perspective", "Three-point Perspective"],
-        duration: "2 weeks",
-        lessons: [
-          { title: "Understanding Perspective", type: "video", duration: "30 min" },
-          { title: "One-point Perspective Demo", type: "video", duration: "35 min" },
-          { title: "Two-point Perspective Tutorial", type: "video", duration: "40 min" },
-          { title: "Perspective Practice Set", type: "assignment", duration: "45 min" },
-          { title: "Perspective Quiz", type: "quiz", duration: "20 min" }
-        ]
-      },
-      {
-        module: "Architectural Elements",
-        topics: ["Building Components", "Structural Elements", "Landscape Elements"],
-        duration: "2 weeks",
-        lessons: [
-          { title: "Drawing Buildings", type: "video", duration: "35 min" },
-          { title: "Structural Details", type: "video", duration: "30 min" },
-          { title: "Landscape Elements", type: "video", duration: "25 min" },
-          { title: "Architectural Portfolio", type: "assignment", duration: "60 min" }
-        ]
-      },
-      {
-        module: "Advanced Techniques",
-        topics: ["Shading & Rendering", "Texture Studies", "Composition", "Speed Drawing"],
-        duration: "2 weeks",
-        lessons: [
-          { title: "Shading Techniques", type: "video", duration: "40 min" },
-          { title: "Texture and Materials", type: "video", duration: "35 min" },
-          { title: "Composition Principles", type: "video", duration: "30 min" },
-          { title: "Speed Drawing Workshop", type: "video", duration: "45 min" },
-          { title: "Final Project", type: "assignment", duration: "90 min" }
-        ]
-      }
-    ],
-    features: [
-      "Live interactive sessions twice a week",
-      "Personal feedback on all drawing submissions",
-      "Downloadable practice worksheets",
-      "Access to drawing reference library",
-      "Mock test papers with solutions",
-      "Moodle LMS with mobile app access",
-      "Discussion forums with peers",
-      "One-on-one doubt clearing sessions"
-    ],
-    requirements: [
-      "Basic drawing materials (pencils, paper, ruler)",
-      "Scanner or smartphone for submission",
-      "Stable internet connection",
-      "Dedication of 2-3 hours daily for practice"
-    ],
-    outcomes: [
-      "Master all NATA drawing techniques",
-      "Develop speed and accuracy in sketching",
-      "Create impressive architectural drawings",
-      "Build confidence for NATA exam",
-      "Receive industry-recognized certificate"
-    ],
-    reviews: [
-      {
-        id: 1,
-        userName: "Priya Sharma",
-        rating: 5,
-        comment: "Excellent course! Prof. Mehta's teaching style is amazing. I improved my drawing skills drastically.",
-        date: "2024-10-15"
-      },
-      {
-        id: 2,
-        userName: "Rahul Kumar",
-        rating: 5,
-        comment: "The Moodle platform makes learning so convenient. Great interactive content and assignments.",
-        date: "2024-10-10"
-      },
-      {
-        id: 3,
-        userName: "Ananya Gupta",
-        rating: 4,
-        comment: "Very comprehensive course. The feedback on drawings is really helpful for improvement.",
-        date: "2024-10-05"
-      }
-    ]
-  }
+  const suggestionQuestions = [
+    "How can I improve my NATA preparation?",
+    "What are the best drawing techniques for NATA?",
+    "How should I manage time during the NATA exam?"
+  ];
 
   useEffect(() => {
+    const checkAuth = () => {
+      const authenticated = api.isAuthenticated();
+      setIsAuthenticated(authenticated);
+    };
+
+    checkAuth();
+
     const fetchCourseData = async () => {
-      // Simulate API call with course ID
-      setCourse(sampleCourse)
-      
-      // Fetch current user
-      if (auth.isAuthenticated()) {
-        const user = await auth.getCurrentUser()
-        setCurrentUser(user)
+      try {
+        const response = await api.get(`/api/nata-courses/${courseId}`)
+        if (response && response.data) {
+          const courseData = response.data.data || response.data;
+          
+          // Transform to match expected format
+          const transformedCourse = {
+            ...courseData,
+            students: courseData.studentsEnrolled || 0,
+            rating: courseData.rating || 0,
+            duration: courseData.duration || 'N/A',
+            totalLessons: courseData.lessonsCount || 0,
+            lastUpdated: courseData.lastUpdated || 'Recently',
+            thumbnail: courseData.thumbnail || 'https://placehold.co/800x450/png?text=NATA+Lesson',
+            reviewCount: courseData.reviewCount || 0,
+            lessons: courseData.lessons || [
+              { id: 1, title: "Introduction to NATA", duration: "15:00", thumbnail: courseData.thumbnail, is_free: true },
+              { id: 2, title: "Drawing Fundamentals", duration: "20:00", thumbnail: courseData.thumbnail },
+              { id: 3, title: "Perspective Techniques", duration: "25:00", thumbnail: courseData.thumbnail },
+              { id: 4, title: "Advanced Methods", duration: "18:00", thumbnail: courseData.thumbnail },
+            ]
+          }
+          setCourse(transformedCourse)
+        }
+      } catch (error) {
+        console.error('Error fetching NATA lesson:', error)
+      }
+    }
+
+    const checkEnrollment = async () => {
+      if (!api.isAuthenticated()) {
+        setIsEnrolled(false);
+        return;
       }
       
-      setLoading(false)
-    }
-
-    fetchCourseData()
-  }, [params.id])
-
-  const handleEnrollCourse = async () => {
-    if (!currentUser) {
-      router.push(`/login?redirect=${encodeURIComponent(`/nata-courses/${params.id}`)}`)
-      return
-    }
-
-    try {
-      setLoading(true)
-      
-      // Call the backend enrollment API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/nata-courses/${params.id}/enroll`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...auth.getAuthHeaders()
-        }
-      })
-
-      const result = await response.json()
-
-      if (response.ok && result.success) {
-        // Show success notification
-        alert(`🎉 Successfully enrolled in ${course?.title}!`)
-        
-        // Redirect to Moodle LMS for course access
-        if (result.data?.sso_url) {
-          window.open(result.data.sso_url, '_blank')
-        } else if (result.moodle_direct_url) {
-          window.open(result.moodle_direct_url, '_blank')
+      try {
+        const response = await api.get(`/api/nata-enrollments/course/${courseId}`)
+        if (response && response.data) {
+          setIsEnrolled(true)
+          setEnrollmentId(response.data.id)
         } else {
-          // Fallback: redirect to course dashboard
-          router.push('/profile/courses')
+          setIsEnrolled(false)
         }
-      } else {
-        throw new Error(result.message || 'Enrollment failed')
+      } catch (error: any) {
+        if (error?.response?.status === 404) {
+          setIsEnrolled(false)
+        } else {
+          console.error('Error checking enrollment:', error)
+          setIsEnrolled(false)
+        }
       }
-    } catch (error) {
-      console.error('Enrollment error:', error)
-      const errorMessage = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown error occurred'
-      alert(`❌ Enrollment failed: ${errorMessage}. Please try again.`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleAccessCourse = async () => {
-    if (!currentUser) {
-      router.push(`/login?redirect=${encodeURIComponent(`/nata-courses/${params.id}`)}`)
-      return
     }
 
-    try {
-      setLoading(true)
-      
-      // Get course access URL
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/nata-courses/${params.id}/access`, {
-        method: 'GET',
-        headers: {
-          ...auth.getAuthHeaders()
-        }
-      })
-
-      const result = await response.json()
-
-      if (response.ok && result.success) {
-        // Redirect to Moodle LMS
-        if (result.sso_url) {
-          window.open(result.sso_url, '_blank')
-        } else if (result.course_url) {
-          window.open(result.course_url, '_blank')
-        }
-      } else {
-        // If backend says access is not allowed (need to purchase), show friendly prompt.
-        // Fall back to showing a purchase/appointment prompt rather than a raw error.
-        setShowPurchasePrompt(true)
-        console.warn('Access denied or purchase required:', result.message || result)
-        return
-      }
-    } catch (error) {
-      console.error('Course access error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      // Show generic failure and a purchase prompt
-      setShowPurchasePrompt(true)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const closeModal = () => {
-    // Try to go back in history. If that doesn't change the route, fall back to listing.
-    try {
-      router.back()
-      // ensure fallback in case router.back doesn't navigate (e.g., opened directly)
-      setTimeout(() => {
-        if (typeof window !== 'undefined' && window.location.pathname.startsWith(`/nata-courses/`)) {
-          router.push('/nata-courses')
-        }
-      }, 250)
-    } catch (e) {
-      router.push('/nata-courses')
-    }
-  }
-
-  const getDiscountPercentage = () => {
-    if (course?.originalPrice && course?.price) {
-      return Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)
-    }
-    return 0
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading course details...</p>
-        </div>
-      </div>
-    )
-  }
+    fetchCourseData();
+    checkEnrollment();
+  }, [courseId]);
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Course Not Found</h1>
-          <Button onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Go Back
-          </Button>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Loading lesson...</div>
       </div>
-    )
+    );
   }
 
+  const toggleBookmark = () => {
+    setIsBookmarked(!isBookmarked);
+  };
+
+  const relatedCourses = [
+    { id: 2, title: "Advanced Drawing Techniques", rating: 4.8, students: 1234, thumbnail: "https://images.unsplash.com/photo-1513364776144-60967b0f800f" },
+    { id: 3, title: "Mathematics for NATA", rating: 4.6, students: 2103, thumbnail: "https://images.unsplash.com/photo-1509228468518-180dd4864904" },
+    { id: 4, title: "General Aptitude Mastery", rating: 4.9, students: 987, thumbnail: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8" }
+  ];
+
+  const handleSendMessage = (messageText?: string) => {
+    const textToSend = messageText || currentMessage;
+    if (!textToSend.trim()) return;
+    setChatMessages([...chatMessages, { text: textToSend, isUser: true }]);
+    setCurrentMessage('');
+    
+    setTimeout(() => {
+      setChatMessages(prev => [...prev, {
+        text: "Thanks for your question! I'm here to help you with NATA preparation, learning guidance, and answer any doubts you have. How can I assist you today?",
+        isUser: false
+      }]);
+    }, 1000);
+  };
+
+  const handleSuggestionClick = (question: string) => {
+    handleSendMessage(question);
+  };
+
+  const handleAddComment = () => {
+    if (!newComment.trim()) return;
+    const comment = {
+      id: Date.now(),
+      user: "Current User",
+      text: newComment,
+      rating: newRating,
+      date: new Date().toLocaleDateString()
+    };
+    setComments([comment, ...comments]);
+    setNewComment('');
+    setNewRating(5);
+  };
+
+  const handleEnroll = async () => {
+    if (!isAuthenticated) {
+      alert('Please login to enroll in this lesson')
+      window.location.href = '/login'
+      return
+    }
+
+    if (isEnrolled) {
+      window.location.href = `/nata-courses/${courseId}/learn`
+      return
+    }
+
+    setIsEnrolling(true)
+    
+    try {
+      const response = await api.post('/api/nata-enrollments', { 
+        course_id: parseInt(courseId)
+      })
+      
+      if (response && response.data) {
+        const newEnrollmentId = response.data.id || response.data.enrollment_id
+        setEnrollmentId(newEnrollmentId)
+        setIsEnrolled(true)
+        
+        alert('🎉 Successfully enrolled! Redirecting to lesson player...')
+        
+        setTimeout(() => {
+          window.location.href = `/nata-courses/${courseId}/learn`
+        }, 1000)
+      }
+    } catch (err: any) {
+      console.error('Enroll error', err)
+      
+      if (err.response?.status === 400 && err.response?.data?.detail?.includes('already enrolled')) {
+        setIsEnrolled(true)
+        alert('You are already enrolled! Redirecting to lesson player...')
+        setTimeout(() => {
+          window.location.href = `/nata-courses/${courseId}/learn`
+        }, 1000)
+      } else {
+        alert(err.response?.data?.detail || 'Failed to enroll. Please try again.')
+      }
+    } finally {
+      setIsEnrolling(false)
+    }
+  }
+
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<Star key={`star-${i}`} className="h-4 w-4 fill-yellow-400 text-yellow-400" />);
+    }
+
+    if (hasHalfStar) {
+      stars.push(<StarHalf key="half-star" className="h-4 w-4 fill-yellow-400 text-yellow-400" />);
+    }
+
+    const emptyStars = 5 - stars.length;
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<Star key={`empty-star-${i}`} className="h-4 w-4 text-gray-300" />);
+    }
+
+    return stars;
+  };
+
   return (
-    <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={closeModal}>
-        <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-        <div className="relative h-64">
-          <img src={course.thumbnail} alt={course.title} className="object-cover w-full h-full" />
-          <button
-              onClick={closeModal}
-            className="absolute top-4 right-4 bg-black bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-70 transition-opacity"
-            aria-label="Close"
-          >
-            <X className="h-5 w-5" />
-          </button>
-          <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
-          <div className="absolute bottom-4 left-6 right-6 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-medium">{course.rating}</span>
-              <span className="text-sm text-white/80">({course.studentsEnrolled} students)</span>
+    <div className="bg-gray-50 min-h-screen">
+      {/* Top Bar */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between">
+            <Link href="/nata-courses" className="flex items-center hover:text-teal-600 transition-colors gap-2 text-gray-700">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="font-medium">Back to NATA Lessons</span>
+            </Link>
+            <div className="flex gap-3">
+              <button 
+                className={`p-2 rounded-md border ${isBookmarked ? 'bg-teal-50 border-teal-200 text-teal-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'} transition-colors`}
+                onClick={toggleBookmark}
+              >
+                <Bookmark className={`h-5 w-5 ${isBookmarked ? 'fill-teal-600' : ''}`} />
+              </button>
+              <button 
+                className="p-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href)
+                  alert('Link copied to clipboard!')
+                }}
+              >
+                <Share2 className="h-5 w-5" />
+              </button>
             </div>
-            <h2 className="text-2xl font-bold">{course.title}</h2>
           </div>
         </div>
+      </div>
 
-  <div className="p-6 overflow-y-auto max-h-[calc(90vh-16rem)]">
-          {/* Course Header and rest of content (kept compact) */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <Badge className="bg-blue-100 text-blue-800">{course.category}</Badge>
-              <Badge variant="outline">{course.difficulty}</Badge>
-            </div>
-            
-            <h1 className="text-2xl lg:text-2xl font-bold text-gray-900 mb-2 leading-tight">{course.title}</h1>
-            <p className="text-sm text-gray-600 mb-3 line-clamp-3">{course.description}</p>
-
-            <div className="flex flex-wrap items-center gap-4 mb-4">
-              <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold">{course.rating}</span>
-                <span className="text-gray-500">({course.studentsEnrolled} students)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-gray-400" />
-                <span>{course.duration}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-gray-400" />
-                <span>{course.lessonsCount} sections</span>
-              </div>
-              {course.certificateIncluded && (
-                <div className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-green-600" />
-                  <span className="text-green-600">Certificate included</span>
+      {/* Lesson Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Main Content - Video Player */}
+          <div className="lg:w-2/3">
+            {/* Lesson Title */}
+            <div className="mb-4">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                {course.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-1.5">
+                  <Users className="h-4 w-4" />
+                  <span>{(course.students || 0).toLocaleString()} students</span>
                 </div>
-              )}
+                <div className="flex items-center gap-1.5">
+                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  <span>{(course.rating || 0).toFixed(1)} ({course.reviewCount || 0} reviews)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <BookOpen className="h-4 w-4" />
+                  <span>{course.totalLessons || 0} sections</span>
+                </div>
+              </div>
             </div>
 
-            {/* Compact CTA (moved from sidebar): Access / Enroll button */}
-            <div className="mb-4 flex flex-wrap items-center gap-3">
-              <Button onClick={handleAccessCourse} className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 rounded-md">
-                {course.moodleUrl ? (
-                  <><Globe className="h-5 w-5 mr-2" />Access on Moodle</>
+            {/* Video Player Section */}
+            <div className="bg-white rounded-lg shadow overflow-hidden mb-4">
+              <div className="aspect-video bg-black">
+                <EnhancedVideoPlayer
+                  src="/Demo.mp4"
+                  title={course.lessons?.[0]?.title || 'Introduction'}
+                  isAuthenticated={isAuthenticated}
+                  isEnrolled={isEnrolled}
+                  userEmail={isAuthenticated ? localStorage.getItem('userEmail') || undefined : undefined}
+                  userName={isAuthenticated ? localStorage.getItem('userName') || undefined : undefined}
+                  onLoginRequired={() => window.location.href = '/login'}
+                  onSubscriptionRequired={() => {
+                    const enrollSection = document.getElementById('enroll-section')
+                    enrollSection?.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-gray-900 mb-1 text-lg">
+                  {course.lessons?.[0]?.title || 'Introduction'}
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {course.description}
+                </p>
+              </div>
+            </div>
+
+            {/* Comments and Reviews Section */}
+            <div className="bg-white rounded-lg shadow p-6 mb-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Reviews & Comments</h3>
+              
+              {/* Add Comment Form */}
+              <div className="mb-6 pb-6 border-b border-gray-200">
+                <div className="flex gap-2 mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setNewRating(star)}
+                      className="transition-colors"
+                    >
+                      <Star
+                        className={`h-6 w-6 ${star <= newRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                      />
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Share your thoughts about this lesson..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                  rows={3}
+                />
+                <button
+                  onClick={handleAddComment}
+                  className="mt-3 px-6 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-lg hover:from-teal-700 hover:to-cyan-700 transition-all font-medium"
+                >
+                  Post Review
+                </button>
+              </div>
+
+              {/* Comments List */}
+              <div className="space-y-4">
+                {comments.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">No reviews yet. Be the first to review!</p>
                 ) : (
-                  <><BookOpen className="h-5 w-5 mr-2" />Enroll Now</>
+                  comments.map((comment) => (
+                    <div key={comment.id} className="pb-4 border-b border-gray-200 last:border-0">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold">
+                          {comment.user[0]}
+                        </div>
+                        <div className="flex-grow">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="font-medium text-gray-900">{comment.user}</h4>
+                            <span className="text-sm text-gray-500">{comment.date}</span>
+                          </div>
+                          <div className="flex mb-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-4 w-4 ${star <= comment.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-gray-700">{comment.text}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
                 )}
-              </Button>
+              </div>
+            </div>
 
-              {course.originalPrice && (
-                <Badge className="bg-green-100 text-green-800">{getDiscountPercentage()}% OFF</Badge>
-              )}
+            {/* Related Lessons */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">You Might Also Like</h3>
+              <div className="space-y-4">
+                {relatedCourses.map((relatedCourse) => (
+                  <Link
+                    key={relatedCourse.id}
+                    href={`/nata-courses/${relatedCourse.id}`}
+                    className="flex gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="w-32 h-20 bg-gray-200 rounded flex-shrink-0 relative overflow-hidden">
+                      <Image
+                        src={relatedCourse.thumbnail}
+                        alt={relatedCourse.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-grow">
+                      <h4 className="font-medium text-gray-900 hover:text-teal-600 transition-colors mb-2">
+                        {relatedCourse.title}
+                      </h4>
+                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                          <span>{relatedCourse.rating}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="h-3.5 w-3.5" />
+                          <span>{relatedCourse.students.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Overview, Sections, Reviews follow (kept as-is) */}
-          <div className="mt-4 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-6 w-6 text-blue-600" />
-                  What you'll learn
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-2 text-sm">
-                  {course.outcomes.map((outcome, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{outcome}</span>
-                    </div>
-                  ))}
+          {/* Sidebar - Video Playlist */}
+          <div className="lg:w-1/3">
+            <div className="sticky top-24">
+              {/* Lesson Playlist */}
+              <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="bg-gray-900 p-4">
+                  <h3 className="font-semibold text-white text-base">Lesson Content</h3>
+                  <p className="text-gray-300 text-sm mt-1">
+                    {course.lessons?.length || 0} sections
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Skills you'll gain</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {course.skills.map((skill, index) => (
-                    <Badge key={index} variant="secondary" className="text-sm">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Requirements</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {course.requirements.map((requirement, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-gray-700">{requirement}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-4">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between w-full">
-                  <div>
-                    <CardTitle>Sections</CardTitle>
-                    <p className="text-gray-600 text-sm">{course.lessonsCount} sections • {course.duration}</p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-3 overflow-x-auto pb-2">
-                  {course.syllabus.map((module, moduleIndex) => (
-                    <div key={moduleIndex} className="min-w-[220px] bg-white border border-gray-100 rounded-md p-3 shadow-sm">
-                      <h4 className="font-semibold text-sm">Section {moduleIndex + 1}</h4>
-                      <p className="text-sm text-gray-600">{module.module}</p>
-                      <p className="text-xs text-gray-500 mt-2">{module.lessons.length} lessons • {module.duration}</p>
-                      <div className="mt-3 text-xs text-gray-700 space-y-1 max-h-20 overflow-hidden">
-                        {module.lessons.slice(0,4).map((lesson, li) => (
-                          <div key={li} className="flex items-center gap-2">
-                            {lesson.type === 'video' && <Video className="h-3 w-3 text-blue-600" />}
-                            <span className="truncate">{lesson.title}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-4">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between w-full">
-                  <CardTitle>Student Reviews</CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => alert('Open reviews modal (not implemented)')}>View all</Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4 text-sm">
-                  {course.reviews.slice(0,2).map((review) => (
-                    <div key={review.id} className="flex items-start gap-3">
-                      <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center">
-                        <UserIcon className="h-4 w-4 text-gray-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <h4 className="font-semibold text-sm">{review.userName}</h4>
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`h-3 w-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                />
-                              ))}
+                
+                <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+                  {course.lessons && course.lessons.map((lesson: any, index: number) => {
+                    const isFree = index === 0;
+                    const needsSubscription = index > 0 && !isEnrolled;
+                    
+                    return (
+                      <div
+                        key={lesson.id}
+                        className={`border-b border-gray-200 last:border-0 transition-colors ${
+                          index === 0 ? 'bg-slate-50' : 'hover:bg-gray-50'
+                        } ${needsSubscription ? 'cursor-pointer' : 'cursor-pointer'}`}
+                        onClick={() => {
+                          if (needsSubscription) {
+                            alert('Subscribe to access this section');
+                          } else {
+                            console.log('Switch to section:', lesson.id);
+                          }
+                        }}
+                      >
+                        <div className="p-3">
+                          <div className="flex gap-3">
+                            {/* Video Thumbnail */}
+                            <div className="w-40 h-24 bg-gray-200 rounded flex-shrink-0 relative overflow-hidden">
+                              <Image
+                                src={lesson.thumbnail || course.thumbnail}
+                                alt={lesson.title}
+                                fill
+                                className="object-cover"
+                              />
+                              {needsSubscription && (
+                                <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+                                  <Lock className="h-6 w-6 text-white" />
+                                </div>
+                              )}
+                              {index === 0 && (
+                                <div className="absolute top-2 right-2">
+                                  <Badge className="bg-green-500 text-white hover:bg-green-500 text-xs px-2 py-0.5">
+                                    FREE
+                                  </Badge>
+                                </div>
+                              )}
+                              <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 px-1.5 py-0.5 rounded text-white text-xs">
+                                {lesson.duration || '15:30'}
+                              </div>
+                            </div>
+                            
+                            {/* Lesson Info */}
+                            <div className="flex-grow min-w-0">
+                              <div className="flex items-start gap-2">
+                                <span className="text-gray-500 font-medium text-sm mt-0.5">{index + 1}.</span>
+                                <div className="flex-grow">
+                                  <h4 className="font-medium text-gray-900 text-sm line-clamp-2 mb-1">
+                                    {lesson.title}
+                                  </h4>
+                                  {needsSubscription && (
+                                    <div className="flex items-center gap-1.5 text-xs text-orange-600 mt-1">
+                                      <Lock className="h-3 w-3" />
+                                      <span className="font-medium">Subscription required</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <span className="text-xs text-gray-500">{review.date}</span>
                         </div>
-                        <p className="text-gray-700 text-sm mt-1 line-clamp-3">{review.comment}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {!isEnrolled && (
+                  <div id="enroll-section" className="p-4 bg-gradient-to-br from-orange-50 to-red-50 border-t border-orange-100">
+                    <p className="text-sm text-gray-800 mb-3">
+                      <strong className="text-orange-700">Subscribe to unlock all {course.lessons?.length || 0} sections</strong>
+                    </p>
+                    <button 
+                      onClick={handleEnroll}
+                      disabled={isEnrolling}
+                      className={`w-full py-3 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white ${
+                        isEnrolling ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {isEnrolling ? 'Enrolling...' : '🚀 Subscribe Now'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* AAO Assistant Chatbot */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {isChatOpen && (
+          <div className="bg-white rounded-2xl shadow-xl w-[400px] h-[600px] mb-4 flex flex-col">
+            {/* Chat Header */}
+            <div className="bg-green-600 text-white px-5 py-4 rounded-t-2xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-md flex items-center justify-center p-0.5 overflow-hidden">
+                  <Image src="/logo.jpg" alt="AAO Logo" width={40} height={40} className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-base">AAO Assistant</h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsChatOpen(false)}
+                className="text-white hover:bg-green-700 transition-colors p-1 rounded"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-grow overflow-y-auto p-4 bg-gray-50">
+              {chatMessages.length === 0 ? (
+                <div className="space-y-3">
+                  {/* Initial Bot Message */}
+                  <div className="flex justify-start">
+                    <div className="flex items-start gap-2 max-w-[85%]">
+                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0 mt-1 p-0.5 overflow-hidden">
+                        <Image src="/logo.jpg" alt="AAO Logo" width={32} height={32} className="w-full h-full object-contain" />
+                      </div>
+                      <div className="bg-white px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm">
+                        <p className="text-sm text-gray-800">Hi there! I'm AAO Assistant. How can I help you with NATA preparation today?</p>
+                        <p className="text-xs text-gray-400 mt-1">just now</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Suggestion Questions */}
+                  <div className="space-y-2 pt-2">
+                    {suggestionQuestions.map((question, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSuggestionClick(question)}
+                        className="w-full text-left px-4 py-2.5 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg text-sm text-blue-600 transition-colors"
+                      >
+                        {question}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {chatMessages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
+                    >
+                      {!msg.isUser && (
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0 mr-2 mt-1 p-0.5 overflow-hidden">
+                          <Image src="/logo.jpg" alt="AAO Logo" width={32} height={32} className="w-full h-full object-contain" />
+                        </div>
+                      )}
+                      <div
+                        className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
+                          msg.isUser
+                            ? 'bg-green-600 text-white rounded-br-sm'
+                            : 'bg-white text-gray-800 rounded-tl-sm shadow-sm'
+                        }`}
+                      >
+                        {msg.text}
                       </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-      </div>
+              )}
+            </div>
 
-      {/* Purchase / Access Prompt Dialog */}
-      <Dialog open={showPurchasePrompt} onOpenChange={setShowPurchasePrompt}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Access required</DialogTitle>
-          </DialogHeader>
-          <div className="p-4">
-            <p className="text-sm text-gray-700">It looks like you don't have access to this course yet. To access full videos and materials you need to purchase the NATA course or schedule an appointment.</p>
-            <div className="mt-4 flex gap-2">
-              <Button onClick={() => { setShowPurchasePrompt(false); router.push(`/nata-courses/${params.id}/buy`) }} className="bg-blue-600 text-white">Buy NATA course</Button>
-              <Button variant="outline" onClick={() => { setShowPurchasePrompt(false); router.push('/contact-us') }}>Contact / Appointment</Button>
-              <Button variant="ghost" onClick={() => setShowPurchasePrompt(false)}>Close</Button>
+            {/* Chat Input */}
+            <div className="p-4 border-t border-gray-200 bg-white rounded-b-2xl">
+              <div className="flex items-center gap-2">
+                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+                <input
+                  type="text"
+                  value={currentMessage}
+                  onChange={(e) => setCurrentMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="Type your message..."
+                  className="flex-grow px-4 py-2.5 border-0 focus:outline-none text-sm text-gray-600 placeholder:text-gray-400"
+                />
+                <button
+                  onClick={() => handleSendMessage()}
+                  disabled={!currentMessage.trim()}
+                  className="p-2 text-gray-400 hover:text-green-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  )
+        )}
+
+        {/* Welcome Popup Notification */}
+        {showWelcomePopup && !isChatOpen && (
+          <div className="fixed bottom-24 right-6 bg-white rounded-2xl shadow-lg p-4 border border-gray-200 w-80 animate-fade-in-up z-50">
+            <button
+              onClick={() => setShowWelcomePopup(false)}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="flex items-start gap-3 pr-6">
+              <div className="w-10 h-10 bg-white rounded-md flex items-center justify-center flex-shrink-0 p-0.5 overflow-hidden">
+                <Image src="/logo.jpg" alt="AAO Logo" width={40} height={40} className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-800 font-medium">Hi there! I'm AAO Assistant.</p>
+                <p className="text-xs text-gray-500 mt-0.5">How can I help you today?</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Chat Button */}
+        <button
+          onClick={() => {
+            setIsChatOpen(!isChatOpen)
+            setShowWelcomePopup(false)
+          }}
+          className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all hover:scale-110 z-50"
+        >
+          <MessageSquare className="h-6 w-6" />
+        </button>
+      </div>
+    </div>
+  );
 }

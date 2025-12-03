@@ -138,20 +138,41 @@ async def startup_event():
         if existing_courses_count == 0:
             print("📚 Creating sample courses...")
             from seed_data import get_sample_courses
+            from seed_lessons import get_sample_lessons_for_course, get_digital_tools_lessons, get_sustainable_architecture_lessons
+            from database import CourseLesson
             
             sample_courses = get_sample_courses()
             created_courses = 0
             
-            for course_data in sample_courses:
+            for idx, course_data in enumerate(sample_courses):
                 try:
                     course = crud.create_course(db, course_data)
                     if course:
                         created_courses += 1
                         print(f"✅ Created course: {course.title}")
+                        
+                        # Add lessons to the course
+                        if idx == 0:  # First course - Introduction to Architectural Design
+                            lessons = get_sample_lessons_for_course(course.id)
+                        elif idx == 2:  # Third course - Digital Tools
+                            lessons = get_digital_tools_lessons(course.id)
+                        elif idx == 1:  # Second course - Sustainable Architecture
+                            lessons = get_sustainable_architecture_lessons(course.id)
+                        else:
+                            lessons = get_sample_lessons_for_course(course.id)
+                        
+                        for lesson_data in lessons:
+                            lesson = CourseLesson(**lesson_data)
+                            db.add(lesson)
+                        
+                        db.commit()
+                        print(f"   📹 Added {len(lessons)} lessons with YouTube videos")
+                        
                 except Exception as e:
                     print(f"❌ Failed to create course: {e}")
+                    db.rollback()
             
-            print(f"🎉 Created {created_courses} sample courses!")
+            print(f"🎉 Created {created_courses} sample courses with video lessons!")
         else:
             print(f"✅ Found {existing_courses_count} existing courses in database")
         

@@ -22,7 +22,9 @@ import {
   User as UserIcon,
   Home,
   Settings,
-  LogOut
+  LogOut,
+  CreditCard,
+  AlertCircle,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -58,6 +60,7 @@ type CourseDetail = {
   short_description?: string | null
   level: string
   duration: string
+  price?: number
   image_url?: string | null
   lessons: Lesson[]
   materials: Material[]
@@ -83,6 +86,8 @@ export default function CourseLearnPage({ params }: { params: Promise<{ id: stri
     { id: 1, sender: "bot", text: "Hello! I'm your course assistant. How can I help you today?" }
   ])
   const [chatInput, setChatInput] = useState("")
+
+  const [showEnrollModal, setShowEnrollModal] = useState(false)
 
   const isEnrolled = useMemo(() => !!enrollmentId, [enrollmentId])
 
@@ -182,7 +187,7 @@ export default function CourseLearnPage({ params }: { params: Promise<{ id: stri
 
   const selectLesson = (lesson: Lesson) => {
     if (!isEnrolled && !lesson.is_free) {
-      alert('This lesson is locked. Please enroll to access.')
+      setShowEnrollModal(true)
       return
     }
     setCurrentLesson(lesson)
@@ -338,10 +343,23 @@ export default function CourseLearnPage({ params }: { params: Promise<{ id: stri
                 </div>
               ) : (
                 <div className="aspect-video max-w-6xl mx-auto flex items-center justify-center bg-gradient-to-br from-blue-900 to-indigo-900">
-                  <div className="text-center text-white">
+                  <div className="text-center text-white max-w-md px-6">
                     <Lock className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                    <h3 className="text-xl font-semibold mb-2">{currentLesson.title}</h3>
-                    <p className="text-gray-300 mb-4">This lesson is locked. {isEnrolled ? 'No video available.' : 'Enroll to unlock.'}</p>
+                    <h3 className="text-2xl font-semibold mb-3">{currentLesson.title}</h3>
+                    <p className="text-gray-300 mb-6">
+                      {isEnrolled 
+                        ? 'No video available for this lesson.' 
+                        : 'This lesson is part of our premium content. Enroll now to unlock all lessons and materials.'}
+                    </p>
+                    {!isEnrolled && (
+                      <Button
+                        onClick={() => setShowEnrollModal(true)}
+                        className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 text-lg"
+                      >
+                        <CreditCard className="h-5 w-5 mr-2" />
+                        Enroll to Unlock
+                      </Button>
+                    )}
                   </div>
                 </div>
               )
@@ -634,6 +652,101 @@ export default function CourseLearnPage({ params }: { params: Promise<{ id: stri
           </button>
         )}
       </div>
+
+      {/* Enrollment Required Modal */}
+      {showEnrollModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in slide-in-from-bottom duration-300">
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 rounded-t-2xl">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                  <Lock className="h-8 w-8 text-amber-500" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-white text-center mb-2">
+                Premium Content
+              </h3>
+              <p className="text-amber-100 text-center">
+                Unlock all {lessons.length} lessons and advance your skills
+              </p>
+            </div>
+            
+            <div className="p-6">
+              <div className="space-y-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">Full Course Access</p>
+                    <p className="text-sm text-gray-600">Access all {lessons.length} video lessons</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">Downloadable Resources</p>
+                    <p className="text-sm text-gray-600">Get all course materials and PDFs</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">Certificate of Completion</p>
+                    <p className="text-sm text-gray-600">Earn a certificate upon completion</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">Lifetime Access</p>
+                    <p className="text-sm text-gray-600">Learn at your own pace, anytime</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Course Price</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {course?.price ? `₹${course.price}` : 'Free'}
+                    </p>
+                  </div>
+                  {course?.price && (
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500 line-through">₹{(course.price * 1.5).toFixed(0)}</p>
+                      <Badge className="bg-green-500 text-white">Save 33%</Badge>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setShowEnrollModal(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Maybe Later
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowEnrollModal(false)
+                    router.push(`/courses/${id}`)
+                  }}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Enroll Now
+                </Button>
+              </div>
+
+              <p className="text-xs text-gray-500 text-center mt-4">
+                30-day money-back guarantee • Secure payment
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

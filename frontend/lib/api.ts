@@ -90,7 +90,7 @@ export const api = {
   // Authentication
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,6 +116,9 @@ export const api = {
       if (typeof window !== 'undefined') {
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('user', JSON.stringify(data.user));
+        // Store user name and email for video watermark
+        localStorage.setItem('userName', `${data.user.first_name} ${data.user.last_name}`);
+        localStorage.setItem('userEmail', data.user.email);
       }
 
       return { data };
@@ -131,7 +134,7 @@ export const api = {
 
   async register(userData: RegisterRequest): Promise<ApiResponse<RegisterResponse>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +164,7 @@ export const api = {
 
   async verifyOTP(otpData: OTPVerificationRequest): Promise<ApiResponse<LoginResponse>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +187,7 @@ export const api = {
 
   async resendOTP(email: string): Promise<ApiResponse<{ message: string; email: string }>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/resend-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +223,7 @@ export const api = {
         return { error: 'No authentication token found' };
       }
 
-      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -260,7 +263,7 @@ export const api = {
         return { error: 'No authentication token found' };
       }
 
-      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -27,8 +27,9 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { LoginRequiredButton } from "@/components/login-required"
+import { CourseIntroductionModal } from "@/components/course-introduction-modal"
 
-// mockCourses removed: page now fetches courses from backend via api.get('/courses')
+// mockCourses removed: page now fetches courses from backend via api.get('/api/courses')
 
 // Types
 interface Lesson {
@@ -74,6 +75,7 @@ export default function CoursesPortal() {
   const [user, setUser] = useState<any>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showIntroModal, setShowIntroModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<Set<number>>(new Set());
   const [filters, setFilters] = useState<FilterOptions>({
@@ -87,7 +89,7 @@ export default function CoursesPortal() {
     const fetchCourses = async () => {
       setIsLoading(true)
       try {
-        const response = await api.get('/courses')
+        const response = await api.get('/api/courses')
         if (response.data) {
           // Transform backend data to match frontend interface
           const transformedCourses = response.data.map((course: any) => ({
@@ -145,7 +147,7 @@ export default function CoursesPortal() {
       }
       
       try {
-        const response = await api.get('/enrollments/my-courses');
+        const response = await api.get('/api/courses/my-courses');
         if (response && response.data) {
           const enrolledIds = new Set<number>(response.data.map((enrollment: any) => Number(enrollment.course_id)));
           setEnrolledCourseIds(enrolledIds);
@@ -235,6 +237,16 @@ export default function CoursesPortal() {
     setSelectedCourse(null);
   };
 
+  const openIntroModal = (course: Course) => {
+    setSelectedCourse(course);
+    setShowIntroModal(true);
+  };
+
+  const closeIntroModal = () => {
+    setShowIntroModal(false);
+    setSelectedCourse(null);
+  };
+
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -259,36 +271,31 @@ export default function CoursesPortal() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 pt-16 pb-20">
+      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900 pt-16 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-4 font-serif">
               Explore Premium Courses
             </h1>
-            <p className="text-xl text-indigo-100 max-w-2xl mx-auto mb-8">
+            <p className="text-xl text-gray-200 max-w-2xl mx-auto mb-8">
               Discover world-class architecture courses taught by industry experts. Learn at your own pace.
             </p>
             <div className="flex items-center justify-center gap-4">
               <a
                 href="#course-catalog"
-                className="inline-flex items-center px-6 py-3 rounded-full bg-white text-indigo-600 font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
+                className="inline-flex items-center px-6 py-3 rounded-full bg-white text-slate-900 font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
               >
                 Browse Courses
               </a>
-              <Link
-                href="/video-demo"
-                className="inline-flex items-center px-6 py-3 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Watch Demo Video
-              </Link>
-              <Link
-                href="/profile/my-courses"
-                className="inline-flex items-center px-6 py-3 rounded-full bg-green-500 hover:bg-green-600 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
-              >
-                <Users className="h-4 w-4 mr-2" />
-                My Courses
-              </Link>
+              {isAuthenticated && (
+                <Link
+                  href="/profile/my-courses"
+                  className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  My Courses
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -473,7 +480,7 @@ export default function CoursesPortal() {
                       {enrolledCourseIds.has(course.id) ? (
                         <Link 
                           href={`/courses/${course.id}/learn`}
-                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-2.5 rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-colors text-center text-sm flex items-center justify-center gap-2"
+                          className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-2.5 rounded-lg font-medium hover:from-emerald-700 hover:to-teal-700 transition-colors text-center text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
                         >
                           <PlayCircle className="h-4 w-4" />
                           View Course
@@ -481,18 +488,12 @@ export default function CoursesPortal() {
                       ) : (
                         <>
                           <button 
-                            onClick={() => openCourseModal(course)}
-                            className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                            onClick={() => openIntroModal(course)}
+                            className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm flex items-center justify-center gap-2"
                           >
-                            Preview
+                            <Play className="h-4 w-4" />
+                            Start Learning
                           </button>
-                          <Link 
-                            href={`/courses/${course.id}`}
-                            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors text-center text-sm flex items-center justify-center gap-2"
-                          >
-                            <PlayCircle className="h-4 w-4" />
-                            Get Free Trial
-                          </Link>
                         </>
                       )}
                     </div>
@@ -502,25 +503,6 @@ export default function CoursesPortal() {
             ))}
           </div>
         )}
-      </section>
-
-      {/* Faculty/Instructor Section */}
-      <section className="bg-gradient-to-r from-blue-100 to-indigo-100 py-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 font-serif">
-            Are You an Architecture Instructor?
-          </h2>
-          <p className="text-lg text-gray-700 mb-8 max-w-3xl mx-auto">
-            Share your knowledge and expertise with students around the world. Create engaging courses and help shape the next generation of architects.
-          </p>
-          <LoginRequiredButton
-            onClick={() => window.location.href = "/create-course"}
-            action="create courses"
-            className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
-          >
-            Create a Course
-          </LoginRequiredButton>
-        </div>
       </section>
 
       {/* Course Detail Modal */}
@@ -590,19 +572,6 @@ export default function CoursesPortal() {
                 </ul>
               </div>
 
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">Course Type</h3>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">AI</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">AI-Powered Architecture Course</h4>
-                    <p className="text-sm text-gray-600">Comprehensive curriculum designed by AI</p>
-                  </div>
-                </div>
-              </div>
-
               <div className="flex flex-wrap gap-2 mt-8">
                 <button className="flex-grow bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-md font-bold hover:from-blue-700 hover:to-cyan-700 transition-colors">
                   Enroll in Course
@@ -617,6 +586,15 @@ export default function CoursesPortal() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Course Introduction Modal */}
+      {selectedCourse && (
+        <CourseIntroductionModal 
+          course={selectedCourse}
+          isOpen={showIntroModal}
+          onClose={closeIntroModal}
+        />
       )}
     </div>
   );

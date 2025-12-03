@@ -67,7 +67,7 @@ export default function NATACoursesPage() {
       try {
         // Fetch NATA courses and user data in parallel
         const [coursesResponse, user] = await Promise.all([
-          api.get('/nata-courses'),
+          api.get('/api/nata-courses'),
           auth.isAuthenticated() ? auth.getCurrentUser() : null
         ]);
 
@@ -169,28 +169,28 @@ export default function NATACoursesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-indigo-600 pt-16 pb-20">
+      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900 pt-16 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-4 font-serif">
-              Master NATA with Expert-Led Courses
+              Master NATA with Expert-Led Lessons
             </h1>
-            <p className="text-xl text-blue-100 max-w-2xl mx-auto mb-8">
+            <p className="text-xl text-gray-200 max-w-2xl mx-auto mb-8">
               Comprehensive NATA preparation covering drawing, mathematics, general aptitude, and complete exam strategies from industry experts
             </p>
             <div className="flex items-center justify-center gap-4">
               <a
                 href="#course-catalog"
-                className="inline-flex items-center px-6 py-3 rounded-full bg-white text-blue-600 font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
+                className="inline-flex items-center px-6 py-3 rounded-full bg-white text-slate-900 font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
               >
-                Browse Courses
+                Browse Lessons
               </a>
               <Link
                 href="/profile/my-courses"
-                className="inline-flex items-center px-6 py-3 rounded-full bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
+                className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
               >
                 <Users className="h-4 w-4 mr-2" />
-                My Courses
+                My Lessons
               </Link>
             </div>
           </div>
@@ -318,15 +318,15 @@ export default function NATACoursesPage() {
                     <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
                       <div className="flex items-center gap-1">
                         <Users className="h-3.5 w-3.5" />
-                        <span>{course.studentsEnrolled.toLocaleString()}</span>
+                        <span>{(course.studentsEnrolled || 0).toLocaleString()}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5" />
-                        <span>{course.duration}</span>
+                        <span>{course.duration || 'N/A'}</span>
                       </div>
                       <div className="flex items-center gap-1">
               <BookOpen className="h-3.5 w-3.5" />
-              <span>{course.lessonsCount} sections</span>
+              <span>{course.lessonsCount || 0} sections</span>
                       </div>
                     </div>
 
@@ -344,22 +344,12 @@ export default function NATACoursesPage() {
                     </div>
 
                     <div className="pt-4 mt-4 border-t border-gray-100">
-                      <LoginRequiredButton
-                        onClick={() => handleEnrollCourse(course)}
-                        action="enroll in course"
-                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors text-sm flex items-center justify-center gap-2"
+                      <Link
+                        href={`/nata-courses/${course.id}`}
+                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm flex items-center justify-center gap-2"
                       >
                         <Play className="h-4 w-4" />
-                        View Course Player
-                      </LoginRequiredButton>
-
-                      <Link href={`/nata-courses/${course.id}`} className="mt-2 block">
-                        <Button 
-                          variant="outline"
-                          className="w-full border-gray-200 hover:bg-gray-50 text-gray-700"
-                        >
-                          View Sections
-                        </Button>
+                        Start Learning
                       </Link>
                     </div>
                   </div>

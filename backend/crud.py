@@ -512,6 +512,12 @@ def create_predefined_recruiter(db: Session):
     # Check if recruiter already exists
     existing_recruiter = get_user_by_email(db, "recruiter@architectureacademics.com")
     if existing_recruiter:
+        # Ensure it's verified
+        if not existing_recruiter.is_verified:
+            existing_recruiter.is_verified = True
+            existing_recruiter.email_otp = None
+            existing_recruiter.email_otp_expires_at = None
+            db.commit()
         return existing_recruiter
     
     recruiter_data = schemas.UserCreate(
@@ -524,6 +530,12 @@ def create_predefined_recruiter(db: Session):
     )
     
     recruiter = create_user(db, recruiter_data)
+    
+    # Mark as verified immediately (no email verification needed for predefined accounts)
+    recruiter.is_verified = True
+    recruiter.email_otp = None
+    recruiter.email_otp_expires_at = None
+    db.commit()
     
     # Update recruiter profile
     profile_data = schemas.UserProfileUpdate(
@@ -543,6 +555,12 @@ def create_predefined_admin(db: Session):
     # Check if admin already exists
     existing_admin = get_user_by_email(db, "admin@architectureacademics.com")
     if existing_admin:
+        # Ensure it's verified
+        if not existing_admin.is_verified:
+            existing_admin.is_verified = True
+            existing_admin.email_otp = None
+            existing_admin.email_otp_expires_at = None
+            db.commit()
         return existing_admin
     
     admin_data = schemas.UserCreate(
@@ -555,6 +573,12 @@ def create_predefined_admin(db: Session):
     )
     
     admin = create_user(db, admin_data)
+    
+    # Mark as verified immediately (no email verification needed for predefined accounts)
+    admin.is_verified = True
+    admin.email_otp = None
+    admin.email_otp_expires_at = None
+    db.commit()
     
     # Update admin profile
     profile_data = schemas.UserProfileUpdate(
