@@ -511,7 +511,7 @@ Architecture reflects the culture, technology, and aspirations of its time. Let'
 
 Understanding architectural history helps us appreciate the evolution of design and informs our contemporary practice.
 """,
-                "category": BlogCategory.ARCHITECTURE.value,
+                "category": BlogCategory.DESIGN_TRENDS.value,
                 "tags": "architectural history, design styles, architecture theory",
                 "featured_image": "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800",
                 "author_id": default_author_id,
