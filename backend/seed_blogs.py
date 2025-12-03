@@ -545,12 +545,6 @@ Understanding architectural history helps us appreciate the evolution of design 
     finally:
         if should_close:
             db.close()
-        
-    except Exception as e:
-        print(f"Error seeding blogs: {e}")
-        db.rollback()
-    finally:
-        db.close()
 
 
 if __name__ == "__main__":
