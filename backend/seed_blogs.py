@@ -6,11 +6,23 @@ from schemas import BlogCategory, BlogStatus
 from datetime import datetime, timedelta
 
 
-def seed_blogs():
+def seed_blogs(db_session=None, default_author_id=None):
     """Create sample blog posts"""
-    db = SessionLocal()
+    db = db_session if db_session else SessionLocal()
+    should_close = db_session is None
     
     try:
+        # Get author ID if not provided
+        if not default_author_id:
+            # Try to find a user
+            from database import User
+            user = db.query(User).first()
+            if user:
+                default_author_id = user.id
+            else:
+                print("No users found. Cannot seed blogs without an author.")
+                return
+
         # Sample blog posts
         blogs = [
             {
@@ -59,14 +71,13 @@ Offers comprehensive B.Arch and M.Arch programs with excellent infrastructure.
 Choosing the right architecture school is crucial for your career. Consider factors like faculty, infrastructure, placement records, and specializations when making your decision.
 """,
                 "category": BlogCategory.EDUCATION.value,
-                "tags": ["architecture schools", "education", "career", "IIT", "SPA"],
+                "tags": "architecture schools, education, career, IIT, SPA",
                 "featured_image": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
-                "author_id": 1,
+                "author_id": default_author_id,
                 "is_featured": True,
-                "is_published": True,
                 "status": BlogStatus.PUBLISHED.value,
-                "published_at": datetime.utcnow() - timedelta(days=5),
-                "read_time_minutes": 8,
+                "views_count": 150,
+                "likes_count": 45,
             },
             {
                 "title": "NATA 2025: Complete Preparation Guide",
@@ -504,24 +515,36 @@ Architecture reflects the culture, technology, and aspirations of its time. Let'
 Understanding architectural history helps us appreciate the evolution of design and informs our contemporary practice.
 """,
                 "category": BlogCategory.ARCHITECTURE.value,
-                "tags": ["architectural history", "design styles", "architecture theory"],
+                "tags": "architectural history, design styles, architecture theory",
                 "featured_image": "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800",
-                "author_id": 1,
+                "author_id": default_author_id,
                 "is_featured": False,
-                "is_published": True,
                 "status": BlogStatus.PUBLISHED.value,
-                "published_at": datetime.utcnow() - timedelta(days=15),
-                "read_time_minutes": 15,
+                "views_count": 80,
+                "likes_count": 25,
             },
         ]
         
         # Create blog posts
         for blog_data in blogs:
-            blog = Blog(**blog_data)
-            db.add(blog)
+            # Check if blog exists
+            existing_blog = db.query(Blog).filter(Blog.slug == blog_data["slug"]).first()
+            if not existing_blog:
+                blog = Blog(**blog_data)
+                db.add(blog)
+                print(f"Added blog: {blog.title}")
+            else:
+                print(f"Blog already exists: {blog_data['title']}")
         
         db.commit()
-        print(f"✅ Created {len(blogs)} sample blog posts")
+        print(f"✅ Blog seeding completed")
+        
+    except Exception as e:
+        print(f"Error seeding blogs: {e}")
+        db.rollback()
+    finally:
+        if should_close:
+            db.close()
         
     except Exception as e:
         print(f"Error seeding blogs: {e}")
