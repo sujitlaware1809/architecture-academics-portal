@@ -208,9 +208,8 @@ As architects, we have a responsibility to design buildings that are not just be
                 "author_id": default_author_id,
                 "is_featured": True,
                 "status": BlogStatus.PUBLISHED.value,
-                "status": BlogStatus.PUBLISHED.value,
-                "published_at": datetime.utcnow() - timedelta(days=7),
-                "read_time_minutes": 7,
+                "views_count": 100,
+                "likes_count": 35,
             },
             {
                 "title": "Career Opportunities in Architecture: Beyond Traditional Practice",
