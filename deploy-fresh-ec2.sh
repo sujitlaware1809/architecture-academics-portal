@@ -17,16 +17,19 @@ echo "📍 EC2 IP: 15.206.47.135"
 # ==========================================
 echo ""
 echo "📦 Updating system and installing dependencies..."
-sudo yum update -y
-sudo yum install -y git curl wget gcc gcc-c++ make openssl-devel
+sudo yum update -y --skip-broken
+sudo yum install -y git wget gcc gcc-c++ make openssl-devel
 
 # ==========================================
 # 2. INSTALL NODE.JS & PNPM
 # ==========================================
 echo ""
 echo "📦 Installing Node.js 20 LTS..."
-curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
-sudo yum install -y nodejs
+if ! command -v node &> /dev/null; then
+    # Use nodesource setup without curl
+    sudo yum install -y https://rpm.nodesource.com/pub_20.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
+    sudo yum install -y nodejs
+fi
 echo "✅ Node.js: $(node -v)"
 echo "✅ NPM: $(npm -v)"
 
