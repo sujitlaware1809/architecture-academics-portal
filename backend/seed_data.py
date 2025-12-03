@@ -422,3 +422,123 @@ As technology advances and design flexibility improves, prefab and modular const
             "status": "PUBLISHED"
         }
     ]
+
+def get_sample_events():
+    """Returns a list of sample events to seed the database."""
+    now = datetime.utcnow()
+    return [
+        {
+            "title": "Annual Architecture Symposium 2025",
+            "description": "Join us for the biggest architectural gathering of the year. Featuring keynote speakers from around the globe, panel discussions on sustainable design, and networking opportunities.",
+            "short_description": "The biggest architectural gathering of the year with global speakers.",
+            "date": now + timedelta(days=30),
+            "duration": 8,
+            "location": "Mumbai Convention Centre",
+            "image_url": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205",
+            "max_participants": 500,
+            "is_online": False,
+            "status": "upcoming"
+        },
+        {
+            "title": "Virtual Design Workshop: Future Cities",
+            "description": "An interactive online workshop exploring the concepts of future cities. Participants will work in teams to design conceptual urban environments using digital tools.",
+            "short_description": "Interactive online workshop exploring future city concepts.",
+            "date": now + timedelta(days=15),
+            "duration": 4,
+            "location": "Online",
+            "image_url": "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df",
+            "max_participants": 100,
+            "is_online": True,
+            "meeting_link": "https://meet.google.com/abc-defg-hij",
+            "status": "upcoming"
+        },
+        {
+            "title": "Architectural Photography Masterclass",
+            "description": "Learn the art of capturing buildings and spaces. This masterclass covers composition, lighting, and post-processing techniques for architectural photography.",
+            "short_description": "Master the art of architectural photography.",
+            "date": now + timedelta(days=45),
+            "duration": 6,
+            "location": "Delhi Habitat Centre",
+            "image_url": "https://images.unsplash.com/photo-1486325212027-8081e485255e",
+            "max_participants": 50,
+            "is_online": False,
+            "status": "upcoming"
+        }
+    ]
+
+def get_sample_workshops():
+    """Returns a list of sample workshops to seed the database."""
+    now = datetime.utcnow()
+    return [
+        {
+            "title": "Sustainable Materials Workshop",
+            "description": "Hands-on workshop exploring various sustainable building materials. Learn about their properties, applications, and environmental impact.",
+            "short_description": "Hands-on exploration of sustainable building materials.",
+            "date": now + timedelta(days=20),
+            "duration": 5,
+            "location": "Architecture Lab, Pune",
+            "image_url": "https://images.unsplash.com/photo-1518005068251-37900150dfca",
+            "max_participants": 30,
+            "is_online": False,
+            "status": "upcoming",
+            "instructor_name": "Dr. Sarah Johnson",
+            "price": 1500.0
+        },
+        {
+            "title": "BIM Fundamentals with Revit",
+            "description": "Intensive workshop on Building Information Modeling (BIM) using Revit. Covers basic modeling, documentation, and collaboration features.",
+            "short_description": "Intensive workshop on BIM using Revit.",
+            "date": now + timedelta(days=10),
+            "duration": 12,
+            "location": "Computer Lab 2",
+            "image_url": "https://images.unsplash.com/photo-1542831371-29b0f74f9713",
+            "max_participants": 25,
+            "is_online": False,
+            "status": "upcoming",
+            "instructor_name": "Ar. Rahul Verma",
+            "price": 3000.0
+        },
+        {
+            "title": "Sketching for Architects",
+            "description": "Improve your hand-sketching skills. Focuses on perspective, shading, and quick visualization techniques for architectural concepts.",
+            "short_description": "Improve your architectural hand-sketching skills.",
+            "date": now + timedelta(days=25),
+            "duration": 4,
+            "location": "City Park",
+            "image_url": "https://images.unsplash.com/photo-1513364776144-60967b0f800f",
+            "max_participants": 20,
+            "is_online": False,
+            "status": "upcoming",
+            "instructor_name": "Ar. Meera Patel",
+            "price": 1000.0
+        }
+    ]
+
+def get_sample_discussions():
+    """Returns a list of sample discussions to seed the database."""
+    return [
+        {
+            "title": "Best laptop for architecture students in 2025?",
+            "content": "I'm a first-year architecture student looking for a laptop that can handle AutoCAD, Revit, and rendering software. My budget is around 1 Lakh. Any recommendations?",
+            "category": "Hardware & Software",
+            "tags": "laptop, hardware, student, advice",
+            "is_solved": False,
+            "is_pinned": False
+        },
+        {
+            "title": "Tips for NATA drawing section",
+            "content": "I'm preparing for NATA and struggling with the perspective drawing part. Can anyone share some tips or resources to improve?",
+            "category": "NATA Preparation",
+            "tags": "NATA, drawing, exam-prep",
+            "is_solved": True,
+            "is_pinned": True
+        },
+        {
+            "title": "Sustainable architecture thesis topics",
+            "content": "I'm in my final year and looking for thesis topics related to sustainable architecture. I'm interested in vernacular architecture and low-cost housing.",
+            "category": "Academic",
+            "tags": "thesis, sustainability, final-year",
+            "is_solved": False,
+            "is_pinned": False
+        }
+    ]
