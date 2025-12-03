@@ -151,18 +151,22 @@ echo ""
 echo "⚛️  Setting up frontend..."
 cd "$APP_DIR/frontend"
 
+# Get the EC2 instance's internal IP
+INTERNAL_IP=$(hostname -I | awk '{print $1}')
+PUBLIC_IP="15.206.47.135"
+
 # Create .env.local
 cat > .env.local << EOF
-# ==========================================
-# FRONTEND ENVIRONMENT CONFIGURATION
-# ==========================================
+# API Configuration
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
+NEXT_PUBLIC_SITE_URL=http://$PUBLIC_IP
+NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:8000
 
-NEXT_PUBLIC_API_URL=http://15.206.47.135/api
-NEXT_PUBLIC_SITE_URL=http://15.206.47.135
+# Build configuration
 NODE_ENV=production
 EOF
 
-echo "✅ Frontend .env.local created"
+echo "✅ Frontend .env.local created with API URL: http://127.0.0.1:8000/api"
 
 # Install dependencies
 echo "📦 Installing frontend packages..."
@@ -246,51 +250,80 @@ echo ""
 echo "🌐 Configuring Nginx..."
 
 sudo tee /etc/nginx/conf.d/architecture-academics.conf > /dev/null <<'EOFNGINX'
-upstream backend {
-    server 127.0.0.1:8000;
-    keepalive 64;
+# Upstream definitions for load balancing
+upstream backend_api {
+    server 127.0.0.1:8000 max_fails=3 fail_timeout=30s;
+    keepalive 32;
 }
 
-upstream frontend {
-    server 127.0.0.1:3000;
-    keepalive 64;
+upstream frontend_app {
+    server 127.0.0.1:3000 max_fails=3 fail_timeout=30s;
+    keepalive 32;
 }
 
+# Main server block
 server {
     listen 80 default_server;
     server_name _;
     
     client_max_body_size 100M;
+    
+    # Log configuration
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
 
-    # Backend API proxy
+    # API Routes - proxy to backend
     location /api/ {
-        proxy_pass http://backend;
+        proxy_pass http://backend_api;
         proxy_http_version 1.1;
+        
+        # WebSocket support
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
+        proxy_set_header Connection "upgrade";
+        
+        # Headers
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Forwarded-Host $server_name;
         
         # Timeouts
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
+        
+        # Buffering
+        proxy_buffering off;
+        proxy_cache_bypass $http_pragma $http_authorization;
     }
 
-    # Frontend
+    # Frontend - proxy to Next.js
     location / {
-        proxy_pass http://frontend;
+        proxy_pass http://frontend_app;
         proxy_http_version 1.1;
+        
+        # WebSocket support
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
+        proxy_set_header Connection "upgrade";
+        
+        # Headers
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Forwarded-Host $server_name;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        # Buffering
+        proxy_buffering off;
+        
+        # For Next.js
+        proxy_cache_bypass $http_pragma $http_authorization;
     }
 }
 EOFNGINX
