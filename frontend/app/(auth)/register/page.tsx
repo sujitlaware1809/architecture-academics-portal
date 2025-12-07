@@ -23,8 +23,10 @@ export default function RegisterPage() {
     // Student fields
     college: "",
     year: "",
+    degree: "", // Added for Student
+    // NATA Student fields
+    location: "", // Added for NATA Student
     // Faculty fields
-    degree: "",
     experience: "",
     // Architect fields
     caoNumber: "",
@@ -66,20 +68,38 @@ export default function RegisterPage() {
     const newErrors: Record<string, string> = {}
 
     if (!formData.userType) newErrors.userType = "Please select user type"
+    
     if (!formData.firstName.trim()) newErrors.firstName = "First name is required"
+    else if (!/^[a-zA-Z]+$/.test(formData.firstName.trim())) newErrors.firstName = "First name must contain only letters"
+    
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required"
+    else if (!/^[a-zA-Z]+$/.test(formData.lastName.trim())) newErrors.lastName = "Last name must contain only letters"
+    
     if (!formData.email.trim()) newErrors.email = "Email is required"
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid"
+    
     if (!formData.phone.trim()) newErrors.phone = "Mobile number is required"
     else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) newErrors.phone = "Enter valid 10-digit mobile number"
+    
     if (!formData.password) newErrors.password = "Password is required"
-    else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters"
+    else {
+      if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters"
+      else if (!/(?=.*[a-z])/.test(formData.password)) newErrors.password = "Password must contain at least one lowercase letter"
+      else if (!/(?=.*[A-Z])/.test(formData.password)) newErrors.password = "Password must contain at least one uppercase letter"
+      else if (!/(?=.*\d)/.test(formData.password)) newErrors.password = "Password must contain at least one number"
+      else if (!/(?=.*[@$!%*?&])/.test(formData.password)) newErrors.password = "Password must contain at least one special character (@$!%*?&)"
+    }
+    
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match"
 
     // Conditional validation based on user type
-    if (formData.userType === "STUDENT" || formData.userType === "NATA_STUDENT") {
+    if (formData.userType === "STUDENT") {
       if (!formData.college.trim()) newErrors.college = "College name is required"
       if (!formData.year.trim()) newErrors.year = "Academic year is required"
+      if (!formData.degree.trim()) newErrors.degree = "Degree is required"
+    } else if (formData.userType === "NATA_STUDENT") {
+      if (!formData.college.trim()) newErrors.college = "School name is required"
+      if (!formData.location.trim()) newErrors.location = "Location is required"
     } else if (formData.userType === "FACULTY") {
       if (!formData.degree.trim()) newErrors.degree = "Highest degree is required"
       if (!formData.experience.trim()) newErrors.experience = "Teaching experience is required"
@@ -93,6 +113,18 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0
   }
 
+  const getPasswordStrength = (password: string) => {
+    let strength = 0
+    if (password.length >= 8) strength += 1
+    if (/(?=.*[a-z])/.test(password)) strength += 1
+    if (/(?=.*[A-Z])/.test(password)) strength += 1
+    if (/(?=.*\d)/.test(password)) strength += 1
+    if (/(?=.*[@$!%*?&])/.test(password)) strength += 1
+    return strength
+  }
+
+  const passwordStrength = getPasswordStrength(formData.password)
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -102,6 +134,16 @@ export default function RegisterPage() {
     setApiError("")
     
     try {
+      // Map fields based on user type
+      let specialization = formData.interest;
+      if (formData.userType === "STUDENT") {
+        specialization = formData.degree;
+      } else if (formData.userType === "NATA_STUDENT") {
+        specialization = formData.location; // Using specialization field for location
+      } else if (formData.userType === "FACULTY") {
+        specialization = formData.degree;
+      }
+
       const result = await api.register({
         email: formData.email,
         password: formData.password,
@@ -115,7 +157,7 @@ export default function RegisterPage() {
         teaching_experience: formData.experience || undefined,
         cao_number: formData.caoNumber || undefined,
         company: formData.company || formData.organizationName || undefined,
-        specialization: formData.interest || undefined,
+        specialization: specialization || undefined,
       })
       
       if (result.error) {
@@ -140,9 +182,9 @@ export default function RegisterPage() {
   }
 
   const renderConditionalFields = () => {
-    if (formData.userType === "STUDENT" || formData.userType === "NATA_STUDENT") {
+    if (formData.userType === "STUDENT") {
       return (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-3">
           <div className="space-y-1">
             <label className="text-sm font-medium text-gray-700">College/University</label>
             <Input
@@ -154,16 +196,66 @@ export default function RegisterPage() {
             />
             {errors.college && <p className="text-xs text-red-600">{errors.college}</p>}
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Academic Year</label>
+              <select
+                name="year"
+                value={formData.year}
+                onChange={(e) => handleInputChange(e as any)}
+                className="w-full h-10 px-3 bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-sm"
+              >
+                <option value="">Select Year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+                <option value="5">5th Year</option>
+              </select>
+              {errors.year && <p className="text-xs text-red-600">{errors.year}</p>}
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Degree</label>
+              <select
+                name="degree"
+                value={formData.degree}
+                onChange={(e) => handleInputChange(e as any)}
+                className="w-full h-10 px-3 bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-sm"
+              >
+                <option value="">Select Degree</option>
+                <option value="B.Arch">B.Arch</option>
+                <option value="M.Arch">M.Arch</option>
+                <option value="Other">Other</option>
+              </select>
+              {errors.degree && <p className="text-xs text-red-600">{errors.degree}</p>}
+            </div>
+          </div>
+        </div>
+      )
+    } else if (formData.userType === "NATA_STUDENT") {
+      return (
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Academic Year</label>
+            <label className="text-sm font-medium text-gray-700">School</label>
             <Input
-              name="year"
-              placeholder="e.g. 3rd Year"
-              value={formData.year}
+              name="college"
+              placeholder="e.g. DPS Delhi"
+              value={formData.college}
               onChange={handleInputChange}
               className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
             />
-            {errors.year && <p className="text-xs text-red-600">{errors.year}</p>}
+            {errors.college && <p className="text-xs text-red-600">{errors.college}</p>}
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Location</label>
+            <Input
+              name="location"
+              placeholder="e.g. Mumbai"
+              value={formData.location}
+              onChange={handleInputChange}
+              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+            />
+            {errors.location && <p className="text-xs text-red-600">{errors.location}</p>}
           </div>
         </div>
       )
@@ -573,6 +665,32 @@ export default function RegisterPage() {
                     {errors.confirmPassword && <p className="text-xs text-red-600">{errors.confirmPassword}</p>}
                   </div>
                 </div>
+
+                {/* Password Strength Indicator */}
+                {formData.password && (
+                  <div className="space-y-1">
+                    <div className="flex space-x-1 h-1.5">
+                      {[1, 2, 3, 4, 5].map((level) => (
+                        <div
+                          key={level}
+                          className={`h-full w-full rounded-full transition-colors duration-300 ${
+                            passwordStrength >= level
+                              ? passwordStrength <= 2
+                                ? "bg-red-500"
+                                : passwordStrength <= 3
+                                ? "bg-yellow-500"
+                                : "bg-green-500"
+                              : "bg-gray-200"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Strength</span>
+                      <span>{passwordStrength <= 2 ? "Weak" : passwordStrength <= 3 ? "Medium" : "Strong"}</span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Register Button */}
                 <Button
