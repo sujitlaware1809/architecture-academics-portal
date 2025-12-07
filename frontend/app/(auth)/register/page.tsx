@@ -18,6 +18,7 @@ export default function RegisterPage() {
     lastName: "",
     email: "",
     phone: "",
+    countryCode: "+91", // Default country code
     password: "",
     confirmPassword: "",
     // Student fields
@@ -42,11 +43,39 @@ export default function RegisterPage() {
   const [apiError, setApiError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
 
+  // Common country codes
+  const countryCodes = [
+    { code: "+91", country: "IN", name: "India" },
+    { code: "+1", country: "US", name: "USA" },
+    { code: "+44", country: "GB", name: "UK" },
+    { code: "+61", country: "AU", name: "Australia" },
+    { code: "+971", country: "AE", name: "UAE" },
+    { code: "+1", country: "CA", name: "Canada" },
+    { code: "+65", country: "SG", name: "Singapore" },
+    { code: "+33", country: "FR", name: "France" },
+    { code: "+49", country: "DE", name: "Germany" },
+    { code: "+81", country: "JP", name: "Japan" },
+  ]
+
   useEffect(() => {
     const redirect = searchParams.get('redirect')
     if (redirect) {
       setRedirectTo(redirect)
     }
+
+    // Auto-detect country code based on IP
+    const fetchCountryCode = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        if (data.country_calling_code) {
+          setFormData(prev => ({ ...prev, countryCode: data.country_calling_code }));
+        }
+      } catch (error) {
+        console.error("Error fetching location:", error);
+      }
+    };
+    fetchCountryCode();
   }, [searchParams])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,13 +173,16 @@ export default function RegisterPage() {
         specialization = formData.degree;
       }
 
+      // Combine country code and phone number
+      const fullPhone = `${formData.countryCode}${formData.phone}`;
+
       const result = await api.register({
         email: formData.email,
         password: formData.password,
         confirm_password: formData.confirmPassword,
         first_name: formData.firstName,
         last_name: formData.lastName,
-        phone: formData.phone,
+        phone: fullPhone,
         user_type: formData.userType,
         university: formData.college || undefined,
         graduation_year: formData.year ? parseInt(formData.year) : undefined,
@@ -598,17 +630,36 @@ export default function RegisterPage() {
                 {/* Mobile Number */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Mobile Number</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      type="tel"
-                      name="phone"
-                      placeholder="9876543210"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="pl-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
-                      required
-                    />
+                  <div className="flex space-x-2">
+                    <div className="w-1/3 relative">
+                      <select
+                        name="countryCode"
+                        value={formData.countryCode}
+                        onChange={(e) => handleInputChange(e as any)}
+                        className="w-full h-10 pl-2 pr-6 bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-sm appearance-none"
+                      >
+                        {countryCodes.map((country) => (
+                          <option key={country.code + country.country} value={country.code}>
+                            {country.code} ({country.country})
+                          </option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                      </div>
+                    </div>
+                    <div className="w-2/3 relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        type="tel"
+                        name="phone"
+                        placeholder="9876543210"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="pl-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+                        required
+                      />
+                    </div>
                   </div>
                   {errors.phone && <p className="text-xs text-red-600">{errors.phone}</p>}
                 </div>
