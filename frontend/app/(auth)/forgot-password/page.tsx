@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
     try {
       console.log('Sending password reset request for:', email)
       
-      const response = await fetch('http://127.0.0.1:8000/auth/forgot-password', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

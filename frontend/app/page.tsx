@@ -76,7 +76,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchFeaturedArticles = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs?is_featured=true&limit=4`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs?is_featured=true&limit=4`)
         if (response.ok) {
           const data = await response.json()
           setFeaturedArticles(data)
@@ -145,7 +145,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchPopularDiscussions = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/discussions?limit=10`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/discussions?limit=10`)
         if (response.ok) {
           const data = await response.json()
           setPopularDiscussions(data)

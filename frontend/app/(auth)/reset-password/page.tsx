@@ -53,7 +53,7 @@ export default function ResetPasswordPage() {
     try {
       console.log('Resetting password with token:', token)
       
-      const response = await fetch('http://127.0.0.1:8000/auth/reset-password', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

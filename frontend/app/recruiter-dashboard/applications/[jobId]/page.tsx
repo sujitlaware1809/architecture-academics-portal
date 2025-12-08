@@ -79,7 +79,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
     try {
       setLoading(true)
       const token = api.getStoredToken()
-      const response = await fetch(`http://localhost:8000/jobs/${jobId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${jobId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -102,7 +102,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
     try {
       setLoading(true)
       const token = api.getStoredToken()
-      const response = await fetch(`http://localhost:8000/jobs/${jobId}/applications`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${jobId}/applications`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -123,7 +123,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
     try {
       setStatusUpdateLoading(true)
       const token = api.getStoredToken()
-      const response = await fetch(`http://localhost:8000/applications/${applicationId}/status`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applications/${applicationId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -167,7 +167,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
         return
       }
       
-      const response = await fetch(`http://localhost:8000/applications/${selectedApplication.id}/message`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applications/${selectedApplication.id}/message`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

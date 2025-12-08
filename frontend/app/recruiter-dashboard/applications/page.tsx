@@ -85,7 +85,7 @@ export default function ApplicationsPage() {
     try {
       setLoading(true)
       const token = api.getStoredToken()
-      const response = await fetch('http://localhost:8000/jobs/my/posted', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/my/posted`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -111,7 +111,7 @@ export default function ApplicationsPage() {
       const allApps: Application[] = []
       
       for (const job of jobs) {
-        const response = await fetch(`http://localhost:8000/jobs/${job.id}/applications`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${job.id}/applications`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

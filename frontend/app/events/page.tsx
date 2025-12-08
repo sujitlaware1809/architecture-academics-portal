@@ -23,6 +23,7 @@ export default function EventsPortal() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming")
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -94,8 +95,16 @@ export default function EventsPortal() {
       filtered = filtered.filter(event => event.is_online)
     }
 
+    // Filter by Active Tab (Upcoming vs Past)
+    const now = new Date()
+    if (activeTab === "upcoming") {
+      filtered = filtered.filter(event => new Date(event.date) >= now)
+    } else {
+      filtered = filtered.filter(event => new Date(event.date) < now)
+    }
+
     setFilteredEvents(filtered)
-  }, [searchQuery, filters, events])
+  }, [searchQuery, filters, events, activeTab])
 
   // Handle opening event details
   const openEventDetails = (event: Event) => {
@@ -135,6 +144,30 @@ export default function EventsPortal() {
       {/* Search and Filters */}
       <section className="max-w-7xl mx-auto px-4 py-8 -mt-8 z-10 relative">
         <div className="bg-white rounded-xl shadow-xl p-6 search-card">
+          {/* Tabs for Upcoming/Past */}
+          <div className="flex space-x-4 mb-6 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab("upcoming")}
+              className={`pb-2 px-4 text-sm font-medium transition-colors relative ${
+                activeTab === "upcoming"
+                  ? "text-teal-600 border-b-2 border-teal-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Upcoming Events
+            </button>
+            <button
+              onClick={() => setActiveTab("past")}
+              className={`pb-2 px-4 text-sm font-medium transition-colors relative ${
+                activeTab === "past"
+                  ? "text-teal-600 border-b-2 border-teal-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Past Events
+            </button>
+          </div>
+
           <div className="flex flex-col md:flex-row gap-4 items-stretch">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />

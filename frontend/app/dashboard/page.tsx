@@ -82,7 +82,7 @@ export default function UserDashboard() {
       setError("") // Clear previous errors
       
       console.log("Dashboard: Fetching data from API...")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/dashboard`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/dashboard`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }

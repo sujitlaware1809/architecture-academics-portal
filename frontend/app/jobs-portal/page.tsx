@@ -192,7 +192,7 @@ export default function JobsPortal() {
   const fetchJobs = async () => {
     try {
       setLoading(true)
-      const response = await fetch('http://localhost:8000/jobs')
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`)
       if (response.ok) {
         const data = await response.json()
         setRealJobs(data)
@@ -238,14 +238,14 @@ export default function JobsPortal() {
         const form = new FormData()
         form.append('cover_letter', coverLetterInput || `I am interested in applying for this position.`)
         form.append('resume_file', resumeFile)
-        const res = await fetch(`${base}/jobs/${applyJobId}/apply/upload`, {
+        const res = await fetch(`${base}/api/jobs/${applyJobId}/apply/upload`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` },
           body: form
         })
         ok = res.ok
       } else {
-        const res = await fetch(`${base}/jobs/${applyJobId}/apply`, {
+        const res = await fetch(`${base}/api/jobs/${applyJobId}/apply`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

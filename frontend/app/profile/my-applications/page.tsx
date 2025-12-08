@@ -107,7 +107,7 @@ export default function MyApplicationsPage() {
     try {
       setLoading(true)
       const token = api.getStoredToken()
-      const response = await fetch('http://localhost:8000/applications/my', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applications/my`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

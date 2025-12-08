@@ -80,7 +80,7 @@ export default function DashboardPage() {
     try {
       setLoading(true)
       const token = api.getStoredToken()
-      const response = await fetch('http://localhost:8000/applications/my', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applications/my`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -116,7 +116,7 @@ export default function DashboardPage() {
     try {
       setLoading(true)
       const token = api.getStoredToken()
-      const response = await fetch('http://localhost:8000/jobs/saved/my', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/saved/my`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -181,7 +181,7 @@ export default function DashboardPage() {
   const removeApplication = async (id: number) => {
     try {
       const token = api.getStoredToken();
-      const response = await fetch(`http://localhost:8000/applications/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applications/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -202,7 +202,7 @@ export default function DashboardPage() {
   const removeSavedJob = async (id: number) => {
     try {
       const token = api.getStoredToken();
-      const response = await fetch(`http://localhost:8000/jobs/saved/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/saved/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

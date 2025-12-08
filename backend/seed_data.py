@@ -463,6 +463,32 @@ def get_sample_events():
             "max_participants": 50,
             "is_online": False,
             "status": "upcoming"
+        },
+        # Past Events
+        {
+            "title": "Sustainable Urban Planning Summit 2024",
+            "description": "A retrospective on the challenges and solutions discussed during last year's summit. Key takeaways included green infrastructure and smart city integration.",
+            "short_description": "Retrospective on sustainable urban planning challenges.",
+            "date": now - timedelta(days=60),
+            "duration": 8,
+            "location": "Bangalore International Exhibition Centre",
+            "image_url": "https://images.unsplash.com/photo-1497366216548-37526070297c",
+            "max_participants": 300,
+            "is_online": False,
+            "status": "completed"
+        },
+        {
+            "title": "History of Indian Architecture Webinar",
+            "description": "An in-depth look at the evolution of architectural styles in India, from ancient temples to modern skyscrapers.",
+            "short_description": "Evolution of architectural styles in India.",
+            "date": now - timedelta(days=120),
+            "duration": 2,
+            "location": "Online",
+            "image_url": "https://images.unsplash.com/photo-1564507592333-c60657eea523",
+            "max_participants": 200,
+            "is_online": True,
+            "meeting_link": "https://meet.google.com/past-event-link",
+            "status": "completed"
         }
     ]
 
@@ -511,6 +537,35 @@ def get_sample_workshops():
             "status": "upcoming",
             "instructor_name": "Ar. Meera Patel",
             "price": 1000.0
+        },
+        # Past Workshops
+        {
+            "title": "Advanced AutoCAD Techniques",
+            "description": "A deep dive into advanced AutoCAD commands and workflows for experienced users.",
+            "short_description": "Master advanced AutoCAD workflows.",
+            "date": now - timedelta(days=45),
+            "duration": 6,
+            "location": "Computer Lab 1",
+            "image_url": "https://images.unsplash.com/photo-1581092921461-eab62e97a782",
+            "max_participants": 20,
+            "is_online": False,
+            "status": "completed",
+            "instructor_name": "Ar. Vikram Singh",
+            "price": 2500.0
+        },
+        {
+            "title": "Model Making Workshop",
+            "description": "Learn to build physical architectural models using various materials like foam board, wood, and acrylic.",
+            "short_description": "Hands-on model making techniques.",
+            "date": now - timedelta(days=90),
+            "duration": 8,
+            "location": "Design Studio",
+            "image_url": "https://images.unsplash.com/photo-1531835551805-16d864c8d311",
+            "max_participants": 15,
+            "is_online": False,
+            "status": "completed",
+            "instructor_name": "Ar. Anjali Desai",
+            "price": 2000.0
         }
     ]
 

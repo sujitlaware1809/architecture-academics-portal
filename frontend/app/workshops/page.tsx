@@ -32,6 +32,7 @@ export default function WorkshopsPortal() {
   const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming")
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -130,9 +131,19 @@ export default function WorkshopsPortal() {
       )
     }
 
+    // Filter by Active Tab (Upcoming vs Past)
+    const now = new Date()
+    if (activeTab === "upcoming") {
+      filteredW = filteredW.filter(w => new Date(w.date) >= now)
+      filteredF = filteredF.filter(w => new Date(w.date) >= now)
+    } else {
+      filteredW = filteredW.filter(w => new Date(w.date) < now)
+      filteredF = filteredF.filter(w => new Date(w.date) < now)
+    }
+
     setFilteredWorkshops(filteredW)
     setFilteredFDPs(filteredF)
-  }, [searchQuery, filters, workshops])
+  }, [searchQuery, filters, workshops, activeTab])
 
   // Handle opening workshop details
   const openWorkshopDetails = (workshop: Workshop) => {
@@ -152,7 +163,7 @@ export default function WorkshopsPortal() {
   }
 
   // Get all unique categories from workshops
-  const categories = [...new Set(workshops.map(w => w.category))]
+  const categories = [...new Set(workshops.map(w => w.category).filter(Boolean))] as string[]
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -175,6 +186,30 @@ export default function WorkshopsPortal() {
       {/* Search and Filters */}
       <section className="max-w-7xl mx-auto px-4 py-8 -mt-8 z-10 relative">
         <div className="bg-white rounded-xl shadow-xl p-6 search-card">
+          {/* Tabs for Upcoming/Past */}
+          <div className="flex space-x-4 mb-6 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab("upcoming")}
+              className={`pb-2 px-4 text-sm font-medium transition-colors relative ${
+                activeTab === "upcoming"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Upcoming Workshops
+            </button>
+            <button
+              onClick={() => setActiveTab("past")}
+              className={`pb-2 px-4 text-sm font-medium transition-colors relative ${
+                activeTab === "past"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Past Workshops
+            </button>
+          </div>
+
           <div className="flex flex-col md:flex-row gap-4 items-stretch">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />

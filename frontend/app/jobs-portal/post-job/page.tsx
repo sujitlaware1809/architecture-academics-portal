@@ -143,7 +143,7 @@ export default function PostJobPage() {
         company_description: formData.companyDescription
       }
 
-      const response = await fetch('http://localhost:8000/jobs', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

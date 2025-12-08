@@ -298,7 +298,7 @@ export const api = {
         return { error: 'Authentication required' };
       }
 
-      const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/apply`, {
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/apply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -327,7 +327,7 @@ export const api = {
         return { error: 'Authentication required' };
       }
 
-      const response = await fetch(`${API_BASE_URL}/applications/my`, {
+      const response = await fetch(`${API_BASE_URL}/api/applications/my`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -354,7 +354,7 @@ export const api = {
         return { error: 'Authentication required' };
       }
 
-      const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/save`, {
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/save`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -381,7 +381,7 @@ export const api = {
         return { error: 'Authentication required' };
       }
 
-      const response = await fetch(`${API_BASE_URL}/jobs/saved/my`, {
+      const response = await fetch(`${API_BASE_URL}/api/jobs/saved/my`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -404,7 +404,11 @@ export const api = {
   // Generic HTTP methods
   async get(endpoint: string, options: {params?: any} = {}): Promise<any> {
     try {
-      const url = new URL(`${API_BASE_URL}${endpoint}`);
+      // Ensure endpoint starts with /api if not already present
+      const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+      const finalEndpoint = cleanEndpoint.startsWith('/api') ? cleanEndpoint : '/api' + cleanEndpoint;
+      
+      const url = new URL(`${API_BASE_URL}${finalEndpoint}`);
       
       if (options.params) {
         Object.keys(options.params).forEach(key => {
@@ -473,7 +477,11 @@ export const api = {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      // Ensure endpoint starts with /api if not already present
+      const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+      const finalEndpoint = cleanEndpoint.startsWith('/api') ? cleanEndpoint : '/api' + cleanEndpoint;
+
+      const response = await fetch(`${API_BASE_URL}${finalEndpoint}`, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
@@ -505,7 +513,11 @@ export const api = {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      // Ensure endpoint starts with /api if not already present
+      const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+      const finalEndpoint = cleanEndpoint.startsWith('/api') ? cleanEndpoint : '/api' + cleanEndpoint;
+
+      const response = await fetch(`${API_BASE_URL}${finalEndpoint}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(body),
@@ -535,7 +547,11 @@ export const api = {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      // Ensure endpoint starts with /api if not already present
+      const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+      const finalEndpoint = cleanEndpoint.startsWith('/api') ? cleanEndpoint : '/api' + cleanEndpoint;
+
+      const response = await fetch(`${API_BASE_URL}${finalEndpoint}`, {
         method: 'DELETE',
         headers,
       });
