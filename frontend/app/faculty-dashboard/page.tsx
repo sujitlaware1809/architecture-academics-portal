@@ -2,11 +2,24 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Building, BookOpen, Users, Award, TrendingUp, Calendar } from "lucide-react"
+import Link from "next/link"
+import { 
+  BookOpen, 
+  Users, 
+  Award, 
+  TrendingUp, 
+  Calendar,
+  Clock,
+  FileText,
+  CheckCircle2
+} from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
 export default function FacultyDashboard() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const token = localStorage.getItem('access_token')
@@ -19,156 +32,188 @@ export default function FacultyDashboard() {
     
     const parsedUser = JSON.parse(userData)
     setUser(parsedUser)
+    setLoading(false)
   }, [router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Faculty Dashboard</h1>
-              <p className="text-gray-600 mt-1">Welcome back, {user.first_name}!</p>
+      <div className="bg-gradient-to-r from-gray-900 via-blue-600 to-gray-900 text-white rounded-xl shadow-lg overflow-hidden">
+        <div className="px-6 py-8 md:px-8 md:py-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                {user.profile_image_url ? (
+                  <div className="h-20 w-20 rounded-full overflow-hidden border-4 border-white/30 shadow-xl">
+                    <img 
+                      src={`${process.env.NEXT_PUBLIC_API_URL}${user.profile_image_url}`} 
+                      alt={user.first_name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-20 w-20 rounded-full bg-white/20 flex items-center justify-center border-4 border-white/30 shadow-xl">
+                    <span className="text-3xl font-bold text-white">
+                      {user.first_name ? user.first_name.charAt(0).toUpperCase() : "F"}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Welcome back, {user.first_name}!</h1>
+                <p className="text-blue-100">Manage your courses and students from here</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-2 bg-blue-100 px-4 py-2 rounded-lg">
-              <Users className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-medium text-blue-700">Faculty Member</span>
+            
+            <div className="flex gap-3">
+              <Link href="/faculty-dashboard/courses/create">
+                <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Create Course
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Courses</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">12</p>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border-none shadow-md hover:shadow-lg transition-all duration-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600">
+                <BookOpen className="h-6 w-6" />
               </div>
-              <BookOpen className="h-10 w-10 text-blue-600" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Students Enrolled</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">245</p>
+                <p className="text-sm font-medium text-gray-500">Total Courses</p>
+                <h3 className="text-2xl font-bold text-gray-900">12</h3>
               </div>
-              <Users className="h-10 w-10 text-green-600" />
             </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md hover:shadow-lg transition-all duration-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600">
+                <Users className="h-6 w-6" />
+              </div>
               <div>
-                <p className="text-sm text-gray-600">Course Rating</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">4.8</p>
+                <p className="text-sm font-medium text-gray-500">Students Enrolled</p>
+                <h3 className="text-2xl font-bold text-gray-900">245</h3>
               </div>
-              <Award className="h-10 w-10 text-yellow-600" />
             </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md hover:shadow-lg transition-all duration-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 text-yellow-600">
+                <Award className="h-6 w-6" />
+              </div>
               <div>
-                <p className="text-sm text-gray-600">Completion Rate</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">87%</p>
+                <p className="text-sm font-medium text-gray-500">Course Rating</p>
+                <h3 className="text-2xl font-bold text-gray-900">4.8</h3>
               </div>
-              <TrendingUp className="h-10 w-10 text-purple-600" />
             </div>
-          </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md hover:shadow-lg transition-all duration-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-600">
+                <TrendingUp className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Completion Rate</p>
+                <h3 className="text-2xl font-bold text-gray-900">87%</h3>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column - Recent Courses */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="border-none shadow-md">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900">Recent Courses</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 bg-blue-200 rounded-lg flex items-center justify-center">
+                        <BookOpen className="h-6 w-6 text-blue-700" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Advanced Architecture Design</h4>
+                        <p className="text-sm text-gray-500">Last updated 2 days ago</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">Edit</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4">
+                <Link href="/faculty-dashboard/courses">
+                  <Button variant="outline" className="w-full">View All Courses</Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - All Courses */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">All Available Courses</h2>
-              <p className="text-gray-600 mb-4">Browse and access all courses on the platform</p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
-                  ✓ You have access to view all courses
-                  <br />
-                  ✓ Explore course materials and content
-                  <br />
-                  ✓ Monitor student progress and engagement
-                </p>
-              </div>
-            </div>
-
-            {/* Request Special Courses Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-start space-x-3 mb-4">
-                <Building className="h-6 w-6 text-indigo-600 mt-1" />
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Request Special Courses</h2>
-                  <p className="text-gray-600 mt-1">Submit requests for specialized courses or custom content</p>
-                </div>
-              </div>
-              
+        {/* Right Column - Upcoming Schedule */}
+        <div className="space-y-6">
+          <Card className="border-none shadow-md">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900">Upcoming Schedule</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Course Title</label>
-                  <input
-                    type="text"
-                    placeholder="e.g., Advanced Sustainable Architecture"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Course Description</label>
-                  <textarea
-                    rows={4}
-                    placeholder="Describe the course content and objectives..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all">
-                  Submit Request
-                </button>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                    <div className="flex-shrink-0 w-12 text-center">
+                      <span className="block text-xs font-bold text-blue-600 uppercase">OCT</span>
+                      <span className="block text-xl font-bold text-gray-900">{10 + i}</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">Live Session: Design Principles</h4>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                        <Clock className="h-3 w-3" />
+                        <span>10:00 AM - 11:30 AM</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          </div>
-
-          {/* Right Column - Quick Actions */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
-              <div className="space-y-3">
-                <button className="w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <BookOpen className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-gray-900">Browse Courses</span>
-                  </div>
-                </button>
-                <button className="w-full text-left px-4 py-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <Calendar className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-gray-900">Schedule Classes</span>
-                  </div>
-                </button>
-                <button className="w-full text-left px-4 py-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <Users className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium text-gray-900">Student Analytics</span>
-                  </div>
-                </button>
+              <div className="mt-4">
+                <Link href="/faculty-dashboard/schedule">
+                  <Button variant="outline" className="w-full">View Full Schedule</Button>
+                </Link>
               </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
-              <h3 className="text-lg font-bold mb-2">Faculty Resources</h3>
-              <p className="text-sm text-blue-100 mb-4">Access teaching materials, guides, and support</p>
-              <button className="w-full bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
-                View Resources
-              </button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
