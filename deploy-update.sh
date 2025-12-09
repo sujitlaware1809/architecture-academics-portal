@@ -33,6 +33,11 @@ else
     source .venv/bin/activate
 fi
 pip install -r requirements.txt
+
+# Run Database Seeding
+echo "🌱 Seeding Database..."
+python seed_all.py
+
 cd ..
 
 # 3. Configure Frontend Environment
