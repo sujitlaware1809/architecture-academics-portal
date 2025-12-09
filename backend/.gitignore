@@ -19,6 +19,10 @@ venv.bak/
 .env.*.local
 
 # Database
+*.db
+*.sqlite3
+architecture_academics.db
+
 
 # IDE
 .vscode/
