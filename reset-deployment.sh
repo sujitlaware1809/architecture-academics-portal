@@ -70,15 +70,15 @@ S3_BUCKET_NAME=architecture-academics-videos
 CORS_ORIGINS=["http://15.206.47.135", "http://15.206.47.135:80", "http://15.206.47.135:3000"]
 
 # Email/SMTP Configuration
-SMTP_HOST=smtp.gmail.com
+SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=your-app-specific-password
-SMTP_FROM_EMAIL=noreply@15.206.47.135
-SMTP_FROM_NAME=Architecture Academics
+SMTP_USERNAME=sujitlaware123@gmail.com
+SMTP_PASSWORD=rkqa vzjv eylm dkcj
+FROM_EMAIL=sujitlaware123@gmail.com
+FROM_NAME=Architecture Academics
 
 # Frontend URL
-FRONTEND_URL=http://15.206.47.135
+FRONTEND_URL=http://15.206.47.135:3000
 EOF
 
 python3 -m venv .venv
