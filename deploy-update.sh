@@ -9,6 +9,10 @@ SERVER_IP="15.206.47.135"
 
 echo "🚀 Starting update deployment for $SERVER_IP..."
 
+# 0. Stop Services to Free Memory
+echo "🛑 Stopping PM2 services to free up memory for build..."
+pm2 stop all
+
 # 1. Pull latest changes
 echo "📥 Pulling latest code from git..."
 git pull origin main
