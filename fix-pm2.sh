@@ -9,7 +9,15 @@ pm2 delete all
 
 echo "🚀 Starting Backend..."
 cd /home/ec2-user/architecture-academics-portal/backend
-pm2 start run_server.py --name aa-backend --interpreter ./.venv/bin/python
+# Use absolute path to python interpreter
+PYTHON_PATH="/home/ec2-user/architecture-academics-portal/backend/.venv/bin/python"
+if [ ! -f "$PYTHON_PATH" ]; then
+    echo "⚠️  Virtual environment not found, creating one..."
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+fi
+pm2 start run_server.py --name aa-backend --interpreter "$PYTHON_PATH"
 
 echo "🚀 Starting Frontend..."
 cd /home/ec2-user/architecture-academics-portal/frontend
