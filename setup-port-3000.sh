@@ -36,11 +36,13 @@ pnpm install
 pnpm build
 
 # Restart services
-echo "🔄 Restarting services..."
-pm2 restart aa-frontend
-pm2 restart aa-backend
+echo "🔄 Starting services..."
+cd "$APP_DIR"
+pm2 delete all 2>/dev/null || true
+pm2 start ecosystem.config.js --env production
+pm2 save
 
-sleep 2
+sleep 5
 
 echo ""
 echo "✅ Frontend and Backend ready!"
