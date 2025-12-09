@@ -142,7 +142,15 @@ echo "✅ Backend .env created at: $APP_DIR/backend/.env"
 echo "⚠️  IMPORTANT: Edit the .env file with your AWS and email credentials"
 echo "   nano $APP_DIR/backend/.env"
 
+# ==========================================
+# 8.5 SEED DATABASE
+# ==========================================
+echo ""
+echo "🌱 Seeding database..."
+source .venv/bin/activate
+python seed_all.py
 deactivate
+echo "✅ Database seeded"
 
 # ==========================================
 # 9. SETUP FRONTEND

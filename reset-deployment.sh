@@ -44,6 +44,50 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 # 6. Run Setup
 echo "🚀 Running Setup..."
+
+# Setup Backend
+echo "🐍 Setting up backend..."
+cd backend
+
+# Create .env file
+echo "📝 Creating backend .env file..."
+cat > .env << 'EOF'
+# Database Configuration
+DATABASE_URL=sqlite:///./architecture_academics.db
+
+# JWT Security
+SECRET_KEY=your-super-secret-key-change-this-production
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# AWS S3 Configuration
+AWS_ACCESS_KEY_ID=your_aws_access_key_id
+AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+AWS_REGION=us-east-1
+S3_BUCKET_NAME=architecture-academics-videos
+
+# CORS Configuration
+CORS_ORIGINS=["http://15.206.47.135", "http://15.206.47.135:80", "http://15.206.47.135:3000"]
+
+# Email/SMTP Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-specific-password
+SMTP_FROM_EMAIL=noreply@15.206.47.135
+SMTP_FROM_NAME=Architecture Academics
+
+# Frontend URL
+FRONTEND_URL=http://15.206.47.135
+EOF
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python seed_all.py
+deactivate
+cd ..
+
 chmod +x setup-port-3000.sh
 ./setup-port-3000.sh
 
