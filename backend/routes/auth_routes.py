@@ -173,6 +173,39 @@ async def verify_email_link(token: str, db: Session = Depends(get_db)):
         "verified": True
     }
 
+@router.post("/resend-verification")
+async def resend_verification(request: schemas.OTPRequest, db: Session = Depends(get_db)):
+    """Resend verification email"""
+    
+    # Check if user exists
+    user = crud.get_user_by_email(db, request.email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Check if user is already verified
+    if user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email is already verified"
+        )
+    
+    # Resend verification token
+    success = crud.resend_verification_token(db, request.email)
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to resend verification email"
+        )
+    
+    return {
+        "message": "Verification email sent successfully! Please check your inbox.",
+        "email": request.email
+    }
+
 # OLD OTP ROUTE - DISABLED (now using email link verification)
 # @router.post("/resend-otp")
 # async def resend_otp(otp_request: schemas.OTPRequest, db: Session = Depends(get_db)):

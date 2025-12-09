@@ -116,6 +116,36 @@ def verify_email_token(db: Session, token: str) -> bool:
     
     return True
 
+def resend_verification_token(db: Session, email: str) -> bool:
+    """Resend verification token to user email"""
+    import secrets
+    from email_service import send_verification_email
+    
+    user = get_user_by_email(db, email)
+    
+    if not user:
+        return False
+        
+    if user.is_verified:
+        return False
+    
+    # Generate new token
+    token = secrets.token_urlsafe(32)
+    token_expires = datetime.utcnow() + timedelta(hours=24)
+    
+    # Update user with new token
+    user.email_otp = token
+    user.email_otp_expires_at = token_expires
+    db.commit()
+    
+    # Send verification email
+    try:
+        send_verification_email(user.email, token, f"{user.first_name} {user.last_name}")
+        return True
+    except Exception as e:
+        print(f"Failed to send verification email: {e}")
+        return False
+
 def resend_otp(db: Session, email: str) -> bool:
     """Resend OTP to user email"""
     user = get_user_by_email(db, email)
