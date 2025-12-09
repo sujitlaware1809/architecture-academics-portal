@@ -147,7 +147,7 @@ export default function CourseTestPage() {
         </Button>
         
         <Button asChild variant="outline" size="lg">
-          <Link href="http://localhost:8000/docs" target="_blank">
+          <Link href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/docs`} target="_blank">
             <Upload className="h-4 w-4 mr-2" />
             API Documentation
           </Link>

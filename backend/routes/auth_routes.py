@@ -1,59 +1,22 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
 import crud
 import schemas
 from database import get_db, User
 from auth import create_access_token, verify_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from services import social_auth_service
+import os
+import secrets
+import string
+
+from services.auth_service import get_current_user, get_current_user_optional
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer()
-
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
-) -> User:
-    """Get current authenticated user"""
-    token = credentials.credentials
-    email = verify_token(token)
-    
-    if email is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    user = crud.get_user_by_email(db, email=email)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    return user
-
-async def get_current_user_optional(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
-) -> User:
-    """Get current user if authenticated, or None if not"""
-    if not credentials:
-        return None
-    
-    try:
-        token = credentials.credentials
-        email = verify_token(token)
-        
-        if email is None:
-            return None
-        
-        user = crud.get_user_by_email(db, email=email)
-        return user
-    except:
-        return None
 
 async def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
     """Get current authenticated admin"""
@@ -299,11 +262,128 @@ async def update_profile(
 ):
     """Update user profile"""
     
-    updated_user = crud.update_user_profile(db, current_user.id, profile_data)
-    if not updated_user:
+    try:
+        updated_user = crud.update_user_profile(db, current_user.id, profile_data)
+        if not updated_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        return updated_user
+    except IntegrityError as e:
+        db.rollback()
+        if "username" in str(e.orig):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken. Please choose another one."
+            )
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not update profile. Please check your input."
         )
-    
-    return updated_user
+
+# Social Login Routes
+
+@router.get("/google/login")
+async def google_login():
+    try:
+        auth_url = await social_auth_service.get_google_login_url()
+        return RedirectResponse(auth_url)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/google/callback")
+async def google_callback(code: str, db: Session = Depends(get_db)):
+    try:
+        user_info = await social_auth_service.get_google_user_info(code)
+        email = user_info.get("email")
+        
+        if not email:
+            raise HTTPException(status_code=400, detail="Email not found in Google account")
+            
+        # Check if user exists
+        user = crud.get_user_by_email(db, email=email)
+        
+        if not user:
+            # Create new user
+            # Generate random password
+            alphabet = string.ascii_letters + string.digits
+            password = ''.join(secrets.choice(alphabet) for i in range(12))
+            
+            user_data = schemas.UserCreate(
+                email=email,
+                password=password,
+                confirm_password=password,
+                first_name=user_info.get("given_name", ""),
+                last_name=user_info.get("family_name", ""),
+                user_type=schemas.UserType.GENERAL_USER # Default to General User
+            )
+            user = crud.create_user(db=db, user=user_data)
+            # Auto-verify email for social login
+            user.is_active = True
+            user.is_verified = True
+            db.commit()
+        
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user.email}, expires_delta=access_token_expires
+        )
+        
+        # Redirect to frontend with token
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        return RedirectResponse(f"{frontend_url}/login?token={access_token}")
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/outlook/login")
+async def outlook_login():
+    try:
+        auth_url = await social_auth_service.get_outlook_login_url()
+        return RedirectResponse(auth_url)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/outlook/callback")
+async def outlook_callback(code: str, db: Session = Depends(get_db)):
+    try:
+        user_info = await social_auth_service.get_outlook_user_info(code)
+        email = user_info.get("mail") or user_info.get("userPrincipalName")
+        
+        if not email:
+            raise HTTPException(status_code=400, detail="Email not found in Outlook account")
+            
+        # Check if user exists
+        user = crud.get_user_by_email(db, email=email)
+        
+        if not user:
+            # Create new user
+            alphabet = string.ascii_letters + string.digits
+            password = ''.join(secrets.choice(alphabet) for i in range(12))
+            
+            user_data = schemas.UserCreate(
+                email=email,
+                password=password,
+                confirm_password=password,
+                first_name=user_info.get("givenName", ""),
+                last_name=user_info.get("surname", ""),
+                user_type=schemas.UserType.GENERAL_USER
+            )
+            user = crud.create_user(db=db, user=user_data)
+            user.is_active = True
+            user.is_verified = True
+            db.commit()
+            
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user.email}, expires_delta=access_token_expires
+        )
+        
+        # Redirect to frontend with token
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        return RedirectResponse(f"{frontend_url}/login?token={access_token}")
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

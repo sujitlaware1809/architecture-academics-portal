@@ -93,6 +93,63 @@ export default function RegisterPage() {
     }
   }
 
+  const validateField = (name: string, value: string) => {
+    let error = ""
+    switch (name) {
+      case "firstName":
+        if (!value.trim()) error = "First name is required"
+        else if (!/^[a-zA-Z]+$/.test(value.trim())) error = "First name must contain only letters"
+        break
+      case "lastName":
+        if (!value.trim()) error = "Last name is required"
+        else if (!/^[a-zA-Z]+$/.test(value.trim())) error = "Last name must contain only letters"
+        break
+      case "email":
+        if (!value.trim()) error = "Email is required"
+        else if (!/\S+@\S+\.\S+/.test(value)) error = "Email is invalid"
+        break
+      case "phone":
+        if (!value.trim()) error = "Mobile number is required"
+        else if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) error = "Enter valid 10-digit mobile number"
+        break
+      case "password":
+        if (!value) error = "Password is required"
+        else if (value.length < 8) error = "Password must be at least 8 characters"
+        break
+      case "confirmPassword":
+        if (value !== formData.password) error = "Passwords do not match"
+        break
+      case "college":
+        if (!value.trim()) error = formData.userType === "NATA_STUDENT" ? "School name is required" : "College name is required"
+        break
+      case "year":
+        if (!value.trim()) error = "Academic year is required"
+        break
+      case "degree":
+        if (!value.trim()) error = formData.userType === "FACULTY" ? "Highest degree is required" : "Degree is required"
+        break
+      case "location":
+        if (!value.trim()) error = "Location is required"
+        break
+      case "experience":
+        if (!value.trim()) error = "Teaching experience is required"
+        break
+      case "company":
+        if (!value.trim()) error = "Company/Practice name is required"
+        break
+      case "interest":
+        if (!value) error = "Please select your area of interest"
+        break
+    }
+    
+    setErrors(prev => ({ ...prev, [name]: error }))
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    validateField(name, value)
+  }
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
@@ -199,10 +256,10 @@ export default function RegisterPage() {
         setApiError(errorMessage)
       } else {
         // Registration successful - redirect to success page
-        setSuccessMessage("Registration successful! Please check your email for the verification link.")
+        setSuccessMessage(`Registration successful, ${formData.firstName}! Please check your email for the verification link.`)
         
         setTimeout(() => {
-          router.push(`/login?registered=true`)
+          router.push(`/login?message=registered&name=${encodeURIComponent(formData.firstName)}`)
         }, 3000)
       }
     } catch (error) {
@@ -224,7 +281,8 @@ export default function RegisterPage() {
               placeholder="e.g. IIT Delhi"
               value={formData.college}
               onChange={handleInputChange}
-              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+              onBlur={handleBlur}
+              className={`h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.college ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
             />
             {errors.college && <p className="text-xs text-red-600">{errors.college}</p>}
           </div>
@@ -235,7 +293,8 @@ export default function RegisterPage() {
                 name="year"
                 value={formData.year}
                 onChange={(e) => handleInputChange(e as any)}
-                className="w-full h-10 px-3 bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-sm"
+                onBlur={handleBlur}
+                className={`w-full h-10 px-3 bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-sm ${errors.year ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
               >
                 <option value="">Select Year</option>
                 <option value="1">1st Year</option>
@@ -252,7 +311,8 @@ export default function RegisterPage() {
                 name="degree"
                 value={formData.degree}
                 onChange={(e) => handleInputChange(e as any)}
-                className="w-full h-10 px-3 bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-sm"
+                onBlur={handleBlur}
+                className={`w-full h-10 px-3 bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-sm ${errors.degree ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
               >
                 <option value="">Select Degree</option>
                 <option value="B.Arch">B.Arch</option>
@@ -274,7 +334,8 @@ export default function RegisterPage() {
               placeholder="e.g. DPS Delhi"
               value={formData.college}
               onChange={handleInputChange}
-              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+              onBlur={handleBlur}
+              className={`h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.college ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
             />
             {errors.college && <p className="text-xs text-red-600">{errors.college}</p>}
           </div>
@@ -285,7 +346,8 @@ export default function RegisterPage() {
               placeholder="e.g. Mumbai"
               value={formData.location}
               onChange={handleInputChange}
-              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+              onBlur={handleBlur}
+              className={`h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.location ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
             />
             {errors.location && <p className="text-xs text-red-600">{errors.location}</p>}
           </div>
@@ -301,7 +363,8 @@ export default function RegisterPage() {
               placeholder="e.g. M.Arch, Ph.D"
               value={formData.degree}
               onChange={handleInputChange}
-              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+              onBlur={handleBlur}
+              className={`h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.degree ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
             />
             {errors.degree && <p className="text-xs text-red-600">{errors.degree}</p>}
           </div>
@@ -312,7 +375,8 @@ export default function RegisterPage() {
               placeholder="e.g. 5 years"
               value={formData.experience}
               onChange={handleInputChange}
-              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+              onBlur={handleBlur}
+              className={`h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.experience ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
             />
             {errors.experience && <p className="text-xs text-red-600">{errors.experience}</p>}
           </div>
@@ -328,7 +392,8 @@ export default function RegisterPage() {
               placeholder="e.g. ABC Architects"
               value={formData.company}
               onChange={handleInputChange}
-              className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+              onBlur={handleBlur}
+              className={`h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.company ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
             />
             {errors.company && <p className="text-xs text-red-600">{errors.company}</p>}
           </div>
@@ -354,7 +419,8 @@ export default function RegisterPage() {
               name="interest"
               value={formData.interest}
               onChange={(e) => handleInputChange({ target: { name: 'interest', value: e.target.value } } as any)}
-              className="h-10 w-full bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg px-3 text-sm"
+              onBlur={handleBlur}
+              className={`h-10 w-full bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg px-3 text-sm ${errors.interest ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
             >
               <option value="">Select your interest</option>
               <option value="industry_partner">Industry Partner</option>
@@ -454,7 +520,94 @@ export default function RegisterPage() {
               )}
 
               <form onSubmit={handleRegister} className="space-y-4">
-                {/* User Type Selection - FIRST */}
+                {/* Name Fields */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">First Name</label>
+                    <Input
+                      name="firstName"
+                      placeholder="John"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      onBlur={handleBlur}
+                      className={`h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.firstName ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
+                      required
+                    />
+                    {errors.firstName && <p className="text-xs text-red-600">{errors.firstName}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Last Name</label>
+                    <Input
+                      name="lastName"
+                      placeholder="Doe"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      onBlur={handleBlur}
+                      className={`h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.lastName ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
+                      required
+                    />
+                    {errors.lastName && <p className="text-xs text-red-600">{errors.lastName}</p>}
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      type="email"
+                      name="email"
+                      placeholder="john.doe@example.com"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      onBlur={handleBlur}
+                      className={`pl-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
+                      required
+                    />
+                  </div>
+                  {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
+                </div>
+
+                {/* Mobile Number */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Mobile Number</label>
+                  <div className="flex space-x-2">
+                    <div className="w-1/3 relative">
+                      <select
+                        name="countryCode"
+                        value={formData.countryCode}
+                        onChange={(e) => handleInputChange(e as any)}
+                        className="w-full h-10 pl-2 pr-6 bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-sm appearance-none"
+                      >
+                        {countryCodes.map((country) => (
+                          <option key={country.code + country.country} value={country.code}>
+                            {country.code} ({country.country})
+                          </option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                      </div>
+                    </div>
+                    <div className="w-2/3 relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        type="tel"
+                        name="phone"
+                        placeholder="9876543210"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        onBlur={handleBlur}
+                        className={`pl-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.phone ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
+                        required
+                      />
+                    </div>
+                  </div>
+                  {errors.phone && <p className="text-xs text-red-600">{errors.phone}</p>}
+                </div>
+
+                {/* User Type Selection */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-gray-700">I am a <span className="text-red-500">*</span></label>
                   <div className="grid grid-cols-3 gap-2">
@@ -581,89 +734,6 @@ export default function RegisterPage() {
                   {errors.userType && <p className="text-xs text-red-600">{errors.userType}</p>}
                 </div>
 
-                {/* Name Fields */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">First Name</label>
-                    <Input
-                      name="firstName"
-                      placeholder="John"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
-                      required
-                    />
-                    {errors.firstName && <p className="text-xs text-red-600">{errors.firstName}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Last Name</label>
-                    <Input
-                      name="lastName"
-                      placeholder="Doe"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      className="h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
-                      required
-                    />
-                    {errors.lastName && <p className="text-xs text-red-600">{errors.lastName}</p>}
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Email Address</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      type="email"
-                      name="email"
-                      placeholder="john.doe@example.com"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="pl-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
-                      required
-                    />
-                  </div>
-                  {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
-                </div>
-
-                {/* Mobile Number */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Mobile Number</label>
-                  <div className="flex space-x-2">
-                    <div className="w-1/3 relative">
-                      <select
-                        name="countryCode"
-                        value={formData.countryCode}
-                        onChange={(e) => handleInputChange(e as any)}
-                        className="w-full h-10 pl-2 pr-6 bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-sm appearance-none"
-                      >
-                        {countryCodes.map((country) => (
-                          <option key={country.code + country.country} value={country.code}>
-                            {country.code} ({country.country})
-                          </option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                      </div>
-                    </div>
-                    <div className="w-2/3 relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        type="tel"
-                        name="phone"
-                        placeholder="9876543210"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="pl-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
-                        required
-                      />
-                    </div>
-                  </div>
-                  {errors.phone && <p className="text-xs text-red-600">{errors.phone}</p>}
-                </div>
-
                 {/* Conditional Fields */}
                 {renderConditionalFields()}
 
@@ -679,7 +749,8 @@ export default function RegisterPage() {
                         placeholder="Password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="pl-10 pr-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+                        onBlur={handleBlur}
+                        className={`pl-10 pr-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
                         required
                       />
                       <button
@@ -702,7 +773,8 @@ export default function RegisterPage() {
                         placeholder="Confirm Password"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        className="pl-10 pr-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg"
+                        onBlur={handleBlur}
+                        className={`pl-10 pr-10 h-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg ${errors.confirmPassword ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}`}
                         required
                       />
                       <button
@@ -761,6 +833,71 @@ export default function RegisterPage() {
                     </div>
                   )}
                 </Button>
+
+                {/* Social Login */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-gray-200" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-10 border-gray-200 hover:bg-gray-50 hover:text-gray-900"
+                    onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/login`}
+                  >
+                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                      <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335"
+                      />
+                    </svg>
+                    Google
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-10 border-gray-200 hover:bg-gray-50 hover:text-gray-900"
+                    onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/outlook/login`}
+                  >
+                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                      <path
+                        fill="#f35325"
+                        d="M1 1h10v10H1z"
+                      />
+                      <path
+                        fill="#81bc06"
+                        d="M13 1h10v10H13z"
+                      />
+                      <path
+                        fill="#05a6f0"
+                        d="M1 13h10v10H1z"
+                      />
+                      <path
+                        fill="#ffba08"
+                        d="M13 13h10v10H13z"
+                      />
+                    </svg>
+                    Outlook
+                  </Button>
+                </div>
 
                 {/* Terms */}
                 <p className="text-xs text-gray-500 text-center">

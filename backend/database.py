@@ -32,6 +32,7 @@ class User(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, unique=True, index=True, nullable=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
@@ -53,6 +54,7 @@ class User(Base):
     website = Column(String, nullable=True)
     linkedin = Column(String, nullable=True)
     portfolio = Column(String, nullable=True)
+    profile_image_url = Column(String, nullable=True)
     
     # User type specific fields
     cao_number = Column(String, nullable=True)  # For architects
@@ -83,6 +85,19 @@ class User(Base):
     discussion_replies = relationship("DiscussionReply", back_populates="author")
     discussion_likes = relationship("DiscussionLike", back_populates="user")
     discussion_reply_likes = relationship("DiscussionReplyLike", back_populates="user")
+    notifications = relationship("Notification", back_populates="recipient")
+
+class Institution(Base):
+    __tablename__ = "institutions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String, unique=True, index=True)
+    name = Column(String, nullable=False)
+    address = Column(Text, nullable=True)
+    city = Column(String, index=True, nullable=True)
+    state = Column(String, index=True, nullable=True)
+    pin_code = Column(String, nullable=True)
+    affiliating_university = Column(String, nullable=True)
 
 class Job(Base):
     __tablename__ = "jobs"
@@ -525,6 +540,20 @@ class DiscussionReplyLike(Base):
     reply = relationship("DiscussionReply", back_populates="likes")
     user = relationship("User", back_populates="discussion_reply_likes")
 
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    recipient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    subject = Column(String, nullable=True)
+    content = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    sender = relationship("User", foreign_keys=[sender_id], backref="sent_messages")
+    recipient = relationship("User", foreign_keys=[recipient_id], backref="received_messages")
+
 class NATACourse(Base):
     __tablename__ = "nata_courses"
 
@@ -549,6 +578,19 @@ class NATACourse(Base):
     status = Column(String, default="active")  # active, inactive, archived
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    recipient_id = Column(Integer, ForeignKey("users.id"))
+    title = Column(String, nullable=False)
+    message = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    link = Column(String, nullable=True)
+    
+    recipient = relationship("User", back_populates="notifications")
 
 def get_db():
     db = SessionLocal()

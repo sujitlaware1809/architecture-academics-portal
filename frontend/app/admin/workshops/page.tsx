@@ -92,7 +92,7 @@ export default function AdminWorkshopsPage() {
       };
 
       if (editingWorkshop) {
-        await api.put(`/admin/workshops/${editingWorkshop.id}`, payload);
+        await api.put(`/api/admin/workshops/${editingWorkshop.id}`, payload);
       } else {
         await api.post('/api/admin/workshops', payload);
       }
@@ -152,7 +152,7 @@ export default function AdminWorkshopsPage() {
     if (!confirm('Are you sure you want to delete this workshop?')) return;
 
     try {
-      await api.delete(`/admin/workshops/${id}`);
+      await api.delete(`/api/admin/workshops/${id}`);
       toast({
         title: "Success",
         description: "Workshop deleted successfully"
@@ -172,7 +172,7 @@ export default function AdminWorkshopsPage() {
     setLoadingRegistrations(true);
     setShowRegistrations(true);
     try {
-      const response = await api.get(`/admin/workshops/${workshop.id}/registrations`);
+      const response = await api.get(`/api/admin/workshops/${workshop.id}/registrations`);
       setSelectedWorkshopRegistrations(response.data);
     } catch (err: any) {
       console.error("Error fetching registrations:", err);

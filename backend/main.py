@@ -23,7 +23,10 @@ from routes import (
     admin_routes,
     registration_routes,
     test_routes,
-    user_routes
+    user_routes,
+    message_routes,
+    notification_routes,
+    search_routes
 )
 
 # Import middleware
@@ -72,6 +75,7 @@ app.add_middleware(
 )
 
 # Register route modules with /api prefix
+app.include_router(admin_routes.router, prefix="/api")
 app.include_router(auth_routes.router, prefix="/api")
 app.include_router(job_routes.router, prefix="/api")
 app.include_router(application_routes.router, prefix="/api")
@@ -81,10 +85,12 @@ app.include_router(discussion_routes.router, prefix="/api")
 app.include_router(nata_course_routes.router, prefix="/api")
 app.include_router(event_routes.router, prefix="/api")
 app.include_router(workshop_routes.router, prefix="/api")
-app.include_router(admin_routes.router, prefix="/api")
 app.include_router(registration_routes.router, prefix="/api")
 app.include_router(test_routes.router, prefix="/api")
 app.include_router(user_routes.router, prefix="/api")
+app.include_router(message_routes.router, prefix="/api")
+app.include_router(notification_routes.router, prefix="/api")
+app.include_router(search_routes.router, prefix="/api")
 
 # Root endpoint
 @app.get("/")

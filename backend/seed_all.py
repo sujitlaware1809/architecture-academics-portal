@@ -213,7 +213,6 @@ def get_sample_workshops():
             "location": "Architecture Lab, Pune",
             "image_url": "https://images.unsplash.com/photo-1518005068251-37900150dfca",
             "max_participants": 30,
-            "is_online": False,
             "status": schemas.WorkshopStatus.UPCOMING,
             "price": 1500.0
         }

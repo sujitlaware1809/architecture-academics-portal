@@ -23,7 +23,6 @@ export default function EventsPortal() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming")
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -95,16 +94,8 @@ export default function EventsPortal() {
       filtered = filtered.filter(event => event.is_online)
     }
 
-    // Filter by Active Tab (Upcoming vs Past)
-    const now = new Date()
-    if (activeTab === "upcoming") {
-      filtered = filtered.filter(event => new Date(event.date) >= now)
-    } else {
-      filtered = filtered.filter(event => new Date(event.date) < now)
-    }
-
     setFilteredEvents(filtered)
-  }, [searchQuery, filters, events, activeTab])
+  }, [searchQuery, filters, events])
 
   // Handle opening event details
   const openEventDetails = (event: Event) => {
@@ -123,6 +114,11 @@ export default function EventsPortal() {
     })
   }
 
+  // Split events into upcoming and past
+  const now = new Date()
+  const upcomingEvents = filteredEvents.filter(event => new Date(event.date) >= now)
+  const pastEvents = filteredEvents.filter(event => new Date(event.date) < now)
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white">
       {/* Hero Section */}
@@ -132,42 +128,26 @@ export default function EventsPortal() {
           <p className="text-lg md:text-xl text-white/90 mb-8 max-w-3xl mx-auto">
             Join architecture workshops, seminars, conferences, and more to expand your knowledge and network with professionals
           </p>
-          <button
-            className="explore-button"
-            onClick={() => document.getElementById('events-listing')?.scrollIntoView({ behavior: 'smooth' })}
-          >
-            Explore Events
-          </button>
+          <div className="flex gap-4 justify-center">
+            <button
+              className="explore-button"
+              onClick={() => document.getElementById('upcoming-events')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Upcoming Events
+            </button>
+            <button
+              className="px-8 py-3 bg-white/10 backdrop-blur-sm border-2 border-white text-white font-semibold rounded-full hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              onClick={() => document.getElementById('past-events')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Past Events
+            </button>
+          </div>
         </div>
       </section>
 
       {/* Search and Filters */}
       <section className="max-w-7xl mx-auto px-4 py-8 -mt-8 z-10 relative">
         <div className="bg-white rounded-xl shadow-xl p-6 search-card">
-          {/* Tabs for Upcoming/Past */}
-          <div className="flex space-x-4 mb-6 border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab("upcoming")}
-              className={`pb-2 px-4 text-sm font-medium transition-colors relative ${
-                activeTab === "upcoming"
-                  ? "text-teal-600 border-b-2 border-teal-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Upcoming Events
-            </button>
-            <button
-              onClick={() => setActiveTab("past")}
-              className={`pb-2 px-4 text-sm font-medium transition-colors relative ${
-                activeTab === "past"
-                  ? "text-teal-600 border-b-2 border-teal-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Past Events
-            </button>
-          </div>
-
           <div className="flex flex-col md:flex-row gap-4 items-stretch">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -247,33 +227,54 @@ export default function EventsPortal() {
 
       {/* Events Listing */}
       <section id="events-listing" className="max-w-7xl mx-auto px-4 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">Upcoming Events</h2>
-          <p className="text-gray-600">{filteredEvents.length} events found</p>
+        {/* Upcoming Events Section */}
+        <div id="upcoming-events" className="mb-16">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-800">Upcoming Events</h2>
+            <p className="text-gray-600">{upcomingEvents.length} events found</p>
+          </div>
+
+          {upcomingEvents.length === 0 ? (
+            <div className="text-center py-16 bg-gray-50 rounded-lg">
+              <h3 className="text-xl font-medium text-gray-600">No upcoming events match your criteria</h3>
+              <p className="text-gray-500 mt-2">Try adjusting your filters or search terms</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingEvents.map((event) => (
+                <EventCard 
+                  key={event.id} 
+                  event={event}
+                  onViewDetails={openEventDetails}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {filteredEvents.length === 0 ? (
-          <div className="text-center py-16 bg-gray-50 rounded-lg">
-            <h3 className="text-xl font-medium text-gray-600">No events match your criteria</h3>
-            <p className="text-gray-500 mt-2">Try adjusting your filters or search terms</p>
-            <button 
-              onClick={resetFilters}
-              className="mt-4 px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-colors"
-            >
-              Reset Filters
-            </button>
+        {/* Past Events Section */}
+        <div id="past-events">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-800">Past Events</h2>
+            <p className="text-gray-600">{pastEvents.length} events found</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event) => (
-              <EventCard 
-                key={event.id} 
-                event={event}
-                onViewDetails={openEventDetails}
-              />
-            ))}
-          </div>
-        )}
+
+          {pastEvents.length === 0 ? (
+            <div className="text-center py-16 bg-gray-50 rounded-lg">
+              <h3 className="text-xl font-medium text-gray-600">No past events match your criteria</h3>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75">
+              {pastEvents.map((event) => (
+                <EventCard 
+                  key={event.id} 
+                  event={event}
+                  onViewDetails={openEventDetails}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Event Detail Modal */}

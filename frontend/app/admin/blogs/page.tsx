@@ -81,10 +81,8 @@ export default function AdminBlogsPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch('http://localhost:8000/blogs?limit=100')
-      if (!response.ok) throw new Error('Failed to fetch blogs')
-      const data = await response.json()
-      setBlogs(data)
+      const response = await api.get('/api/admin/blogs?limit=100')
+      setBlogs(response.data)
     } catch (err: any) {
       setError(err.message || 'Failed to load blogs')
       showNotification('Failed to load blogs', 'error')
@@ -98,18 +96,7 @@ export default function AdminBlogsPage() {
     
     try {
       setDeleting(true)
-      const token = api.getStoredToken()
-      const response = await fetch(`http://localhost:8000/blogs/${blogToDelete.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'Failed to delete blog')
-      }
+      await api.delete(`/api/admin/blogs/${blogToDelete.id}`)
       
       showNotification('Blog deleted successfully', 'success')
       setBlogToDelete(null)

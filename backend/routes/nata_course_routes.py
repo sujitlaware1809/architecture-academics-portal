@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 import os
+import json
 
 import crud
 import schemas
-from database import get_db, User
-from routes.auth_routes import get_current_user
+from database import get_db, User, NATACourse
+from routes.auth_routes import get_current_user, get_current_admin
 
 # Moodle integration - optional dependency
 try:
@@ -38,21 +39,34 @@ async def get_nata_courses(
 ):
     """Get all NATA preparation lessons"""
     try:
-        # Use seed data for NATA lessons
-        nata_lessons = get_nata_lessons()
+        # Try to fetch from DB first
+        db_courses = db.query(NATACourse).all()
         
-        # Add IDs to lessons
-        for idx, lesson in enumerate(nata_lessons):
-            lesson['id'] = idx + 1
+        if not db_courses:
+            # Fallback to seed data if DB is empty
+            nata_lessons = get_nata_lessons()
+            # Add IDs to lessons
+            for idx, lesson in enumerate(nata_lessons):
+                lesson['id'] = idx + 1
+            
+            # Filter by category if provided
+            if category and category != "All":
+                nata_lessons = [lesson for lesson in nata_lessons if lesson.get('category') == category]
+            
+            return {
+                "success": True,
+                "data": nata_lessons,
+                "total": len(nata_lessons)
+            }
         
         # Filter by category if provided
         if category and category != "All":
-            nata_lessons = [lesson for lesson in nata_lessons if lesson.get('category') == category]
-        
+            db_courses = [c for c in db_courses if c.category == category]
+            
         return {
             "success": True,
-            "data": nata_lessons,
-            "total": len(nata_lessons)
+            "data": db_courses,
+            "total": len(db_courses)
         }
     except Exception as e:
         print(f"Error fetching NATA lessons: {str(e)}")
@@ -65,6 +79,15 @@ async def get_nata_course_detail(
 ):
     """Get detailed information about a specific NATA lesson"""
     try:
+        # Try DB first
+        course = db.query(NATACourse).filter(NATACourse.id == course_id).first()
+        if course:
+            return {
+                "success": True,
+                "data": course
+            }
+
+        # Fallback to seed data
         nata_lessons = get_nata_lessons()
         
         # Find lesson by ID (ID is 1-indexed)
@@ -82,6 +105,93 @@ async def get_nata_course_detail(
     except Exception as e:
         print(f"Error fetching NATA lesson detail: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# Admin Endpoints
+
+class NATACourseCreate(schemas.BaseModel):
+    title: str
+    description: str
+    instructor: str
+    duration: str
+    difficulty: str
+    price: float
+    original_price: float
+    category: str
+    thumbnail: Optional[str] = None
+    skills: Optional[List[str]] = []
+    features: Optional[List[str]] = []
+    syllabus: Optional[List[dict]] = []
+
+@router.post("", status_code=status.HTTP_201_CREATED)
+async def create_nata_course(
+    course: NATACourseCreate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Create a new NATA course (Admin only)"""
+    db_course = NATACourse(
+        title=course.title,
+        description=course.description,
+        instructor=course.instructor,
+        duration=course.duration,
+        difficulty=course.difficulty,
+        price=course.price,
+        original_price=course.original_price,
+        category=course.category,
+        thumbnail=course.thumbnail,
+        skills=json.dumps(course.skills),
+        features=json.dumps(course.features),
+        syllabus=json.dumps(course.syllabus)
+    )
+    db.add(db_course)
+    db.commit()
+    db.refresh(db_course)
+    return db_course
+
+@router.put("/{course_id}")
+async def update_nata_course(
+    course_id: int,
+    course: NATACourseCreate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Update a NATA course (Admin only)"""
+    db_course = db.query(NATACourse).filter(NATACourse.id == course_id).first()
+    if not db_course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    db_course.title = course.title
+    db_course.description = course.description
+    db_course.instructor = course.instructor
+    db_course.duration = course.duration
+    db_course.difficulty = course.difficulty
+    db_course.price = course.price
+    db_course.original_price = course.original_price
+    db_course.category = course.category
+    db_course.thumbnail = course.thumbnail
+    db_course.skills = json.dumps(course.skills)
+    db_course.features = json.dumps(course.features)
+    db_course.syllabus = json.dumps(course.syllabus)
+    
+    db.commit()
+    db.refresh(db_course)
+    return db_course
+
+@router.delete("/{course_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_nata_course(
+    course_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Delete a NATA course (Admin only)"""
+    db_course = db.query(NATACourse).filter(NATACourse.id == course_id).first()
+    if not db_course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    db.delete(db_course)
+    db.commit()
+    return None
+
 
 @router.post("/{course_id}/enroll")
 async def enroll_in_nata_course(

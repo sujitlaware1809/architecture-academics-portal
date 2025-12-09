@@ -32,7 +32,6 @@ export default function WorkshopsPortal() {
   const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming")
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -131,19 +130,9 @@ export default function WorkshopsPortal() {
       )
     }
 
-    // Filter by Active Tab (Upcoming vs Past)
-    const now = new Date()
-    if (activeTab === "upcoming") {
-      filteredW = filteredW.filter(w => new Date(w.date) >= now)
-      filteredF = filteredF.filter(w => new Date(w.date) >= now)
-    } else {
-      filteredW = filteredW.filter(w => new Date(w.date) < now)
-      filteredF = filteredF.filter(w => new Date(w.date) < now)
-    }
-
     setFilteredWorkshops(filteredW)
     setFilteredFDPs(filteredF)
-  }, [searchQuery, filters, workshops, activeTab])
+  }, [searchQuery, filters, workshops])
 
   // Handle opening workshop details
   const openWorkshopDetails = (workshop: Workshop) => {
@@ -165,6 +154,14 @@ export default function WorkshopsPortal() {
   // Get all unique categories from workshops
   const categories = [...new Set(workshops.map(w => w.category).filter(Boolean))] as string[]
 
+  // Split workshops into upcoming and past
+  const now = new Date()
+  const upcomingWorkshops = filteredWorkshops.filter(w => new Date(w.date) >= now)
+  const pastWorkshops = filteredWorkshops.filter(w => new Date(w.date) < now)
+  
+  const upcomingFDPs = filteredFDPs.filter(w => new Date(w.date) >= now)
+  const pastFDPs = filteredFDPs.filter(w => new Date(w.date) < now)
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Hero Section */}
@@ -174,42 +171,26 @@ export default function WorkshopsPortal() {
           <p className="text-lg md:text-xl text-white/90 mb-8 max-w-3xl mx-auto">
             Join expert-led workshops and faculty development programs designed to enhance your architectural knowledge and teaching skills
           </p>
-          <button
-            className="cta-button"
-            onClick={() => document.getElementById('workshops-listing')?.scrollIntoView({ behavior: 'smooth' })}
-          >
-            Join Now
-          </button>
+          <div className="flex gap-4 justify-center">
+            <button
+              className="cta-button"
+              onClick={() => document.getElementById('upcoming-workshops')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Upcoming Workshops
+            </button>
+            <button
+              className="px-8 py-3 bg-white/10 backdrop-blur-sm border-2 border-white text-white font-semibold rounded-full hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              onClick={() => document.getElementById('past-workshops')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Past Workshops
+            </button>
+          </div>
         </div>
       </section>
 
       {/* Search and Filters */}
       <section className="max-w-7xl mx-auto px-4 py-8 -mt-8 z-10 relative">
         <div className="bg-white rounded-xl shadow-xl p-6 search-card">
-          {/* Tabs for Upcoming/Past */}
-          <div className="flex space-x-4 mb-6 border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab("upcoming")}
-              className={`pb-2 px-4 text-sm font-medium transition-colors relative ${
-                activeTab === "upcoming"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Upcoming Workshops
-            </button>
-            <button
-              onClick={() => setActiveTab("past")}
-              className={`pb-2 px-4 text-sm font-medium transition-colors relative ${
-                activeTab === "past"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Past Workshops
-            </button>
-          </div>
-
           <div className="flex flex-col md:flex-row gap-4 items-stretch">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -373,64 +354,28 @@ export default function WorkshopsPortal() {
 
       {/* Workshops Listing */}
       <section id="workshops-listing" className="max-w-7xl mx-auto px-4 workshops-section">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="section-title">Upcoming Workshops</h2>
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-blue-500" />
-            <p className="text-gray-600">
-              {filteredWorkshops.length} workshop{filteredWorkshops.length !== 1 ? 's' : ''} available
-              {searchQuery || filters.category || filters.difficulty || filters.price || filters.trainer ? 
-                ` (filtered from ${workshops.filter(w => !w.isFDP).length})` : ''}
-            </p>
-          </div>
-        </div>
-
-        {filteredWorkshops.length === 0 ? (
-          <EmptyState 
-            title="No workshops found" 
-            message="Try adjusting your filters or search terms to find workshops that match your interests."
-            icon={<Calendar className="h-10 w-10 text-blue-400" />}
-            resetFilters={resetFilters}
-          />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredWorkshops.map((workshop) => (
-              <WorkshopCard 
-                key={workshop.id} 
-                workshop={workshop}
-                onViewDetails={openWorkshopDetails}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* FDP Section */}
-      <section className="fdp-section">
-        <div className="max-w-7xl mx-auto px-4">
+        {/* Upcoming Workshops */}
+        <div id="upcoming-workshops" className="mb-16">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="section-title">Faculty Development Programs</h2>
+            <h2 className="section-title">Upcoming Workshops</h2>
             <div className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-indigo-500" />
+              <BookOpen className="h-5 w-5 text-blue-500" />
               <p className="text-gray-600">
-                {filteredFDPs.length} FDP{filteredFDPs.length !== 1 ? 's' : ''} available
-                {searchQuery || filters.category || filters.difficulty || filters.price || filters.trainer ? 
-                  ` (filtered from ${workshops.filter(w => w.isFDP).length})` : ''}
+                {upcomingWorkshops.length} workshop{upcomingWorkshops.length !== 1 ? 's' : ''} available
               </p>
             </div>
           </div>
 
-          {filteredFDPs.length === 0 ? (
+          {upcomingWorkshops.length === 0 ? (
             <EmptyState 
-              title="No FDPs found" 
-              message="Try adjusting your filters or search terms to find Faculty Development Programs that match your interests."
-              icon={<GraduationCap className="h-10 w-10 text-indigo-400" />}
+              title="No upcoming workshops found" 
+              message="Try adjusting your filters or search terms to find workshops that match your interests."
+              icon={<Calendar className="h-10 w-10 text-blue-400" />}
               resetFilters={resetFilters}
-              isForFdp={true}
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredFDPs.map((workshop) => (
+              {upcomingWorkshops.map((workshop) => (
                 <WorkshopCard 
                   key={workshop.id} 
                   workshop={workshop}
@@ -439,6 +384,102 @@ export default function WorkshopsPortal() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Past Workshops */}
+        <div id="past-workshops">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="section-title">Past Workshops</h2>
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-gray-500" />
+              <p className="text-gray-600">
+                {pastWorkshops.length} workshop{pastWorkshops.length !== 1 ? 's' : ''} available
+              </p>
+            </div>
+          </div>
+
+          {pastWorkshops.length === 0 ? (
+            <div className="text-center py-16 bg-gray-50 rounded-lg">
+              <h3 className="text-xl font-medium text-gray-600">No past workshops found</h3>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75">
+              {pastWorkshops.map((workshop) => (
+                <WorkshopCard 
+                  key={workshop.id} 
+                  workshop={workshop}
+                  onViewDetails={openWorkshopDetails}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* FDP Section */}
+      <section className="fdp-section">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Upcoming FDPs */}
+          <div className="mb-16">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="section-title">Upcoming Faculty Development Programs</h2>
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-indigo-500" />
+                <p className="text-gray-600">
+                  {upcomingFDPs.length} FDP{upcomingFDPs.length !== 1 ? 's' : ''} available
+                </p>
+              </div>
+            </div>
+
+            {upcomingFDPs.length === 0 ? (
+              <EmptyState 
+                title="No upcoming FDPs found" 
+                message="Try adjusting your filters or search terms to find Faculty Development Programs that match your interests."
+                icon={<GraduationCap className="h-10 w-10 text-indigo-400" />}
+                resetFilters={resetFilters}
+                isForFdp={true}
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {upcomingFDPs.map((workshop) => (
+                  <WorkshopCard 
+                    key={workshop.id} 
+                    workshop={workshop}
+                    onViewDetails={openWorkshopDetails}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Past FDPs */}
+          <div>
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="section-title">Past Faculty Development Programs</h2>
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-gray-500" />
+                <p className="text-gray-600">
+                  {pastFDPs.length} FDP{pastFDPs.length !== 1 ? 's' : ''} available
+                </p>
+              </div>
+            </div>
+
+            {pastFDPs.length === 0 ? (
+              <div className="text-center py-16 bg-gray-50 rounded-lg">
+                <h3 className="text-xl font-medium text-gray-600">No past FDPs found</h3>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75">
+                {pastFDPs.map((workshop) => (
+                  <WorkshopCard 
+                    key={workshop.id} 
+                    workshop={workshop}
+                    onViewDetails={openWorkshopDetails}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
 

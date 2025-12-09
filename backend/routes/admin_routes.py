@@ -11,7 +11,7 @@ from database import get_db, User, Job, Event, Workshop, Course, SystemSettings,
 from routes.auth_routes import get_current_admin
 from aws_s3 import s3_manager
 
-router = APIRouter(prefix="/api/admin", tags=["Admin"])
+router = APIRouter(prefix="/admin", tags=["Admin"])
 
 # File upload utilities
 UPLOAD_DIR = Path("uploads")
@@ -720,6 +720,65 @@ async def admin_get_workshop_registrations(
         "total_registrations": len(result),
         "registrations": result
     }
+
+# ==================== BLOG MANAGEMENT ====================
+
+@router.get("/blogs", response_model=List[schemas.BlogResponse])
+async def get_admin_blogs(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    """Get all blogs for admin management"""
+    blogs = crud.get_blogs(db, skip=skip, limit=limit)
+    return blogs
+
+@router.post("/blogs", response_model=schemas.BlogResponse)
+async def create_admin_blog(
+    blog: schemas.BlogCreate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    """Create a new blog post"""
+    return crud.create_blog(db, blog, current_admin.id)
+
+@router.get("/blogs/{blog_id}", response_model=schemas.BlogResponse)
+async def get_admin_blog(
+    blog_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    """Get blog by ID"""
+    blog = crud.get_blog_by_id(db, blog_id)
+    if not blog:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    return blog
+
+@router.put("/blogs/{blog_id}", response_model=schemas.BlogResponse)
+async def update_admin_blog(
+    blog_id: int,
+    blog_update: schemas.BlogUpdate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    """Update blog post"""
+    blog = crud.update_blog(db, blog_id, blog_update)
+    if not blog:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    return blog
+
+@router.delete("/blogs/{blog_id}")
+async def delete_admin_blog(
+    blog_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    """Delete blog post"""
+    success = crud.delete_blog(db, blog_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    return {"message": "Blog deleted successfully"}
 
 # ==================== SYSTEM SETTINGS ====================
 

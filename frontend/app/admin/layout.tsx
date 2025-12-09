@@ -14,7 +14,10 @@ import {
   ChevronDown,
   Menu,
   X,
-  FileText
+  FileText,
+  MessageSquare,
+  Bell,
+  Layers
 } from "lucide-react"
 
 interface AdminLayoutProps {
@@ -22,7 +25,7 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   
   const sidebarItems = [
@@ -30,8 +33,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { name: "Events", href: "/admin/events", icon: Calendar },
     { name: "Workshops", href: "/admin/workshops", icon: Wrench },
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
+    { name: "NATA Courses", href: "/admin/nata-courses", icon: Layers },
     { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
     { name: "Blogs", href: "/admin/blogs", icon: FileText },
+    { name: "Discussions", href: "/admin/discussions", icon: MessageSquare },
+    { name: "Communications", href: "/admin/communications", icon: Bell },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ]
@@ -96,7 +102,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       )}
 
       {/* Desktop Sidebar */}
-      <div className={`hidden lg:flex h-screen fixed inset-y-0 z-50 ${sidebarOpen ? 'w-64' : 'w-20'} flex-col transition-all duration-300 bg-white border-r border-gray-200`}>
+      <div className={`hidden lg:flex fixed top-16 bottom-0 z-40 ${sidebarOpen ? 'w-64' : 'w-20'} flex-col transition-all duration-300 bg-white border-r border-gray-200`}>
         <div className={`flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'} p-4 border-b border-gray-200`}>
           {sidebarOpen && (
             <div className="flex items-center">
@@ -115,17 +121,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </button>
         </div>
         
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className={`flex-1 p-4 space-y-1 ${sidebarOpen ? 'overflow-y-auto' : 'overflow-visible'}`}>
           {sidebarItems.map((item) => {
             const IconComponent = item.icon
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center ${sidebarOpen ? 'px-3' : 'justify-center'} py-2 text-sm font-medium rounded-md hover:bg-blue-50 hover:text-blue-700 text-gray-700`}
+                className={`group relative flex items-center ${sidebarOpen ? 'px-3' : 'justify-center'} py-2 text-sm font-medium rounded-md hover:bg-blue-50 hover:text-blue-700 text-gray-700`}
               >
                 <IconComponent className={sidebarOpen ? 'mr-3 h-5 w-5' : 'h-6 w-6'} />
                 {sidebarOpen && item.name}
+                
+                {!sidebarOpen && (
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-lg">
+                    {item.name}
+                    <div className="absolute top-1/2 -left-1 -mt-1 border-4 border-transparent border-r-gray-900" />
+                  </div>
+                )}
               </Link>
             )
           })}
@@ -134,10 +147,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="p-4 border-t border-gray-200">
           <Link 
             href="/"
-            className={`flex items-center ${sidebarOpen ? 'px-3' : 'justify-center'} py-2 text-sm font-medium rounded-md hover:bg-red-50 hover:text-red-700 text-gray-700`}
+            className={`group relative flex items-center ${sidebarOpen ? 'px-3' : 'justify-center'} py-2 text-sm font-medium rounded-md hover:bg-red-50 hover:text-red-700 text-gray-700`}
           >
             <LogOut className={sidebarOpen ? 'mr-3 h-5 w-5' : 'h-6 w-6'} />
             {sidebarOpen && 'Exit Admin'}
+            
+            {!sidebarOpen && (
+              <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-lg">
+                Exit Admin
+                <div className="absolute top-1/2 -left-1 -mt-1 border-4 border-transparent border-r-gray-900" />
+              </div>
+            )}
           </Link>
         </div>
       </div>

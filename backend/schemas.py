@@ -43,10 +43,33 @@ class JobStatus(str, Enum):
 
 class ApplicationStatus(str, Enum):
     PENDING = "pending"
-    UNDER_REVIEW = "under_review"
-    INTERVIEW_SCHEDULED = "interview_scheduled"
-    ACCEPTED = "accepted"
+    REVIEWING = "reviewing"
+    SHORTLISTED = "shortlisted"
     REJECTED = "rejected"
+    ACCEPTED = "accepted"
+
+class NotificationCreate(BaseModel):
+    recipient_id: Optional[int] = None
+    title: str
+    message: str
+    link: Optional[str] = None
+
+class EmailSend(BaseModel):
+    recipient_id: Optional[int] = None
+    subject: str
+    body: str
+
+class NotificationResponse(BaseModel):
+    id: int
+    title: str
+    message: str
+    is_read: bool
+    created_at: datetime
+    link: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
 
 class CourseStatus(str, Enum):
     DRAFT = "draft"
@@ -73,6 +96,7 @@ class CourseLevel(str, Enum):
 # User Schemas
 class UserBase(BaseModel):
     email: EmailStr
+    username: Optional[str] = None
     first_name: str
     last_name: str
 
@@ -120,13 +144,17 @@ class UserProfile(BaseModel):
     website: Optional[str] = None
     linkedin: Optional[str] = None
     portfolio: Optional[str] = None
+    profile_image_url: Optional[str] = None
     company_name: Optional[str] = None
     company_website: Optional[str] = None
     company_description: Optional[str] = None
+    cao_number: Optional[str] = None
+    teaching_experience: Optional[str] = None
 
 class UserProfileUpdate(UserProfile):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    username: Optional[str] = None
 
 class UserResponse(UserBase):
     id: int
@@ -145,6 +173,7 @@ class UserResponse(UserBase):
     website: Optional[str] = None
     linkedin: Optional[str] = None
     portfolio: Optional[str] = None
+    profile_image_url: Optional[str] = None
     company_name: Optional[str] = None
     company_website: Optional[str] = None
     company_description: Optional[str] = None
@@ -830,4 +859,44 @@ class DiscussionSearchParams(BaseModel):
     is_pinned: Optional[bool] = None
     skip: int = 0
     limit: int = 20
+
+# Message Schemas
+class MessageBase(BaseModel):
+    recipient_email: EmailStr
+    subject: Optional[str] = None
+    content: str
+
+class MessageCreate(MessageBase):
+    pass
+
+class MessageResponse(BaseModel):
+    id: int
+    sender_id: int
+    recipient_id: int
+    subject: Optional[str]
+    content: str
+    is_read: bool
+    created_at: datetime
+    sender: Optional[UserResponse] = None
+
+    class Config:
+        from_attributes = True
+
+# Notification Schemas
+class NotificationBase(BaseModel):
+    title: str
+    message: str
+    link: Optional[str] = None
+
+class NotificationCreate(NotificationBase):
+    recipient_id: int
+
+class NotificationResponse(NotificationBase):
+    id: int
+    recipient_id: int
+    is_read: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 

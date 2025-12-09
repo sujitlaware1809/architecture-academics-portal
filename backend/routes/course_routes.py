@@ -62,6 +62,52 @@ async def get_public_courses(
     """Get all published courses for public viewing (no authentication required)"""
     return crud.get_published_courses(db, skip=skip, limit=limit, level=level, search=search)
 
+@router.get("/my-courses")
+async def get_my_courses(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all enrolled courses with details for current user"""
+    enrollments = db.query(CourseEnrollment).filter(
+        CourseEnrollment.student_id == current_user.id
+    ).all()
+    
+    result = []
+    for enrollment in enrollments:
+        course = crud.get_course_by_id(db, enrollment.course_id)
+        if course:
+            # Safely derive instructor name (Course has instructor_id and relationship 'instructor')
+            instructor_name = None
+            try:
+                if getattr(course, "instructor", None):
+                    first = getattr(course.instructor, "first_name", "") or ""
+                    last = getattr(course.instructor, "last_name", "") or ""
+                    full = f"{first} {last}".strip()
+                    instructor_name = full if full else None
+            except Exception:
+                instructor_name = None
+
+            result.append({
+                "id": enrollment.id,
+                "course_id": enrollment.course_id,
+                "enrolled_at": enrollment.enrolled_at.isoformat() if enrollment.enrolled_at else None,
+                "progress": enrollment.progress_percentage or 0,
+                "last_accessed": enrollment.last_accessed_at.isoformat() if enrollment.last_accessed_at else None,
+                "completed": enrollment.completed or False,
+                "course": {
+                    "id": course.id,
+                    "title": course.title,
+                    "description": course.description,
+                    "image_url": course.image_url,
+                    "level": course.level,
+                    "duration": course.duration,
+                    "instructor_name": instructor_name,
+                    "lessons": [{"id": l.id, "title": l.title, "is_free": l.is_free} for l in course.lessons] if course.lessons else []
+                }
+            })
+    
+    return result
+
 @router.get("/{course_id}", response_model=schemas.CourseDetailResponse)
 async def get_public_course_detail(
     course_id: int,
@@ -225,52 +271,6 @@ async def check_enrollment(
         "enrolled": enrollment is not None,
         "enrollment": enrollment if enrollment else None
     }
-
-@router.get("/my-courses")
-async def get_my_courses(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get all enrolled courses with details for current user"""
-    enrollments = db.query(CourseEnrollment).filter(
-        CourseEnrollment.student_id == current_user.id
-    ).all()
-    
-    result = []
-    for enrollment in enrollments:
-        course = crud.get_course_by_id(db, enrollment.course_id)
-        if course:
-            # Safely derive instructor name (Course has instructor_id and relationship 'instructor')
-            instructor_name = None
-            try:
-                if getattr(course, "instructor", None):
-                    first = getattr(course.instructor, "first_name", "") or ""
-                    last = getattr(course.instructor, "last_name", "") or ""
-                    full = f"{first} {last}".strip()
-                    instructor_name = full if full else None
-            except Exception:
-                instructor_name = None
-
-            result.append({
-                "id": enrollment.id,
-                "course_id": enrollment.course_id,
-                "enrolled_at": enrollment.enrolled_at.isoformat() if enrollment.enrolled_at else None,
-                "progress": enrollment.progress_percentage or 0,
-                "last_accessed": enrollment.last_accessed_at.isoformat() if enrollment.last_accessed_at else None,
-                "completed": enrollment.completed or False,
-                "course": {
-                    "id": course.id,
-                    "title": course.title,
-                    "description": course.description,
-                    "image_url": course.image_url,
-                    "level": course.level,
-                    "duration": course.duration,
-                    "instructor_name": instructor_name,
-                    "lessons": [{"id": l.id, "title": l.title, "is_free": l.is_free} for l in course.lessons] if course.lessons else []
-                }
-            })
-    
-    return result
 
 # ===============================
 # LESSON PROGRESS ENDPOINTS

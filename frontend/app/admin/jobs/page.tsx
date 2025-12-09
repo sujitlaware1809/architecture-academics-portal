@@ -58,21 +58,17 @@ export default function AdminJobsPage() {
   // Fetch jobs from backend
   const fetchJobs = async () => {
     try {
-      const token = api.getStoredToken();
-      if (!token) throw new Error('Not authenticated');
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const url = new URL(`${base}/api/admin/jobs`);
-      url.searchParams.set('skip', String(page * limit));
-      url.searchParams.set('limit', String(limit));
-      const response = await fetch(url.toString(), {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await api.get('/api/admin/jobs', {
+        params: {
+          skip: page * limit,
+          limit: limit
+        }
       });
-      if (response.ok) {
-        const data = await response.json();
-        setJobs(data);
-      } else {
-        // Fallback mock data if backend is not available
-        setJobs([
+      setJobs(response.data || response);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+      // Fallback mock data if backend is not available
+      setJobs([
           {
             id: 1,
             title: "Senior Architect",
@@ -125,8 +121,6 @@ export default function AdminJobsPage() {
             created_at: "2025-08-20T09:00:00Z"
           }
         ]);
-      }
-    } catch (error) {
       console.error('Error fetching jobs:', error);
       toast({
         title: "Error",
@@ -146,39 +140,25 @@ export default function AdminJobsPage() {
     e.preventDefault();
     
     try {
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const url = editingJob 
-        ? `${base}/api/admin/jobs/${editingJob.id}`
-        : `${base}/api/admin/jobs`;
-      
-      const method = editingJob ? 'PUT' : 'POST';
-      
-      const token = api.getStoredToken();
-      if (!token) throw new Error('Not authenticated');
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...formData,
-          posted_date: new Date().toISOString().split('T')[0]
-        }),
-      });
+      const payload = {
+        ...formData,
+        posted_date: new Date().toISOString().split('T')[0]
+      };
 
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: editingJob ? "Job updated successfully" : "Job posted successfully"
-        });
-        setIsDialogOpen(false);
-        setEditingJob(null);
-        resetForm();
-        fetchJobs();
+      if (editingJob) {
+        await api.put(`/api/admin/jobs/${editingJob.id}`, payload);
       } else {
-        throw new Error('Failed to save job');
+        await api.post('/api/admin/jobs', payload);
       }
+
+      toast({
+        title: "Success",
+        description: editingJob ? "Job updated successfully" : "Job posted successfully"
+      });
+      setIsDialogOpen(false);
+      setEditingJob(null);
+      resetForm();
+      fetchJobs();
     } catch (error) {
       console.error('Error saving job:', error);
       toast({
@@ -227,22 +207,13 @@ export default function AdminJobsPage() {
     if (!confirm('Are you sure you want to delete this job posting?')) return;
 
     try {
-      const token = api.getStoredToken();
-      if (!token) throw new Error('Not authenticated');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/jobs/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      await api.delete(`/api/admin/jobs/${id}`);
 
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: "Job deleted successfully"
-        });
-        fetchJobs();
-      } else {
-        throw new Error('Failed to delete job');
-      }
+      toast({
+        title: "Success",
+        description: "Job deleted successfully"
+      });
+      fetchJobs();
     } catch (error) {
       console.error('Error deleting job:', error);
       toast({
@@ -634,26 +605,21 @@ function AdminJobEvents({ onNewEvent, pollSinceRef }: { onNewEvent: (ev: any) =>
   const { toast } = useToast();
   useEffect(() => {
     let mounted = true;
-    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const tick = async () => {
       try {
-        const token = api.getStoredToken();
-        if (!token) return;
-        const params = new URLSearchParams();
-        if (pollSinceRef.current) params.set('since', pollSinceRef.current);
-        const res = await fetch(`${base}/api/admin/jobs/applications/events?${params.toString()}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const events = await res.json();
-          if (events && events.length > 0) {
-            const lastTs = events[events.length - 1]?.timestamp;
-            if (lastTs) pollSinceRef.current = lastTs;
-            events.forEach((ev: any) => {
-              onNewEvent(ev);
-              toast({ title: 'New Application', description: `Job #${ev.job_id} received a new application` });
-            });
-          }
+        const params: any = {};
+        if (pollSinceRef.current) params.since = pollSinceRef.current;
+        
+        const response = await api.get('/api/admin/jobs/applications/events', { params });
+        
+        const events = response.data;
+        if (events && events.length > 0) {
+          const lastTs = events[events.length - 1]?.timestamp;
+          if (lastTs) pollSinceRef.current = lastTs;
+          events.forEach((ev: any) => {
+            onNewEvent(ev);
+            toast({ title: 'New Application', description: `Job #${ev.job_id} received a new application` });
+          });
         }
       } catch {}
     };

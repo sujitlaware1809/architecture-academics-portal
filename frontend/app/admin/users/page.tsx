@@ -44,35 +44,16 @@ export default function AdminUsersPage() {
   // Fetch users from backend
   const fetchUsers = async () => {
     try {
-      const token = api.getStoredToken();
-      if (!token) {
-        throw new Error('Authentication required. Please login first.');
-      }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      } else if (response.status === 401) {
-        throw new Error('Authentication failed. Please login again.');
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    } catch (error) {
+      const response = await api.get('/api/admin/users');
+      setUsers(response.data || response);
+    } catch (error: any) {
       console.error('Error fetching users:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch users from database",
+        description: error.message || "Failed to fetch users from database",
         variant: "destructive"
       });
-      setUsers([]); // Set empty array instead of hardcoded fallback
+      setUsers([]); 
     } finally {
       setLoading(false);
     }
@@ -86,42 +67,24 @@ export default function AdminUsersPage() {
     e.preventDefault();
     
     try {
-      const token = api.getStoredToken();
-      if (!token) {
-        throw new Error('Authentication required. Please login first.');
-      }
-
-      const url = editingUser 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${editingUser.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`;
-      
-      const method = editingUser ? 'PUT' : 'POST';
-      
       const submitData = editingUser 
         ? { ...formData, password: undefined } // Don't include password in updates unless specifically changing it
         : formData;
       
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
-      });
-
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: editingUser ? "User updated successfully" : "User created successfully"
-        });
-        setIsDialogOpen(false);
-        setEditingUser(null);
-        resetForm();
-        fetchUsers();
+      if (editingUser) {
+        await api.put(`/api/admin/users/${editingUser.id}`, submitData);
       } else {
-        throw new Error('Failed to save user');
+        await api.post('/api/admin/users', submitData);
       }
+
+      toast({
+        title: "Success",
+        description: editingUser ? "User updated successfully" : "User created successfully"
+      });
+      setIsDialogOpen(false);
+      setEditingUser(null);
+      resetForm();
+      fetchUsers();
     } catch (error) {
       console.error('Error saving user:', error);
       toast({
@@ -160,28 +123,13 @@ export default function AdminUsersPage() {
     if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
 
     try {
-      const token = api.getStoredToken();
-      if (!token) {
-        throw new Error('Authentication required. Please login first.');
-      }
+      await api.delete(`/api/admin/users/${id}`);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      toast({
+        title: "Success",
+        description: "User deleted successfully"
       });
-
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: "User deleted successfully"
-        });
-        fetchUsers();
-      } else {
-        throw new Error('Failed to delete user');
-      }
+      fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
       toast({

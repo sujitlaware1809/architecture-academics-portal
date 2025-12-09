@@ -75,7 +75,8 @@ export default function BlogsPage() {
     try {
       setLoading(true)
       // Use the correct API endpoint
-      const response = await fetch('http://localhost:8000/api/blogs?limit=100')
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiBase}/api/blogs?limit=100`)
       if (!response.ok) throw new Error('Failed to fetch blogs')
       
       const data: Blog[] = await response.json()

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ export default function VerifyEmailPage() {
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
   const [message, setMessage] = useState("")
+  const verifyingRef = useRef(false)
 
   useEffect(() => {
     const token = searchParams.get("token")
@@ -20,6 +21,10 @@ export default function VerifyEmailPage() {
       setMessage("Invalid verification link. Token is missing.")
       return
     }
+
+    // Prevent double execution in React Strict Mode
+    if (verifyingRef.current) return
+    verifyingRef.current = true
 
     verifyEmail(token)
   }, [searchParams])

@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2, Plus, BookOpen, Users, Clock, Eye, Video, FileText, Upload, PlayCircle, Download } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { api } from '@/lib/api';
 
 interface CourseLesson {
   id: number;
@@ -120,24 +121,8 @@ export default function EnhancedAdminCoursesPage() {
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('http://localhost:8000/api/admin/courses', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setCourses(data);
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to fetch courses",
-          variant: "destructive"
-        });
-      }
+      const response = await api.get('/api/admin/courses');
+      setCourses(response.data);
     } catch (error) {
       console.error('Error fetching courses:', error);
       toast({
@@ -153,14 +138,8 @@ export default function EnhancedAdminCoursesPage() {
   // Fetch one course with full details (lessons, materials, totals)
   const fetchCourseDetail = async (courseId: number) => {
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(`http://localhost:8000/api/admin/courses/${courseId}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
-      if (!res.ok) {
-        throw new Error(`Failed to load course ${courseId} (${res.status})`);
-      }
-      const data: Course = await res.json();
+      const response = await api.get(`/api/admin/courses/${courseId}`);
+      const data: Course = response.data;
       // Update the selected course and also refresh the summary row in the table
       setSelectedCourse(data);
       setCourses(prev => prev.map(c => (c.id === data.id ? { ...c, ...data } : c)));
@@ -281,13 +260,6 @@ export default function EnhancedAdminCoursesPage() {
     e.preventDefault();
     
     try {
-      const token = localStorage.getItem('access_token');
-      const url = editingCourse 
-        ? `http://localhost:8000/api/admin/courses/${editingCourse.id}`
-        : 'http://localhost:8000/api/admin/courses';
-      
-      const method = editingCourse ? 'PUT' : 'POST';
-      
       // Only send fields that backend expects
       const courseData = {
         title: formData.title,
@@ -303,37 +275,25 @@ export default function EnhancedAdminCoursesPage() {
         ...(editingCourse && { status: formData.status }) // Only send status on update
       };
       
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(courseData)
-      });
-      
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: editingCourse ? "Course updated successfully" : "Course created successfully"
-        });
-        setIsDialogOpen(false);
-        setEditingCourse(null);
-        resetForm();
-        fetchCourses(); // Reload courses
+      if (editingCourse) {
+        await api.put(`/api/admin/courses/${editingCourse.id}`, courseData);
       } else {
-        const error = await response.json();
-        toast({
-          title: "Error",
-          description: error.detail || "Failed to save course",
-          variant: "destructive"
-        });
+        await api.post('/api/admin/courses', courseData);
       }
-    } catch (error) {
+      
+      toast({
+        title: "Success",
+        description: editingCourse ? "Course updated successfully" : "Course created successfully"
+      });
+      setIsDialogOpen(false);
+      setEditingCourse(null);
+      resetForm();
+      fetchCourses(); // Reload courses
+    } catch (error: any) {
       console.error('Error saving course:', error);
       toast({
         title: "Error",
-        description: "Network error. Please try again.",
+        description: error.response?.data?.detail || "Failed to save course",
         variant: "destructive"
       });
     }
@@ -346,7 +306,6 @@ export default function EnhancedAdminCoursesPage() {
 
     try {
       setUploadProgress(10);
-      const token = localStorage.getItem('access_token');
       const form = new FormData();
       form.append('title', lessonFormData.title);
       if (lessonFormData.description) form.append('description', lessonFormData.description);
@@ -356,16 +315,12 @@ export default function EnhancedAdminCoursesPage() {
       if (lessonFormData.transcript) form.append('transcript', lessonFormData.transcript);
       if (videoFile) form.append('video_file', videoFile);
 
-      const url = `http://localhost:8000/api/admin/courses/${selectedCourse.id}/lessons`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } as any : undefined,
-        body: form,
+      await api.post(`/api/admin/courses/${selectedCourse.id}/lessons`, form, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(`Lesson upload failed (${res.status}): ${msg}`);
-      }
+
       setUploadProgress(100);
       alert(editingLesson ? 'Lesson updated successfully' : 'Lesson created successfully');
       setIsLessonDialogOpen(false);
@@ -375,9 +330,9 @@ export default function EnhancedAdminCoursesPage() {
       // Refresh the detailed view so the new lesson appears immediately
       await fetchCourseDetail(selectedCourse.id);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving lesson:', error);
-      alert(`Failed to save lesson: ${error}`);
+      alert(`Failed to save lesson: ${error.response?.data?.detail || error.message}`);
     }
   };
 
@@ -388,7 +343,6 @@ export default function EnhancedAdminCoursesPage() {
 
     try {
       setUploadProgress(10);
-      const token = localStorage.getItem('access_token');
       const form = new FormData();
       form.append('title', materialFormData.title);
       if (materialFormData.description) form.append('description', materialFormData.description);
@@ -397,16 +351,12 @@ export default function EnhancedAdminCoursesPage() {
       form.append('is_downloadable', String(materialFormData.is_downloadable));
       if (materialFile) form.append('material_file', materialFile);
 
-      const url = `http://localhost:8000/api/admin/courses/${selectedCourse.id}/materials`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } as any : undefined,
-        body: form,
+      await api.post(`/api/admin/courses/${selectedCourse.id}/materials`, form, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(`Material upload failed (${res.status}): ${msg}`);
-      }
+
       setUploadProgress(100);
       alert(editingMaterial ? 'Material updated successfully' : 'Material added successfully');
       setIsMaterialDialogOpen(false);
@@ -416,9 +366,9 @@ export default function EnhancedAdminCoursesPage() {
       // Refresh the detailed view so the new material appears immediately
       await fetchCourseDetail(selectedCourse.id);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving material:', error);
-      alert(`Failed to save material: ${error}`);
+      alert(`Failed to save material: ${error.response?.data?.detail || error.message}`);
     }
   };
 

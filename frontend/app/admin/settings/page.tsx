@@ -89,42 +89,29 @@ export default function AdminSettingsPage() {
   // Fetch settings from backend
   const fetchSettings = async () => {
     try {
-      const token = api.getStoredToken();
-      if (!token) {
-        console.warn('No authentication token found');
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/settings`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.get('/api/admin/settings');
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Fetched settings from backend:', data);
-        // Merge fetched settings with default settings to ensure all properties exist
-        setSettings(prevSettings => ({
-          ...prevSettings,
-          ...data.settings,
-          // Ensure allowed_file_types is always an array
-          allowed_file_types: data.settings?.allowed_file_types || prevSettings.allowed_file_types
-        }));
-        setSystemInfo(data.system_info || systemInfo);
-      } else if (response.status === 401) {
+      const data = response.data;
+      console.log('Fetched settings from backend:', data);
+      // Merge fetched settings with default settings to ensure all properties exist
+      setSettings(prevSettings => ({
+        ...prevSettings,
+        ...data.settings,
+        // Ensure allowed_file_types is always an array
+        allowed_file_types: data.settings?.allowed_file_types || prevSettings.allowed_file_types
+      }));
+      setSystemInfo(data.system_info || systemInfo);
+      
+      // If backend is not available, use mock data (already set above)
+    } catch (error: any) {
+      console.error('Error fetching settings:', error);
+      if (error.response?.status === 401) {
         toast({
           title: "Authentication Required",
           description: "Please login as admin to access settings",
           variant: "destructive"
         });
       }
-      // If backend is not available, use mock data (already set above)
-    } catch (error) {
-      console.error('Error fetching settings:', error);
     } finally {
       setLoading(false);
     }
@@ -139,35 +126,17 @@ export default function AdminSettingsPage() {
     setSaving(true);
 
     try {
-      const token = api.getStoredToken();
-      if (!token) {
-        throw new Error('Authentication required. Please login as admin.');
-      }
+      await api.put('/api/admin/settings', settings);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/settings`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(settings),
+      toast({
+        title: "Success",
+        description: "Settings updated successfully"
       });
-
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: "Settings updated successfully"
-        });
-      } else if (response.status === 401) {
-        throw new Error('Authentication failed. Please login again.');
-      } else {
-        throw new Error('Failed to update settings');
-      }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating settings:', error);
       toast({
         title: "Error",
-        description: "Failed to update settings",
+        description: error.response?.data?.detail || "Failed to update settings",
         variant: "destructive"
       });
     } finally {
@@ -177,24 +146,18 @@ export default function AdminSettingsPage() {
 
   const handleBackupNow = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/backup`, {
-        method: 'POST',
-      });
+      await api.post('/api/admin/backup', {});
 
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: "Database backup initiated"
-        });
-        fetchSettings(); // Refresh system info
-      } else {
-        throw new Error('Failed to initiate backup');
-      }
-    } catch (error) {
+      toast({
+        title: "Success",
+        description: "Database backup initiated"
+      });
+      fetchSettings(); // Refresh system info
+    } catch (error: any) {
       console.error('Error initiating backup:', error);
       toast({
         title: "Error",
-        description: "Failed to initiate backup",
+        description: error.response?.data?.detail || "Failed to initiate backup",
         variant: "destructive"
       });
     }

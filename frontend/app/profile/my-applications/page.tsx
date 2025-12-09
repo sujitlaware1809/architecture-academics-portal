@@ -169,7 +169,8 @@ export default function MyApplicationsPage() {
     }
     
     // Otherwise, construct the URL with the backend base
-    return `http://localhost:8000${resumeUrl.startsWith('/') ? '' : '/'}${resumeUrl}`
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    return `${apiBase}${resumeUrl.startsWith('/') ? '' : '/'}${resumeUrl}`
   }
 
   if (loading) {

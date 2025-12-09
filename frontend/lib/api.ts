@@ -440,7 +440,10 @@ export const api = {
       }
 
       if (!response.ok) {
-        const error: any = new Error(data.detail || 'Request failed');
+        const errorMsg = typeof data.detail === 'object' 
+          ? JSON.stringify(data.detail) 
+          : (data.detail || 'Request failed');
+        const error: any = new Error(errorMsg);
         error.response = {
           status: response.status,
           data: data
@@ -490,7 +493,10 @@ export const api = {
       const data = await response.json();
 
       if (!response.ok) {
-        const error: any = new Error(data.detail || 'Request failed');
+        const errorMsg = typeof data.detail === 'object' 
+          ? JSON.stringify(data.detail) 
+          : (data.detail || 'Request failed');
+        const error: any = new Error(errorMsg);
         error.response = { status: response.status, data };
         throw error;
       }
@@ -526,7 +532,10 @@ export const api = {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Request failed');
+        const errorMsg = typeof data.detail === 'object' 
+          ? JSON.stringify(data.detail) 
+          : (data.detail || 'Request failed');
+        throw new Error(errorMsg);
       }
 
       return { data };
@@ -559,7 +568,10 @@ export const api = {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Request failed');
+        const errorMsg = typeof data.detail === 'object' 
+          ? JSON.stringify(data.detail) 
+          : (data.detail || 'Request failed');
+        throw new Error(errorMsg);
       }
 
       return { data };

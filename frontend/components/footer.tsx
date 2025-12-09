@@ -103,12 +103,18 @@ export default function Footer() {
               <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 IIA Portal
               </a>
-              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
+              <Link href="/competitions" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Competitions
-              </a>
-              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
+              </Link>
+              <Link href="/publications" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Publications
-              </a>
+              </Link>
+              <Link href="/surveys" className="block text-sm text-black hover:text-purple-600 transition-colors">
+                Surveys
+              </Link>
+              <Link href="/contextual-study" className="block text-sm text-black hover:text-purple-600 transition-colors">
+                Contextual Study
+              </Link>
             </div>
           </div>
 

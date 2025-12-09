@@ -188,7 +188,8 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
     } catch (error) {
       console.error('Error sending message:', error)
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        setMessageError("Cannot connect to server. Please make sure the backend is running on http://localhost:8000")
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        setMessageError(`Cannot connect to server. Please make sure the backend is running on ${apiBase}`)
       } else {
         setMessageError("Error sending message. Please check your connection and try again.")
       }

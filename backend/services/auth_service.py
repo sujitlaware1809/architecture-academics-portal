@@ -1,10 +1,58 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import Optional, List
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import crud
 import schemas
 from database import get_db, User
 from auth import create_access_token, verify_token, ACCESS_TOKEN_EXPIRE_MINUTES
+
+security = HTTPBearer()
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+) -> User:
+    """Get current authenticated user"""
+    token = credentials.credentials
+    email = verify_token(token)
+    
+    if email is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    user = crud.get_user_by_email(db, email=email)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return user
+
+async def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    """Get current user if authenticated, or None if not"""
+    if not credentials:
+        return None
+        
+    try:
+        token = credentials.credentials
+        email = verify_token(token)
+        if email is None:
+            return None
+            
+        user = crud.get_user_by_email(db, email=email)
+        return user
+    except:
+        return None
 
 class AuthService:
     """Service class for authentication-related business logic"""

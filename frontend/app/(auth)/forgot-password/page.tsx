@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ArrowLeft, Mail, Send } from 'lucide-react'
+import { ArrowLeft, Mail, Send, CheckCircle2 } from 'lucide-react'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -48,46 +48,50 @@ export default function ForgotPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900/30 to-slate-900 relative flex items-center justify-center">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,#3b82f6,transparent)]" />
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-slate-900/80" />
+      <div className="min-h-screen bg-white relative overflow-hidden flex items-center justify-center p-4">
+        {/* Subtle Background Pattern */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20"></div>
+          <div className="absolute top-20 right-20 w-64 h-64 bg-blue-100/30 rounded-full filter blur-3xl"></div>
+          <div className="absolute bottom-20 left-20 w-64 h-64 bg-indigo-100/30 rounded-full filter blur-3xl"></div>
+        </div>
 
-        <div className="relative z-10 w-full max-w-md mx-auto px-6">
-          <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl shadow-2xl p-8">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full mb-6 backdrop-blur-sm border border-white/10">
-                <Mail className="h-8 w-8 text-green-400" />
-              </div>
-              
-              <h1 className="text-3xl font-bold text-white mb-3 tracking-tight">
-                Check Your Email
-              </h1>
-              
-              <p className="text-gray-400 text-sm leading-relaxed mb-8">
-                We've sent password reset instructions to<br />
-                <strong className="text-white">{email}</strong>
+        <div className="relative z-10 w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6 border border-green-200">
+              <CheckCircle2 className="h-8 w-8 text-green-600" />
+            </div>
+            
+            <h1 className="text-2xl font-bold text-gray-900 mb-3">
+              Check Your Email
+            </h1>
+            
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+              <p className="text-gray-700 text-sm leading-relaxed">
+                ✅ Email sent successfully to <strong className="text-gray-900">{email}</strong>
               </p>
+              <p className="text-gray-600 text-sm mt-1">
+                Please check your inbox for password reset instructions.
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              <Button
+                onClick={() => router.push('/login')}
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300"
+              >
+                Back to Login
+              </Button>
               
-              <div className="space-y-4">
-                <Button
-                  onClick={() => router.push('/login')}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  Back to Login
-                </Button>
-                
-                <button
-                  onClick={() => {
-                    setIsSuccess(false)
-                    setEmail('')
-                  }}
-                  className="w-full text-gray-400 hover:text-white text-sm transition-all duration-200 py-2"
-                >
-                  Didn't receive the email? Try again
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  setIsSuccess(false)
+                  setEmail('')
+                }}
+                className="text-sm text-gray-500 hover:text-blue-600 transition-colors font-medium"
+              >
+                Didn't receive the email? Try again
+              </button>
             </div>
           </div>
         </div>
@@ -96,25 +100,27 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900/30 to-slate-900 relative flex items-center justify-center">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,#3b82f6,transparent)]" />
-      <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-slate-900/80" />
+    <div className="min-h-screen bg-white relative overflow-hidden flex items-center justify-center p-4">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/20"></div>
+        <div className="absolute top-20 right-20 w-64 h-64 bg-blue-100/30 rounded-full filter blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-64 h-64 bg-indigo-100/30 rounded-full filter blur-3xl"></div>
+      </div>
       
-      <div className="relative z-10 w-full max-w-md mx-auto px-6">
-        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl shadow-2xl p-8">
+      <div className="relative z-10 w-full max-w-md">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full mb-6 backdrop-blur-sm border border-white/10">
-              <Mail className="h-8 w-8 text-blue-400" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6 border border-blue-200">
+              <Mail className="h-8 w-8 text-blue-600" />
             </div>
             
-            <h1 className="text-3xl font-bold text-white mb-3 tracking-tight">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Reset Password
             </h1>
             
-            <p className="text-gray-400 text-sm leading-relaxed">
+            <p className="text-gray-600 text-sm">
               Enter your email address and we'll send you instructions to reset your password.
             </p>
           </div>
@@ -123,25 +129,26 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm backdrop-blur-sm">
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
                 {error}
               </div>
             )}
 
             {/* Email Input */}
-            <div className="space-y-3">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email Address
               </label>
-              <div className="relative">
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 group-focus-within:text-blue-600 transition-colors" />
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
+                  placeholder="your.email@example.com"
                   required
-                  className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
+                  className="pl-12 h-12 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl"
                 />
               </div>
             </div>
@@ -150,7 +157,7 @@ export default function ForgotPasswordPage() {
             <Button
               type="submit"
               disabled={isLoading || !email}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl group"
+              className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
@@ -159,7 +166,7 @@ export default function ForgotPasswordPage() {
                 </div>
               ) : (
                 <div className="flex items-center justify-center">
-                  <Send className="mr-3 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <Send className="mr-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   <span>Send Reset Instructions</span>
                 </div>
               )}
@@ -170,7 +177,7 @@ export default function ForgotPasswordPage() {
           <div className="mt-8 text-center">
             <Link 
               href="/login" 
-              className="inline-flex items-center text-sm text-gray-400 hover:text-white transition-all duration-200 group"
+              className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors group"
             >
               <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
               <span>Back to Login</span>

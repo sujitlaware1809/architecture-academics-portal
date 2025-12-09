@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, KeyboardEvent } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -39,12 +39,14 @@ import { Button } from "@/components/ui/button"
 export default function Header() {
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState<typeof searchContent>([])
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [notifications, setNotifications] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState<number>(0)
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState<number>(0)
   const [showNotifications, setShowNotifications] = useState<boolean>(false)
 
   useEffect(() => {
@@ -85,7 +87,7 @@ export default function Header() {
         if (res.ok) {
           const data = await res.json()
           setNotifications(data)
-          setUnreadCount(data.filter((n: any) => !n.read).length)
+          setUnreadCount(data.filter((n: any) => n.is_read === false || n.read === false).length)
           return
         }
       } catch (err) {
@@ -102,6 +104,31 @@ export default function Header() {
     }
 
     fetchNotifications()
+  }, [isAuthenticated])
+
+  // Fetch unread messages count
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      if (!isAuthenticated) return
+      try {
+        const token = localStorage.getItem("access_token")
+        if (!token) return
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/messages/unread-count`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setUnreadMessagesCount(data.count)
+        }
+      } catch (err) {
+        console.error("Failed to fetch unread messages count", err)
+      }
+    }
+
+    fetchUnreadMessages()
+    // Poll every minute
+    const interval = setInterval(fetchUnreadMessages, 60000)
+    return () => clearInterval(interval)
   }, [isAuthenticated])
 
   const userMenuItems = isAuthenticated ? [
@@ -127,20 +154,46 @@ export default function Header() {
     { title: "Learn", href: "/learn", description: "Start learning" },
   ]
 
-  const handleSearch = (query: string) => {
+  const handleSearch = async (query: string) => {
     setSearchQuery(query)
-    if (query.trim()) {
-      const filtered = searchContent.filter((item) => 
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.description.toLowerCase().includes(query.toLowerCase())
-      )
-      setSearchResults(filtered.slice(0, 6))
+    if (query.trim().length > 1) {
+      setIsSearching(true)
+      try {
+        // Use the API to search
+        const res = await api.get(`/api/search?q=${encodeURIComponent(query)}`)
+        if (res.data) {
+           setSearchResults(res.data.map((item: any) => ({
+             title: item.title,
+             description: item.description,
+             href: item.url,
+             type: item.type,
+             image: item.image
+           })))
+        }
+      } catch (err) {
+        console.error("Search failed", err)
+        // Fallback to static search if API fails
+        const filtered = searchContent.filter((item) => 
+          item.title.toLowerCase().includes(query.toLowerCase()) ||
+          item.description.toLowerCase().includes(query.toLowerCase())
+        )
+        setSearchResults(filtered)
+      } finally {
+        setIsSearching(false)
+      }
     } else {
       setSearchResults([])
     }
   }
 
-  const handleSearchSelect = (item: typeof searchContent[0]) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      setSearchResults([])
+      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`
+    }
+  }
+
+  const handleSearchSelect = (item: any) => {
     setSearchQuery("")
     setSearchResults([])
     window.location.href = item.href
@@ -157,7 +210,7 @@ export default function Header() {
   return (
     <div className="sticky top-0 z-50 flex flex-col transition-all duration-300">
       {/* Main Navigation Header with Integrated Search */}
-      <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 shadow-lg">
+      <header className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -235,19 +288,26 @@ export default function Header() {
                     className="pl-8 pr-3 w-56 h-7 text-xs bg-white/15 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/20 focus:border-white/50 focus:ring-0 focus:outline-none rounded-md"
                     value={searchQuery}
                     onChange={(e) => handleSearch(e.target.value)}
+                    onKeyDown={handleKeyDown}
                   />
                 </div>
-                {searchResults.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 overflow-hidden">
+                {(searchResults.length > 0 || isSearching) && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 overflow-hidden max-h-96 overflow-y-auto">
+                    {isSearching && searchResults.length === 0 && (
+                      <div className="px-4 py-3 text-sm text-gray-500 text-center">Searching...</div>
+                    )}
                     {searchResults.map((result, index) => (
                       <div
                         key={index}
                         className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm text-gray-800 border-b border-gray-100 last:border-b-0 transition-colors duration-200 flex items-center justify-between group"
                         onClick={() => handleSearchSelect(result)}
                       >
-                        <div className="flex flex-col">
-                          <span className="font-medium text-gray-900">{result.title}</span>
-                          <span className="text-xs text-gray-500">{result.description}</span>
+                        <div className="flex flex-col w-full">
+                          <div className="flex items-center justify-between">
+                             <span className="font-medium text-gray-900 truncate pr-2">{result.title}</span>
+                             {result.type && <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-full whitespace-nowrap">{result.type}</span>}
+                          </div>
+                          <span className="text-xs text-gray-500 line-clamp-1">{result.description}</span>
                         </div>
                         <ArrowRight className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                       </div>
@@ -317,11 +377,14 @@ export default function Header() {
                                 </div>
                                 <div className="text-xs text-gray-500 mt-1">{n.message}</div>
                               </div>
-                              {!n.read && <span className="text-xs text-blue-600 self-start">•</span>}
+                              {(!n.read && !n.is_read) && <span className="text-xs text-blue-600 self-start">•</span>}
                             </div>
                           ))}
                         </div>
-                        <div className="px-3 py-2 border-t text-xs text-gray-500">Notifications are delivered here. Click a notification to open related content.</div>
+                        <div className="px-3 py-2 border-t text-xs text-gray-500 flex justify-between items-center">
+                          <span>Notifications are delivered here.</span>
+                          <Link href="/notifications" className="text-blue-600 hover:underline font-medium">View all</Link>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -337,16 +400,32 @@ export default function Header() {
                   <Link href="/messages">
                     <button className="p-2 rounded-md text-white hover:bg-white/10 transition-colors relative" title="Messages">
                       <Mail className="h-4 w-4" />
+                      {unreadMessagesCount > 0 && (
+                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-black"></span>
+                      )}
                     </button>
                   </Link>
 
                   {/* User info display */}
                   <Link href="/profile">
                     <div className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
-                      {user && user.avatar ? (
-                        <Image src={user.avatar} alt={user.name || 'avatar'} width={40} height={40} className="rounded-full border-2 border-white/40" />
+                      {user && (user.avatar || user.profile_image_url) ? (
+                        <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-white/40 relative">
+                          <img 
+                            src={user.avatar || (user.profile_image_url?.startsWith('http') ? user.profile_image_url : `${process.env.NEXT_PUBLIC_API_URL}${user.profile_image_url}`)} 
+                            alt={user.name || 'avatar'} 
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.parentElement?.classList.add('hidden');
+                              // Fallback to showing the initial if image fails
+                              const fallback = document.getElementById('user-initial-fallback');
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                        </div>
                       ) : (
-                        <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-sm text-white border-2 border-white/40 font-bold flex-shrink-0">
+                        <div id="user-initial-fallback" className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-sm text-white border-2 border-white/40 font-bold flex-shrink-0">
                           {user && user.first_name ? user.first_name.charAt(0).toUpperCase() : (user && user.name ? user.name.charAt(0).toUpperCase() : <User className="h-4 w-4 text-white" />)}
                         </div>
                       )}
