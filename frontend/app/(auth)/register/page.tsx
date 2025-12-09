@@ -66,13 +66,17 @@ export default function RegisterPage() {
     // Auto-detect country code based on IP
     const fetchCountryCode = async () => {
       try {
-        const response = await fetch('https://ipapi.co/json/');
+        const response = await fetch('https://ipapi.co/json/', {
+          signal: AbortSignal.timeout(5000) // 5 second timeout
+        });
         const data = await response.json();
         if (data.country_calling_code) {
           setFormData(prev => ({ ...prev, countryCode: data.country_calling_code }));
         }
       } catch (error) {
         console.error("Error fetching location:", error);
+        // Set default country code to India if fetch fails
+        setFormData(prev => ({ ...prev, countryCode: '+91' }));
       }
     };
     fetchCountryCode();
