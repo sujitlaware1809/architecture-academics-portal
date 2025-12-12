@@ -33,8 +33,8 @@ interface NATACourse {
   moodleUrl?: string
   thumbnail: string
   category: 'Drawing' | 'Mathematics' | 'General Aptitude' | 'Full Course'
-  skills: string[]
-  features: string[]
+  skills: string[] | string
+  features: string[] | string
   syllabus?: {
     module: string
     topics: string[]
@@ -272,7 +272,27 @@ export default function NATACoursesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCourses.map((course) => (
+            {filteredCourses.map((course) => {
+              // Safely parse skills if it's a JSON string
+              let skillsArray: string[] = [];
+              const skills = course.skills;
+              
+              try {
+                if (typeof skills === 'string') {
+                  try {
+                    skillsArray = JSON.parse(skills);
+                  } catch {
+                    // If JSON parse fails, try comma-separated string
+                    skillsArray = skills.split(',').map((s: string) => s.trim());
+                  }
+                } else if (Array.isArray(skills)) {
+                  skillsArray = skills;
+                }
+              } catch (e) {
+                skillsArray = [];
+              }
+              
+              return (
               <article key={course.id} className="group cursor-pointer h-full">
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 h-full flex flex-col">
                   {/* Course Image */}
@@ -331,14 +351,14 @@ export default function NATACoursesPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {course.skills.slice(0, 3).map((skill, index) => (
+                      {skillsArray.slice(0, 3).map((skill: string, index: number) => (
                         <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200">
                           {skill}
                         </Badge>
                       ))}
-                      {course.skills.length > 3 && (
+                      {skillsArray.length > 3 && (
                         <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200">
-                          +{course.skills.length - 3} more
+                          +{skillsArray.length - 3} more
                         </Badge>
                       )}
                     </div>
@@ -355,7 +375,8 @@ export default function NATACoursesPage() {
                   </div>
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

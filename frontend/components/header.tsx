@@ -31,7 +31,8 @@ import {
   Facebook,
   Linkedin,
   Twitter,
-  Instagram
+  Instagram,
+  MessageSquare
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -79,15 +80,14 @@ export default function Header() {
     const fetchNotifications = async () => {
       if (!isAuthenticated) return
       try {
-        const token = localStorage.getItem("access_token")
-        if (!token) return
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications?limit=6`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        if (res.ok) {
-          const data = await res.json()
-          setNotifications(data)
-          setUnreadCount(data.filter((n: any) => n.is_read === false || n.read === false).length)
+        // allow401 so we don't throw on unauthenticated clients
+        const response = await api.get('/notifications/?limit=6', { allow401: true })
+        // api.get returns { error, status, data } when allow401 is used and 401 occurs
+        if (response && response.status === 401) {
+          // not authenticated server-side; fallback to sample notifications
+        } else if (response && response.data) {
+          setNotifications(response.data)
+          setUnreadCount(response.data.filter((n: any) => n.is_read === false || n.read === false).length)
           return
         }
       } catch (err) {
@@ -111,14 +111,11 @@ export default function Header() {
     const fetchUnreadMessages = async () => {
       if (!isAuthenticated) return
       try {
-        const token = localStorage.getItem("access_token")
-        if (!token) return
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/messages/unread-count`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        if (res.ok) {
-          const data = await res.json()
-          setUnreadMessagesCount(data.count)
+        const response = await api.get('/messages/unread-count', { allow401: true })
+        if (response && response.status === 401) {
+          // ignore - user not authenticated
+        } else if (response && response.data) {
+          setUnreadMessagesCount(response.data.count)
         }
       } catch (err) {
         console.error("Failed to fetch unread messages count", err)
@@ -131,9 +128,48 @@ export default function Header() {
     return () => clearInterval(interval)
   }, [isAuthenticated])
 
+  const getDashboardLink = () => {
+    if (!user) return "/dashboard"
+    
+    let role = user.role
+    if (typeof role === 'object' && role !== null && 'value' in role) {
+      role = role.value
+    }
+    
+    let userType = user.user_type
+    if (typeof userType === 'object' && userType !== null && 'value' in userType) {
+      userType = userType.value
+    }
+
+    if (role === 'RECRUITER') return '/recruiter-dashboard'
+    if (role === 'ADMIN') return '/admin'
+    
+    if (userType === 'FACULTY') return '/faculty-dashboard'
+    if (userType === 'NATA_STUDENT') return '/nata-dashboard'
+    
+    return '/dashboard'
+  }
+
+  const isNataStudent = () => {
+    if (!user) return false
+    let userType = user.user_type
+    if (typeof userType === 'object' && userType !== null && 'value' in userType) {
+      userType = userType.value
+    }
+    return userType === 'NATA_STUDENT'
+  }
+
+  const isFacultyOrArchitect = () => {
+    if (!user) return false
+    let userType = user.user_type
+    if (typeof userType === 'object' && userType !== null && 'value' in userType) {
+      userType = userType.value
+    }
+    return userType === 'FACULTY' || userType === 'ARCHITECT'
+  }
+
   const userMenuItems = isAuthenticated ? [
-    ...(user && user.role === 'ADMIN' ? [{ name: "Admin", href: "/admin", icon: LayoutDashboard }] : []),
-    ...(user && user.role === 'RECRUITER' ? [{ name: "Dashboard", href: "/recruiter-dashboard", icon: LayoutDashboard }] : []),
+    { name: "Dashboard", href: getDashboardLink(), icon: LayoutDashboard },
   ] : [
     { name: "Login", href: "/login", icon: User },
     { name: "Register", href: "/register", icon: User },
@@ -141,15 +177,14 @@ export default function Header() {
 
   const searchContent = [
     { title: "Courses", href: "/courses", description: "Browse architecture courses" },
-    { title: "NATA Courses", href: "/nata-courses", description: "Prepare for NATA exams" },
+    { title: "Events", href: "/events", description: "Upcoming architecture events" },
+    { title: "Discussions", href: "/discussions", description: "Join community discussions" },
     { title: "Jobs Portal", href: "/jobs-portal", description: "Find architecture jobs" },
     { title: "Blogs", href: "/blogs", description: "Read architecture blogs" },
-    { title: "Events", href: "/events", description: "Upcoming architecture events" },
     { title: "Workshops", href: "/workshops", description: "Join architecture workshops" },
     { title: "Contact Us", href: "/contact-us", description: "Get in touch with us" },
     { title: "Advertise with Us", href: "/advertise-with-us", description: "Promote your services" },
-    { title: "Dashboard", href: "/dashboard", description: "Your personal dashboard" },
-    { title: "Discussions", href: "/discussions", description: "Join community discussions" },
+    { title: "Dashboard", href: getDashboardLink(), description: "Your personal dashboard" },
     { title: "Video Demo", href: "/video-demo", description: "Watch course previews" },
     { title: "Learn", href: "/learn", description: "Start learning" },
   ]
@@ -231,14 +266,22 @@ export default function Header() {
               
               {isAuthenticated ? (
                 <>
-                  <Link href="/courses" className="px-3 py-2 text-sm font-medium text-white hover:text-white/80 hover:bg-white/10 rounded-md transition-all duration-200 flex items-center gap-1">
-                    <BookOpen className="h-4 w-4" />
-                    Courses
+                  {!isFacultyOrArchitect() && (
+                    <Link href="/courses" className="px-3 py-2 text-sm font-medium text-white hover:text-white/80 hover:bg-white/10 rounded-md transition-all duration-200 flex items-center gap-1">
+                      <BookOpen className="h-4 w-4" />
+                      Courses
+                    </Link>
+                  )}
+                  <Link href="/events" className="px-3 py-2 text-sm font-medium text-white hover:text-cyan-200 hover:bg-cyan-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    Events
                   </Link>
-                  <Link href="/nata-courses" className="px-3 py-2 text-sm font-medium text-white hover:text-yellow-200 hover:bg-yellow-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
-                    <GraduationCap className="h-4 w-4" />
-                    NATA
-                  </Link>
+                  {isFacultyOrArchitect() && (
+                    <Link href="/discussions" className="px-3 py-2 text-sm font-medium text-white hover:text-pink-200 hover:bg-pink-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
+                      <MessageSquare className="h-4 w-4" />
+                      Discussions
+                    </Link>
+                  )}
                   <Link href="/jobs-portal" className="px-3 py-2 text-sm font-medium text-white hover:text-green-200 hover:bg-green-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
                     <Briefcase className="h-4 w-4" />
                     Jobs
@@ -390,7 +433,7 @@ export default function Header() {
                   </div>
 
                   {/* Dashboard quick link next to notifications */}
-                  <Link href="/dashboard">
+                  <Link href={getDashboardLink()}>
                     <button className="px-2 py-1.5 rounded-md text-white hover:bg-white/10 transition-colors flex items-center gap-1" title="Dashboard">
                       <LayoutDashboard className="h-4 w-4" />
                       <span className="text-sm font-medium hidden xl:inline">Dashboard</span>
@@ -522,22 +565,34 @@ export default function Header() {
                   
                   {isAuthenticated ? (
                     <>
+                      {!isFacultyOrArchitect() && (
+                        <Link
+                          href="/courses"
+                          className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <BookOpen className="h-4 w-4" />
+                          Courses
+                        </Link>
+                      )}
                       <Link
-                        href="/courses"
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                        href="/events"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-cyan-600 hover:bg-cyan-50 transition-colors duration-200"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <BookOpen className="h-4 w-4" />
-                        Courses
+                        <Calendar className="h-4 w-4" />
+                        Events
                       </Link>
-                      <Link
-                        href="/nata-courses"
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-orange-600 hover:bg-orange-50 transition-colors duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <GraduationCap className="h-4 w-4" />
-                        NATA
-                      </Link>
+                      {isFacultyOrArchitect() && (
+                        <Link
+                          href="/discussions"
+                          className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors duration-200"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          Discussions
+                        </Link>
+                      )}
                       <Link
                         href="/jobs-portal"
                         className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-green-600 hover:bg-green-50 transition-colors duration-200"

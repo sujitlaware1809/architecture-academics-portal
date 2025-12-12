@@ -76,7 +76,8 @@ async def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
         )
     
     # Check if user already exists
-    db_user = crud.get_user_by_email(db, email=user.email)
+    # Normalize email for check
+    db_user = crud.get_user_by_email(db, email=user.email.lower().strip())
     if db_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -97,7 +98,8 @@ async def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_d
     """Login user"""
     
     # Authenticate user
-    user = crud.authenticate_user(db, user_credentials.email, user_credentials.password)
+    # Normalize email for login
+    user = crud.authenticate_user(db, user_credentials.email.lower().strip(), user_credentials.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

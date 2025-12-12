@@ -65,6 +65,36 @@ async def get_jobs(
     )
     return jobs
 
+@router.get("/my/posted", response_model=List[schemas.JobResponse])
+async def get_my_posted_jobs(
+    skip: int = Query(0),
+    limit: int = Query(50),
+    current_user: User = Depends(get_current_recruiter),
+    db: Session = Depends(get_db)
+):
+    """Get jobs posted by current recruiter"""
+    return crud.get_recruiter_jobs(db, current_user.id, skip, limit)
+
+@router.get("/my", response_model=List[schemas.JobResponse])
+async def get_recruiter_jobs(
+    skip: int = Query(0),
+    limit: int = Query(50),
+    current_user: User = Depends(get_current_recruiter),
+    db: Session = Depends(get_db)
+):
+    """Get jobs posted by current recruiter (alternative endpoint)"""
+    return crud.get_recruiter_jobs(db, current_user.id, skip, limit)
+
+@router.get("/saved/my", response_model=List[schemas.SavedJobResponse])
+async def get_saved_jobs(
+    skip: int = Query(0),
+    limit: int = Query(50),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get current user's saved jobs"""
+    return crud.get_user_saved_jobs(db, current_user.id, skip, limit)
+
 @router.get("/{job_id}", response_model=schemas.JobResponse)
 async def get_job(job_id: int, db: Session = Depends(get_db)):
     """Get a specific job by ID"""
@@ -85,26 +115,6 @@ async def create_job(
     """Create a new job posting (recruiters only)"""
     print(f"Creating job for user: {current_user.email} (ID: {current_user.id})")
     return crud.create_job(db=db, job=job, recruiter_id=current_user.id)
-
-@router.get("/my/posted", response_model=List[schemas.JobResponse])
-async def get_my_posted_jobs(
-    skip: int = Query(0),
-    limit: int = Query(50),
-    current_user: User = Depends(get_current_recruiter),
-    db: Session = Depends(get_db)
-):
-    """Get jobs posted by current recruiter"""
-    return crud.get_recruiter_jobs(db, current_user.id, skip, limit)
-
-@router.get("/my", response_model=List[schemas.JobResponse])
-async def get_recruiter_jobs(
-    skip: int = Query(0),
-    limit: int = Query(50),
-    current_user: User = Depends(get_current_recruiter),
-    db: Session = Depends(get_db)
-):
-    """Get jobs posted by current recruiter (alternative endpoint)"""
-    return crud.get_recruiter_jobs(db, current_user.id, skip, limit)
 
 @router.put("/{job_id}", response_model=schemas.JobResponse)
 async def update_job(
@@ -293,13 +303,3 @@ async def unsave_job(
             detail="Saved job not found"
         )
     return {"message": "Job removed from saved jobs"}
-
-@router.get("/saved/my", response_model=List[schemas.SavedJobResponse])
-async def get_saved_jobs(
-    skip: int = Query(0),
-    limit: int = Query(50),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Get current user's saved jobs"""
-    return crud.get_user_saved_jobs(db, current_user.id, skip, limit)

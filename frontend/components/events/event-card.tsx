@@ -5,7 +5,7 @@ import { Calendar, Clock, MapPin, User } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { LoginRequiredButton } from "@/components/login-required"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { api } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
 
@@ -50,6 +50,24 @@ export function EventCard({ event, onViewDetails }: EventCardProps) {
   const [isRegistered, setIsRegistered] = useState(false)
   const { toast } = useToast()
 
+  useEffect(() => {
+    checkRegistrationStatus()
+  }, [event.id])
+
+  const checkRegistrationStatus = async () => {
+    try {
+      const token = localStorage.getItem('access_token')
+      if (!token) return
+      
+      const response = await api.get(`/events/${event.id}/check-registration`)
+      if (response.data?.is_registered) {
+        setIsRegistered(true)
+      }
+    } catch (error) {
+      // User might not be registered or there's an error, but we'll allow them to try
+    }
+  }
+
   const eventDate = new Date(event.date)
   const month = eventDate.toLocaleString('default', { month: 'short' })
   const day = eventDate.getDate()
@@ -92,10 +110,16 @@ export function EventCard({ event, onViewDetails }: EventCardProps) {
       })
       setIsRegistered(true)
     } catch (err: any) {
+      const errorDetail = err.response?.data?.detail || err.message || ""
       console.error('Registration error:', err)
       
+      // Check if it's a "already registered" error - silently update state without showing error
+      if (errorDetail.toLowerCase().includes('already registered')) {
+        setIsRegistered(true)
+        // Don't show error toast for already registered - just update the button silently
+      }
       // Check if it's an authentication error
-      if (err.message?.includes('authentication') || err.message?.includes('credentials') || err.response?.status === 401) {
+      else if (err.message?.includes('authentication') || err.message?.includes('credentials') || err.response?.status === 401) {
         toast({
           title: "Session Expired",
           description: "Please login again to register for this event",
@@ -110,7 +134,7 @@ export function EventCard({ event, onViewDetails }: EventCardProps) {
       } else {
         toast({
           title: "Registration Failed",
-          description: err.response?.data?.detail || err.message || "Failed to register for event",
+          description: errorDetail || "Failed to register for event",
           variant: "destructive"
         })
       }

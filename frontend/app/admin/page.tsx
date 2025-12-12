@@ -56,7 +56,17 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (!user || user.role !== 'ADMIN') {
+    // Handle role as string or object
+    let userRole = "";
+    if (user) {
+      if (typeof user.role === "string") {
+        userRole = user.role;
+      } else if (typeof user.role === "object" && user.role !== null && "value" in user.role) {
+        userRole = user.role.value;
+      }
+    }
+
+    if (!user || userRole !== 'ADMIN') {
       setError("Admin access required. Please login with admin credentials.");
       setLoading(false);
       return;
@@ -173,7 +183,7 @@ export default function AdminDashboard() {
                 <p className="text-blue-700 text-sm mb-3">Please log in with admin credentials to access the dashboard:</p>
                 <div className="bg-white border border-blue-200 rounded p-3 text-sm">
                   <div className="font-mono">
-                    <div><strong>Email:</strong> admin@architectureacademics.com</div>
+                    <div><strong>Email:</strong> admin@architecture-academics.online</div>
                     <div><strong>Password:</strong> Admin@123</div>
                   </div>
                 </div>

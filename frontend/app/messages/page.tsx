@@ -33,6 +33,13 @@ export default function MessagesPage() {
   const [user, setUser] = useState<any>(null)
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
   
+  const getUserRole = (u: any) => {
+    if (!u) return "";
+    if (typeof u.role === "string") return u.role;
+    if (typeof u.role === "object" && u.role !== null && "value" in u.role) return u.role.value;
+    return "";
+  }
+  
   // Compose state
   const [isComposeOpen, setIsComposeOpen] = useState(false)
   const [recipientEmail, setRecipientEmail] = useState("")
@@ -149,7 +156,7 @@ export default function MessagesPage() {
             <p className="text-gray-600 mt-1">Manage your communications</p>
           </div>
           
-          {user && (user.role === "ADMIN" || user.role === "RECRUITER") && (
+          {user && (getUserRole(user) === "ADMIN" || getUserRole(user) === "RECRUITER") && (
             <Dialog open={isComposeOpen} onOpenChange={setIsComposeOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white">

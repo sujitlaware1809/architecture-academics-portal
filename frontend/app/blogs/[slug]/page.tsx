@@ -110,8 +110,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     const fetchBlog = async () => {
       try {
         setLoading(true)
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-        const response = await fetch(`${apiBase}/api/blogs/slug/${slug}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs/slug/${slug}`)
         
         if (!response.ok) {
           throw new Error('Blog post not found')

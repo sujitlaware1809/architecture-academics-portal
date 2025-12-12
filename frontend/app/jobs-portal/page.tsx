@@ -230,7 +230,7 @@ export default function JobsPortal() {
     if (!applyJobId) return
     setApplying(applyJobId)
     try {
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const base = process.env.NEXT_PUBLIC_API_URL
       const token = api.getStoredToken()
       if (!token) throw new Error('Login required')
       let ok = false

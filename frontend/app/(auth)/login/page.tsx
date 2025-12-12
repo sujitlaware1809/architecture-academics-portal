@@ -53,7 +53,8 @@ export default function LoginPage() {
     setError("")
     
     try {
-      const result = await api.login({ email, password })
+      // Trim email before sending
+      const result = await api.login({ email: email.trim(), password })
       
       console.log('Login result:', result) // Debug log
       

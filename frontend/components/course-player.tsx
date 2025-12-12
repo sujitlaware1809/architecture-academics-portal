@@ -25,7 +25,7 @@ export default function CoursePlayer({ lessonId, lessonTitle, videoStreamUrl, en
       form.append('current_time', String(Math.floor(currentTime)))
       form.append('completed', String(completed))
 
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/progress`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/progress`, {
         method: 'POST',
         headers: token ? { 'Authorization': `Bearer ${token}` } : undefined,
         body: form,

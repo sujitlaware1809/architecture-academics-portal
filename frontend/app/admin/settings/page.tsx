@@ -51,7 +51,7 @@ export default function AdminSettingsPage() {
     site_name: 'Architecture Academics',
     site_description: 'Platform for architecture education and career development',
     site_url: 'https://architectureacademics.com',
-    admin_email: 'admin@architectureacademics.com',
+    admin_email: 'admin@architecture-academics.online',
     contact_email: 'contact@architectureacademics.com',
     support_email: 'support@architectureacademics.com',
     enable_registrations: true,

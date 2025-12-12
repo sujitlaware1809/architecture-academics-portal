@@ -8,6 +8,7 @@ interface Props {
   color?: string;
   labels?: string[];
   dataLabel?: string;
+  compact?: boolean;
 }
 
 export default function LineChartSimple({ 
@@ -15,7 +16,8 @@ export default function LineChartSimple({
   height = 200, 
   color = '#10b981',
   labels,
-  dataLabel = 'Progress Score'
+  dataLabel = 'Progress Score',
+  compact = false
 }: Props) {
   if (!data || data.length === 0) {
     return (
@@ -68,16 +70,18 @@ export default function LineChartSimple({
           />
         </LineChart>
       </ResponsiveContainer>
-      <div className="mt-3 space-y-1">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-500">Peak: <span className="font-semibold text-gray-700">{maxValue}</span></span>
-          <span className="text-gray-500">Lowest: <span className="font-semibold text-gray-700">{minValue}</span></span>
-          <span className={`font-semibold ${Number(improvement) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {Number(improvement) >= 0 ? '+' : ''}{improvement}% change
-          </span>
+      {!compact && (
+        <div className="mt-3 space-y-1">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-gray-500">Peak: <span className="font-semibold text-gray-700">{maxValue}</span></span>
+            <span className="text-gray-500">Lowest: <span className="font-semibold text-gray-700">{minValue}</span></span>
+            <span className={`font-semibold ${Number(improvement) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {Number(improvement) >= 0 ? '+' : ''}{improvement}% change
+            </span>
+          </div>
+          <p className="text-xs text-gray-500">Tip: Consistent daily learning leads to better outcomes</p>
         </div>
-        <p className="text-xs text-gray-500">Tip: Consistent daily learning leads to better outcomes</p>
-      </div>
+      )}
     </div>
   )
 }

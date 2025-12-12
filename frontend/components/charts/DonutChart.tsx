@@ -8,6 +8,7 @@ interface Props {
   height?: number; 
   colors?: [string, string];
   label?: string;
+  compact?: boolean;
 }
 
 export default function DonutChart({ 
@@ -15,13 +16,21 @@ export default function DonutChart({
   total, 
   height = 200, 
   colors = ['#10b981', '#e5e7eb'],
-  label = 'Completion Rate'
+  label = 'Completion Rate',
+  compact = false
 }: Props) {
   const completed = Math.max(0, Math.min(total, value))
   const remaining = Math.max(0, total - completed)
   const percent = total === 0 ? 0 : Math.round((completed / total) * 100)
 
   if (total === 0) {
+    if (compact) {
+      return (
+        <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
+          <div className="text-center">0%</div>
+        </div>
+      )
+    }
     return (
       <div className="flex flex-col items-center justify-center h-40 text-gray-400 text-sm">
         <p>Enroll in courses to track your progress</p>
@@ -80,23 +89,24 @@ export default function DonutChart({
           <div className="text-3xl font-bold" style={{ color: colors[0] }}>
             {percent}%
           </div>
-          <div className="text-xs text-gray-500 mt-1">{label}</div>
+          {!compact && <div className="text-xs text-gray-500 mt-1">{label}</div>}
         </div>
       </div>
-      
-      <div className="mt-4 space-y-2">
-        <div className="flex items-center justify-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[0] }}></div>
-            <span className="text-gray-600">Completed: <span className="font-semibold">{completed}</span></span>
+      {!compact && (
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[0] }}></div>
+              <span className="text-gray-600">Completed: <span className="font-semibold">{completed}</span></span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[1] }}></div>
+              <span className="text-gray-600">Remaining: <span className="font-semibold">{remaining}</span></span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[1] }}></div>
-            <span className="text-gray-600">Remaining: <span className="font-semibold">{remaining}</span></span>
-          </div>
+          <p className="text-xs text-center text-gray-600 font-medium">{getMessage()}</p>
         </div>
-        <p className="text-xs text-center text-gray-600 font-medium">{getMessage()}</p>
-      </div>
+      )}
     </div>
   )
 }

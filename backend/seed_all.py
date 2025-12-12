@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base, User, Course, CourseLesson, Blog, Event, Workshop, Discussion, NATACourse, Job
 import schemas
 from passlib.context import CryptContext
+from seed_jobs import get_sample_jobs
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -260,7 +261,7 @@ def seed_all():
             logger.info("Admin user already exists.")
 
         # 1.1 Seed Recruiter User
-        recruiter_email = "recruiter@example.com"
+        recruiter_email = "recruiter@architecture-academics.online"
         recruiter_user = db.query(User).filter(User.email == recruiter_email).first()
         if not recruiter_user:
             logger.info("Creating recruiter user...")
@@ -381,6 +382,39 @@ def seed_all():
                 logger.info(f"Added discussion: {discussion.title}")
             else:
                 logger.info(f"Discussion already exists: {discussion_data['title']}")
+        db.commit()
+
+        # 8. Seed Jobs
+        logger.info("Seeding jobs...")
+        jobs_data = get_sample_jobs()
+        for job_data in jobs_data:
+            existing_job = db.query(Job).filter(Job.title == job_data.title, Job.company == job_data.company).first()
+            if not existing_job:
+                job = Job(
+                    title=job_data.title,
+                    company=job_data.company,
+                    location=job_data.location,
+                    work_mode=job_data.work_mode.value,
+                    job_type=job_data.job_type.value,
+                    experience_level=job_data.experience_level.value,
+                    salary_min=job_data.salary_min,
+                    salary_max=job_data.salary_max,
+                    currency=job_data.currency,
+                    description=job_data.description,
+                    requirements=job_data.requirements,
+                    benefits=job_data.benefits,
+                    tags=job_data.tags,
+                    application_deadline=job_data.application_deadline,
+                    contact_email=job_data.contact_email,
+                    company_website=job_data.company_website,
+                    company_description=job_data.company_description,
+                    recruiter_id=recruiter_user.id,
+                    status=schemas.JobStatus.PUBLISHED
+                )
+                db.add(job)
+                logger.info(f"Added job: {job.title} at {job.company}")
+            else:
+                logger.info(f"Job already exists: {job_data.title} at {job_data.company}")
         db.commit()
 
         logger.info("Seeding completed successfully!")

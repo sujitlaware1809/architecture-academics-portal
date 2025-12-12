@@ -56,7 +56,7 @@ const features = [
     textColor: "text-orange-900",
     waveColor: "#FF7043", // Deep Orange
     href: "/mentorship",
-    image: "https://images.unsplash.com/photo-1515168816144-1064ba8b557b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&auto=format&fit=crop&q=60"
   },
   {
     title: "Resources",

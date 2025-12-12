@@ -44,6 +44,7 @@ class JobStatus(str, Enum):
 class ApplicationStatus(str, Enum):
     PENDING = "pending"
     REVIEWING = "reviewing"
+    UNDER_REVIEW = "under_review"
     SHORTLISTED = "shortlisted"
     REJECTED = "rejected"
     ACCEPTED = "accepted"

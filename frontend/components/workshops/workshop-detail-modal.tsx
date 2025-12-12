@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Clock, User, MapPin, Tag, Award, BookOpen, X, CheckCircle, ChevronRight, Calendar } from "lucide-react"
+import { Clock, User, MapPin, Tag, Award, BookOpen, X, CheckCircle, ChevronRight, Calendar, Target, TrendingUp } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Workshop } from "./workshop-card"
 
@@ -10,196 +10,190 @@ interface WorkshopDetailModalProps {
 
 export function WorkshopDetailModal({ workshop, onClose }: WorkshopDetailModalProps) {
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 workshop-modal">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white p-4 border-b flex justify-between items-center">
-          <h3 className="text-xl font-bold text-gray-800">Workshop Details</h3>
-          <button 
-            onClick={onClose} 
-            className="p-1 rounded-md hover:bg-gray-100 transition-colors"
-          >
-            <X size={24} />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose}></div>
         
-        <div className="p-6">
-          {/* Workshop Header */}
-          <div className="flex flex-col md:flex-row gap-6 mb-6">
-            <div className="relative h-64 md:h-auto md:w-1/2 bg-gray-100 rounded-lg overflow-hidden">
-              {workshop.imageUrl ? (
-                <Image
-                  src={workshop.imageUrl}
-                  alt={workshop.title}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-100 to-cyan-100">
-                  <BookOpen className="h-24 w-24 text-blue-400/50" />
-                </div>
-              )}
-              
-              {/* FDP Badge */}
-              {workshop.isFDP && (
-                <div className="absolute top-4 right-4">
-                  <Badge variant="secondary" className="fdp-badge-large">
-                    Faculty Development Program
-                  </Badge>
-                </div>
-              )}
-            </div>
-            
-            <div className="md:w-1/2">
-              <div className="flex gap-2 mb-3 flex-wrap">
-                <Badge 
-                  variant="outline" 
-                  className={`category-tag-large ${workshop.difficulty?.toLowerCase()}`}
-                >
-                  {workshop.difficulty}
-                </Badge>
-                <Badge 
-                  variant="outline" 
-                  className="category-tag-large"
-                >
-                  {workshop.category}
-                </Badge>
-                {workshop.isTrending && (
-                  <Badge className="trend-badge">
-                    Trending
-                  </Badge>
-                )}
-                {workshop.limitedSeats && (
-                  <Badge variant="destructive" className="limited-badge">
-                    Limited Seats
-                  </Badge>
-                )}
-              </div>
-              
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">
-                {workshop.title}
-              </h2>
-              
-              <p className="text-gray-600 mb-6">
-                {workshop.description}
-              </p>
-              
-              <div className="space-y-3 text-gray-600">
-                <div className="flex items-center gap-3">
-                  <User className="h-5 w-5 text-blue-500" />
-                  <span>Conducted by <span className="font-medium">{workshop.trainer?.name}</span></span>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-blue-500" />
-                  <span>{new Date(workshop.date).toLocaleDateString('en-US', { 
-                    weekday: 'long',
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}</span>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-blue-500" />
-                  <span>{workshop.duration}</span>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-blue-500" />
-                  <span>{workshop.mode} {workshop.venue ? `- ${workshop.venue}` : ''}</span>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Tag className="h-5 w-5 text-blue-500" />
-                  <span className="font-medium">{workshop.price === 0 ? 'Free' : `₹${workshop.price}`}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            {/* Syllabus */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-blue-500" />
-                Syllabus Outline
-              </h3>
-              <ul className="space-y-3">
-                {workshop.syllabus?.map((item, index) => (
-                  <li key={index} className="flex gap-3 items-start">
-                    <ChevronRight className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                    <p className="text-gray-700">{item}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            {/* Prerequisites */}
-            {workshop.prerequisites && workshop.prerequisites.length > 0 && (
-              <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-blue-500" />
-                  Prerequisites
-                </h3>
-                <ul className="space-y-3">
-                  {workshop.prerequisites.map((item, index) => (
-                    <li key={index} className="flex gap-3 items-start">
-                      <ChevronRight className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-gray-700">{item}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-          
-          {/* Trainer Bio */}
-          <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Award className="h-5 w-5 text-blue-500" />
-              About the Trainer
-            </h3>
-            <div className="flex gap-4 items-center mb-4">
-              <div className="h-16 w-16 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                {workshop.trainer?.image ? (
-                  <Image
-                    src={workshop.trainer?.image}
-                    alt={workshop.trainer?.name}
-                    width={64}
-                    height={64}
-                    className="object-cover"
-                  />
-                ) : (
-                  <User className="h-full w-full p-4 text-gray-400" />
-                )}
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-800 text-lg">{workshop.trainer?.name}</h4>
-              </div>
-            </div>
-            <p className="text-gray-700">{workshop.trainer?.bio}</p>
-          </div>
-          
-          {/* CTA */}
-          <div className={`p-6 rounded-lg ${
-            workshop.isFDP 
-              ? 'bg-gradient-to-r from-indigo-50 to-blue-50' 
-              : 'bg-gradient-to-r from-blue-50 to-green-50'
-          }`}>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Ready to Enhance Your Skills?</h3>
-            <p className="text-gray-600 mb-4">
-              Secure your spot in this {workshop.isFDP ? 'faculty development program' : 'workshop'} and take your knowledge to the next level.
-            </p>
-            <button
-              className={`inline-flex items-center gap-2 px-6 py-3 rounded-md transition-colors duration-200 text-white ${
-                workshop.isFDP 
-                  ? 'bg-indigo-600 hover:bg-indigo-700' 
-                  : 'bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600'
-              }`}
+        <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          {/* Sticky Header */}
+          <div className="sticky top-0 bg-white/95 backdrop-blur-md z-10 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-800">{workshop.title}</h2>
+            <button 
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
-              Enroll Now
-              <ChevronRight size={16} />
+              <X className="h-6 w-6" />
             </button>
+          </div>
+
+          <div className="p-6">
+            {/* Main Content Grid */}
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Left Column - Image and Quick Info */}
+              <div className="lg:w-1/3">
+                {workshop.imageUrl ? (
+                  <div className="relative h-64 w-full rounded-xl overflow-hidden shadow-sm">
+                    <Image 
+                      src={workshop.imageUrl} 
+                      alt={workshop.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-64 w-full rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center shadow-sm">
+                    <BookOpen className="h-24 w-24 text-blue-400/50" />
+                  </div>
+                )}
+                
+                <div className="mt-6 space-y-3">
+                  {workshop.isFDP && (
+                    <span className="inline-block px-3 py-1.5 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full border border-purple-200">
+                      FDP
+                    </span>
+                  )}
+                  {workshop.difficulty && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Target className="h-4 w-4" />
+                      <span className="text-sm capitalize font-medium">
+                        {workshop.difficulty}
+                      </span>
+                    </div>
+                  )}
+                  {workshop.category && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Tag className="h-4 w-4" />
+                      <span className="text-sm font-medium">{workshop.category}</span>
+                    </div>
+                  )}
+                  {workshop.isTrending && (
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full border border-orange-200">
+                      <TrendingUp className="h-3 w-3" />
+                      Trending
+                    </span>
+                  )}
+                  {workshop.limitedSeats && (
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full border border-red-200">
+                      Limited Seats
+                    </span>
+                  )}
+                </div>
+
+                {/* Quick Details Card */}
+                <div className="mt-6 bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-200">
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <Calendar className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm">{new Date(workshop.date).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      year: 'numeric' 
+                    })}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <Clock className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm">{workshop.duration}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <MapPin className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm">{workshop.mode} {workshop.venue ? `- ${workshop.venue}` : ''}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <Tag className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm font-semibold text-gray-800">
+                      {workshop.price === 0 ? 'Free' : `₹${workshop.price}`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Details */}
+              <div className="lg:w-2/3">
+                <div className="prose max-w-none">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-800">About this Workshop</h3>
+                  <p className="text-gray-600 leading-relaxed mb-6">
+                    {workshop.description}
+                  </p>
+
+                  {/* Trainer Info */}
+                  {workshop.trainer && (
+                    <div className="mb-6 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                      <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Instructor</h4>
+                      <div className="flex gap-4 items-center">
+                        <div className="h-14 w-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                          {workshop.trainer?.image ? (
+                            <Image
+                              src={workshop.trainer.image}
+                              alt={workshop.trainer.name}
+                              width={56}
+                              height={56}
+                              className="object-cover"
+                            />
+                          ) : (
+                            <User className="h-full w-full p-3 text-gray-400" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h5 className="font-semibold text-gray-800">{workshop.trainer.name}</h5>
+                          {workshop.trainer.bio && (
+                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">{workshop.trainer.bio}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Syllabus */}
+                  {workshop.syllabus && workshop.syllabus.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        Syllabus Outline
+                      </h4>
+                      <ul className="space-y-2">
+                        {workshop.syllabus.map((item, index) => (
+                          <li key={index} className="flex gap-3 items-start">
+                            <ChevronRight className="h-4 w-4 text-blue-500 flex-shrink-0 mt-1" />
+                            <span className="text-sm text-gray-700">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Prerequisites */}
+                  {workshop.prerequisites && workshop.prerequisites.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4" />
+                        Prerequisites
+                      </h4>
+                      <ul className="space-y-2">
+                        {workshop.prerequisites.map((item, index) => (
+                          <li key={index} className="flex gap-3 items-start">
+                            <ChevronRight className="h-4 w-4 text-blue-500 flex-shrink-0 mt-1" />
+                            <span className="text-sm text-gray-700">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* CTA */}
+                  <div className="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      Ready to Enhance Your Skills?
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Secure your spot in this {workshop.isFDP ? 'faculty development program' : 'workshop'} and take your knowledge to the next level.
+                    </p>
+                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                      Enroll Now
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

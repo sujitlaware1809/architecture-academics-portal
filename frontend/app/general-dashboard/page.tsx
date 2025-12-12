@@ -78,13 +78,46 @@ export default function GeneralDashboard() {
               </div>
             </div>
             
-            <div className="flex gap-3">
-              <Link href="/general-dashboard/explore">
-                <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0">
-                  <Search className="h-4 w-4 mr-2" />
-                  Explore Content
-                </Button>
-              </Link>
+            {/* Merged profile controls: circular profession progress + Edit Profile button */}
+            <div className="flex items-center gap-4">
+              {/* Circular progress for profession */}
+              <div className="flex flex-col items-center text-center">
+                {/**
+                 * Simple SVG circular progress. Uses user.profession_progress (0-100) if available
+                 * otherwise falls back to 40. Shows profession name below.
+                 */}
+                <div className="relative flex items-center justify-center">
+                  <svg className="-rotate-90" width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="36" cy="36" r="30" stroke="rgba(255,255,255,0.12)" strokeWidth="8" />
+                    {/* progress circle */}
+                    <circle
+                      cx="36"
+                      cy="36"
+                      r="30"
+                      stroke="white"
+                      strokeWidth="8"
+                      strokeLinecap="round"
+                      strokeDasharray={`${Math.PI * 2 * 30}`}
+                      strokeDashoffset={`${Math.PI * 2 * 30 * (1 - ((user.profession_progress ?? 40) / 100))}`}
+                      style={{ transition: 'stroke-dashoffset 600ms ease' }}
+                    />
+                  </svg>
+                  <div className="absolute text-sm font-semibold">
+                    <span>{user.profession_progress ?? 40}%</span>
+                  </div>
+                </div>
+                <div className="mt-2 text-sm text-purple-100">{user.profession ?? 'Profession'}</div>
+              </div>
+
+              {/* Edit profile button */}
+              <div>
+                <Link href="/profile/setup">
+                  <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0">
+                    <Search className="h-4 w-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

@@ -17,7 +17,8 @@ interface User {
   username: string;
   email: string;
   full_name: string;
-  role: 'admin' | 'student' | 'instructor' | 'recruiter';
+  role: any;
+  user_type?: any;
   status: 'active' | 'inactive' | 'suspended';
   last_login?: string;
   created_at: string;
@@ -140,12 +141,15 @@ export default function AdminUsersPage() {
     }
   };
 
-  const getRoleColor = (role: User['role']) => {
-    switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800';
-      case 'instructor': return 'bg-blue-100 text-blue-800';
-      case 'student': return 'bg-green-100 text-green-800';
-      case 'recruiter': return 'bg-indigo-100 text-indigo-800';
+  const getRoleColor = (role: any) => {
+    const roleStr = String((typeof role === 'object' && role?.value) ? role.value : role).toUpperCase();
+    switch (roleStr) {
+      case 'ADMIN': return 'bg-red-100 text-red-800';
+      case 'INSTRUCTOR': 
+      case 'FACULTY': return 'bg-blue-100 text-blue-800';
+      case 'STUDENT': 
+      case 'USER': return 'bg-green-100 text-green-800';
+      case 'RECRUITER': return 'bg-indigo-100 text-indigo-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -159,12 +163,15 @@ export default function AdminUsersPage() {
     }
   };
 
-  const getRoleIcon = (role: User['role']) => {
-    switch (role) {
-      case 'admin': return <Shield className="h-4 w-4" />;
-      case 'instructor': return <UserCheck className="h-4 w-4" />;
-      case 'student': return <User className="h-4 w-4" />;
-      case 'recruiter': return <Users className="h-4 w-4" />;
+  const getRoleIcon = (role: any) => {
+    const roleStr = String((typeof role === 'object' && role?.value) ? role.value : role).toUpperCase();
+    switch (roleStr) {
+      case 'ADMIN': return <Shield className="h-4 w-4" />;
+      case 'INSTRUCTOR': 
+      case 'FACULTY': return <UserCheck className="h-4 w-4" />;
+      case 'STUDENT': 
+      case 'USER': return <User className="h-4 w-4" />;
+      case 'RECRUITER': return <Users className="h-4 w-4" />;
       default: return <User className="h-4 w-4" />;
     }
   };
@@ -329,7 +336,13 @@ export default function AdminUsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {users.filter(u => u.role === 'student').length}
+              {users.filter(u => {
+                const role = (typeof u.role === 'object' && (u.role as any)?.value) ? (u.role as any).value : u.role;
+                const userType = (typeof u.user_type === 'object' && (u.user_type as any)?.value) ? (u.user_type as any).value : u.user_type;
+                const r = String(role).toUpperCase();
+                const t = String(userType || '').toUpperCase();
+                return r === 'STUDENT' || t === 'STUDENT' || t === 'NATA_STUDENT';
+              }).length}
             </div>
           </CardContent>
         </Card>
@@ -341,7 +354,13 @@ export default function AdminUsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {users.filter(u => u.role === 'instructor').length}
+              {users.filter(u => {
+                const role = (typeof u.role === 'object' && (u.role as any)?.value) ? (u.role as any).value : u.role;
+                const userType = (typeof u.user_type === 'object' && (u.user_type as any)?.value) ? (u.user_type as any).value : u.user_type;
+                const r = String(role).toUpperCase();
+                const t = String(userType || '').toUpperCase();
+                return r === 'INSTRUCTOR' || t === 'FACULTY';
+              }).length}
             </div>
           </CardContent>
         </Card>
@@ -390,7 +409,7 @@ export default function AdminUsersPage() {
                   </TableCell>
                   <TableCell>
                     <Badge className={getRoleColor(user.role)}>
-                      {user.role}
+                      {(typeof user.role === 'object' && (user.role as any)?.value) ? (user.role as any).value : user.role}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -427,7 +446,7 @@ export default function AdminUsersPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleDelete(user.id)}
-                        disabled={user.role === 'admin'} // Prevent deleting admin users
+                        disabled={String((typeof user.role === 'object' && (user.role as any)?.value) ? (user.role as any).value : user.role).toUpperCase() === 'ADMIN'} // Prevent deleting admin users
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

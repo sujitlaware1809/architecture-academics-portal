@@ -28,6 +28,7 @@ from routes import (
     notification_routes,
     search_routes
 )
+from routes import analytics_routes
 
 # Import middleware
 import os
@@ -91,6 +92,7 @@ app.include_router(user_routes.router, prefix="/api")
 app.include_router(message_routes.router, prefix="/api")
 app.include_router(notification_routes.router, prefix="/api")
 app.include_router(search_routes.router, prefix="/api")
+app.include_router(analytics_routes.router, prefix="/api")
 
 # Root endpoint
 @app.get("/")
@@ -113,7 +115,7 @@ async def create_predefined_recruiter():
         recruiter = crud.create_predefined_recruiter(db)
         return {
             "message": "Predefined recruiter created successfully",
-            "email": "recruiter@architectureacademics.com",
+            "email": "recruiter@architecture-academics.online",
             "password": "Recruiter@123",
             "user": recruiter
         }
@@ -128,13 +130,13 @@ async def startup_event():
         # Create predefined admin
         admin = crud.create_predefined_admin(db)
         print("✅ Predefined admin account created/verified")
-        print("📧 Email: admin@architectureacademics.com")
+        print("📧 Email: admin@architecture-academics.online")
         print("🔑 Password: Admin@123")
         
         # Create predefined recruiter
         recruiter = crud.create_predefined_recruiter(db)
         print("✅ Predefined recruiter account created/verified")
-        print("📧 Email: recruiter@architectureacademics.com")
+        print("📧 Email: recruiter@architecture-academics.online")
         print("🔑 Password: Recruiter@123")
         
         # Create sample courses if none exist

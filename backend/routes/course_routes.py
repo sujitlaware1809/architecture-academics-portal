@@ -108,6 +108,139 @@ async def get_my_courses(
     
     return result
 
+@router.get("/enrollments", response_model=List[schemas.CourseEnrollmentResponse])
+async def get_user_enrollments(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all enrollments for current user"""
+    return crud.get_user_enrollments(db, current_user.id)
+
+@router.get("/{course_id}/check-enrollment")
+async def check_enrollment(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Check if user is enrolled in course"""
+    enrollment = crud.get_enrollment(db, course_id, current_user.id)
+    return {
+        "enrolled": enrollment is not None,
+        "enrollment": enrollment if enrollment else None
+    }
+
+# ===============================
+# LESSON PROGRESS ENDPOINTS
+# ===============================
+
+@router.post("/progress", response_model=schemas.LessonProgressResponse)
+async def update_lesson_progress(
+    lesson_id: int = Form(...),
+    enrollment_id: int = Form(...),
+    current_time: int = Form(0),
+    completed: bool = Form(False),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Update or create lesson progress"""
+    enrollment = db.query(CourseEnrollment).filter(
+        CourseEnrollment.id == enrollment_id,
+        CourseEnrollment.student_id == current_user.id
+    ).first()
+    
+    if not enrollment:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    progress = crud.create_or_update_lesson_progress(
+        db, lesson_id, enrollment_id, current_time, completed
+    )
+    
+    all_progress = crud.get_enrollment_progress(db, enrollment_id)
+    if all_progress:
+        completed_lessons = sum(1 for p in all_progress if p.completed)
+        total_lessons = len(enrollment.course.lessons)
+        if total_lessons > 0:
+            progress_percentage = (completed_lessons / total_lessons) * 100
+            crud.update_enrollment_progress(db, enrollment_id, progress_percentage)
+    
+    return progress
+
+@router.get("/lessons/{lesson_id}/progress")
+async def get_lesson_progress_api(
+    lesson_id: int,
+    enrollment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get progress for a specific lesson"""
+    enrollment = db.query(CourseEnrollment).filter(
+        CourseEnrollment.id == enrollment_id,
+        CourseEnrollment.student_id == current_user.id
+    ).first()
+    
+    if not enrollment:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    progress = crud.get_lesson_progress(db, lesson_id, enrollment_id)
+    return progress if progress else {"current_time": 0, "completed": False}
+
+# ===============================
+# COURSE QUESTION/DOUBT ENDPOINTS
+# ===============================
+
+@router.post("/questions", response_model=schemas.CourseQuestionResponse)
+async def create_question(
+    question: schemas.CourseQuestionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new question for a lesson"""
+    lesson = db.query(CourseLesson).filter(CourseLesson.id == question.lesson_id).first()
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    enrollment = crud.get_enrollment(db, lesson.course_id, current_user.id)
+    if not enrollment:
+        raise HTTPException(status_code=403, detail="You must be enrolled to ask questions")
+    
+    return crud.create_course_question(db, question, current_user.id)
+
+@router.get("/lessons/{lesson_id}/questions", response_model=List[schemas.CourseQuestionResponse])
+async def get_lesson_questions_api(
+    lesson_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all questions for a lesson"""
+    questions = crud.get_lesson_questions(db, lesson_id)
+    result = []
+    for question in questions:
+        replies = crud.get_question_replies(db, question.id)
+        result.append(schemas.CourseQuestionResponse(
+            **question.__dict__,
+            replies_count=len(replies),
+            replies=[schemas.QuestionReplyResponse(**reply.__dict__) for reply in replies]
+        ))
+    return result
+
+@router.post("/questions/{question_id}/replies", response_model=schemas.QuestionReplyResponse)
+async def create_reply_api(
+    question_id: int,
+    content: str = Form(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Reply to a question"""
+    question = crud.get_question_by_id(db, question_id)
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    lesson = db.query(CourseLesson).filter(CourseLesson.id == question.lesson_id).first()
+    is_instructor = (lesson and lesson.course.instructor_id == current_user.id) or current_user.role == schemas.UserRole.ADMIN
+    
+    reply = schemas.QuestionReplyCreate(question_id=question_id, content=content)
+    return crud.create_question_reply(db, reply, current_user.id, is_instructor)
+
 @router.get("/{course_id}", response_model=schemas.CourseDetailResponse)
 async def get_public_course_detail(
     course_id: int,
@@ -251,135 +384,3 @@ async def enroll_in_course(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/enrollments", response_model=List[schemas.CourseEnrollmentResponse])
-async def get_user_enrollments(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get all enrollments for current user"""
-    return crud.get_user_enrollments(db, current_user.id)
-
-@router.get("/{course_id}/check-enrollment")
-async def check_enrollment(
-    course_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Check if user is enrolled in course"""
-    enrollment = crud.get_enrollment(db, course_id, current_user.id)
-    return {
-        "enrolled": enrollment is not None,
-        "enrollment": enrollment if enrollment else None
-    }
-
-# ===============================
-# LESSON PROGRESS ENDPOINTS
-# ===============================
-
-@router.post("/progress", response_model=schemas.LessonProgressResponse)
-async def update_lesson_progress(
-    lesson_id: int = Form(...),
-    enrollment_id: int = Form(...),
-    current_time: int = Form(0),
-    completed: bool = Form(False),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Update or create lesson progress"""
-    enrollment = db.query(CourseEnrollment).filter(
-        CourseEnrollment.id == enrollment_id,
-        CourseEnrollment.student_id == current_user.id
-    ).first()
-    
-    if not enrollment:
-        raise HTTPException(status_code=403, detail="Not authorized")
-    
-    progress = crud.create_or_update_lesson_progress(
-        db, lesson_id, enrollment_id, current_time, completed
-    )
-    
-    all_progress = crud.get_enrollment_progress(db, enrollment_id)
-    if all_progress:
-        completed_lessons = sum(1 for p in all_progress if p.completed)
-        total_lessons = len(enrollment.course.lessons)
-        if total_lessons > 0:
-            progress_percentage = (completed_lessons / total_lessons) * 100
-            crud.update_enrollment_progress(db, enrollment_id, progress_percentage)
-    
-    return progress
-
-@router.get("/lessons/{lesson_id}/progress")
-async def get_lesson_progress_api(
-    lesson_id: int,
-    enrollment_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get progress for a specific lesson"""
-    enrollment = db.query(CourseEnrollment).filter(
-        CourseEnrollment.id == enrollment_id,
-        CourseEnrollment.student_id == current_user.id
-    ).first()
-    
-    if not enrollment:
-        raise HTTPException(status_code=403, detail="Not authorized")
-    
-    progress = crud.get_lesson_progress(db, lesson_id, enrollment_id)
-    return progress if progress else {"current_time": 0, "completed": False}
-
-# ===============================
-# COURSE QUESTION/DOUBT ENDPOINTS
-# ===============================
-
-@router.post("/questions", response_model=schemas.CourseQuestionResponse)
-async def create_question(
-    question: schemas.CourseQuestionCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Create a new question for a lesson"""
-    lesson = db.query(CourseLesson).filter(CourseLesson.id == question.lesson_id).first()
-    if not lesson:
-        raise HTTPException(status_code=404, detail="Lesson not found")
-    
-    enrollment = crud.get_enrollment(db, lesson.course_id, current_user.id)
-    if not enrollment:
-        raise HTTPException(status_code=403, detail="You must be enrolled to ask questions")
-    
-    return crud.create_course_question(db, question, current_user.id)
-
-@router.get("/lessons/{lesson_id}/questions", response_model=List[schemas.CourseQuestionResponse])
-async def get_lesson_questions_api(
-    lesson_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get all questions for a lesson"""
-    questions = crud.get_lesson_questions(db, lesson_id)
-    result = []
-    for question in questions:
-        replies = crud.get_question_replies(db, question.id)
-        result.append(schemas.CourseQuestionResponse(
-            **question.__dict__,
-            replies_count=len(replies),
-            replies=[schemas.QuestionReplyResponse(**reply.__dict__) for reply in replies]
-        ))
-    return result
-
-@router.post("/questions/{question_id}/replies", response_model=schemas.QuestionReplyResponse)
-async def create_reply_api(
-    question_id: int,
-    content: str = Form(...),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Reply to a question"""
-    question = crud.get_question_by_id(db, question_id)
-    if not question:
-        raise HTTPException(status_code=404, detail="Question not found")
-    
-    lesson = db.query(CourseLesson).filter(CourseLesson.id == question.lesson_id).first()
-    is_instructor = (lesson and lesson.course.instructor_id == current_user.id) or current_user.role == schemas.UserRole.ADMIN
-    
-    reply = schemas.QuestionReplyCreate(question_id=question_id, content=content)
-    return crud.create_question_reply(db, reply, current_user.id, is_instructor)

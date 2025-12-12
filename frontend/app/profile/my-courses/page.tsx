@@ -71,7 +71,7 @@ export default function MyCoursesPage() {
         alert('Session expired. Please login again.')
         window.location.href = '/login'
       } else if (error?.message?.includes('fetch')) {
-        console.error('Backend server might not be running. Check http://127.0.0.1:8000')
+        console.error('Backend server might not be running.')
       }
     } finally {
       setLoading(false)

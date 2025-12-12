@@ -188,8 +188,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
     } catch (error) {
       console.error('Error sending message:', error)
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-        setMessageError(`Cannot connect to server. Please make sure the backend is running on ${apiBase}`)
+        setMessageError(`Cannot connect to server. Please make sure the backend is running on ${process.env.NEXT_PUBLIC_API_URL}`)
       } else {
         setMessageError("Error sending message. Please check your connection and try again.")
       }
@@ -376,7 +375,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
                                 <a 
                                   href={selectedApplication.resume_url.startsWith('http') 
                                     ? selectedApplication.resume_url 
-                                    : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${selectedApplication.resume_url}`
+                                    : `${process.env.NEXT_PUBLIC_API_URL}${selectedApplication.resume_url}`
                                   } 
                                   target="_blank" 
                                   rel="noopener noreferrer"
@@ -388,7 +387,7 @@ export default function JobApplications({ params }: { params: Promise<{ jobId: s
                                 <a 
                                   href={selectedApplication.resume_url.startsWith('http') 
                                     ? selectedApplication.resume_url 
-                                    : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${selectedApplication.resume_url}`
+                                    : `${process.env.NEXT_PUBLIC_API_URL}${selectedApplication.resume_url}`
                                   } 
                                   download
                                   className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"

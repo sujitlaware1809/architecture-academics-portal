@@ -68,7 +68,18 @@ export default function AdminBlogsPage() {
   useEffect(() => {
     // Check if user is admin
     const user = api.getStoredUser()
-    if (!user || user.role !== 'ADMIN') {
+    
+    // Handle role as string or object
+    let userRole = "";
+    if (user) {
+      if (typeof user.role === "string") {
+        userRole = user.role;
+      } else if (typeof user.role === "object" && user.role !== null && "value" in user.role) {
+        userRole = user.role.value;
+      }
+    }
+
+    if (!user || userRole !== 'ADMIN') {
       setError("Admin access required")
       setLoading(false)
       return

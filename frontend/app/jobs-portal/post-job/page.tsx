@@ -36,6 +36,13 @@ export default function PostJobPage() {
   const [success, setSuccess] = useState("")
   const [error, setError] = useState("")
 
+  const getUserRole = (u: any) => {
+    if (!u) return "";
+    if (typeof u.role === "string") return u.role;
+    if (typeof u.role === "object" && u.role !== null && "value" in u.role) return u.role.value;
+    return "";
+  }
+
   const [formData, setFormData] = useState({
     title: "",
     company: "",
@@ -111,7 +118,7 @@ export default function PostJobPage() {
 
     // This check is now redundant since we already check in the render method,
     // but we'll keep it as an extra safety measure
-    if (user && user.role !== 'RECRUITER') {
+    if (user && getUserRole(user) !== 'RECRUITER') {
       setError("Only recruiters can post jobs. Please contact support if you believe this is an error.")
       setIsLoading(false)
       return
@@ -176,7 +183,7 @@ export default function PostJobPage() {
   }
 
   // Show error message if user is not a recruiter
-  if (user && user.role !== 'RECRUITER') {
+  if (user && getUserRole(user) !== 'RECRUITER') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-mint-50">
         {/* Header */}

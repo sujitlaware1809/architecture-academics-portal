@@ -54,7 +54,7 @@ export default function AdminCoursesPage() {
   // Fetch courses from backend
   const fetchCourses = async () => {
     try {
-      const response = await fetch('/api/admin/courses');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/courses`);
       if (response.ok) {
         const data = await response.json();
         setCourses(data);
@@ -132,8 +132,8 @@ export default function AdminCoursesPage() {
     
     try {
       const url = editingCourse 
-        ? `/api/admin/courses/${editingCourse.id}`
-        : '/api/admin/courses';
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/admin/courses/${editingCourse.id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/admin/courses`;
       
       const method = editingCourse ? 'PUT' : 'POST';
       
@@ -207,7 +207,7 @@ export default function AdminCoursesPage() {
     if (!confirm('Are you sure you want to delete this course?')) return;
 
     try {
-      const response = await fetch(`/api/admin/courses/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/courses/${id}`, {
         method: 'DELETE',
       });
 

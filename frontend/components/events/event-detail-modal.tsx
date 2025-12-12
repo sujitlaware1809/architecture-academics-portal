@@ -1,7 +1,10 @@
 import Image from "next/image"
-import { Calendar, Clock, MapPin, User, X, ArrowRight } from "lucide-react"
+import { Calendar, Clock, MapPin, User, X, ArrowRight, Users, Zap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Event } from "./event-card"
+import { api } from "@/lib/api"
+import { useState, useEffect } from "react"
+import toast from "react-hot-toast"
 
 interface EventDetailModalProps {
   event: Event
@@ -9,6 +12,43 @@ interface EventDetailModalProps {
 }
 
 export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [isRegistered, setIsRegistered] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    checkRegistrationStatus()
+  }, [event.id])
+
+  const checkRegistrationStatus = async () => {
+    try {
+      setIsLoading(true)
+      const response = await api.get(`/events/${event.id}/check-registration`)
+      if (response.data?.is_registered) {
+        setIsRegistered(true)
+      }
+    } catch (error) {
+      // User might not be registered or there's an error, but we'll allow them to try
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleRegister = async () => {
+    try {
+      setIsRegistering(true)
+      const response = await api.post(`/events/${event.id}/register`, {})
+      if (response.data) {
+        setIsRegistered(true)
+        toast.success('Successfully registered for the event!')
+      }
+    } catch (error: any) {
+      const message = error?.response?.data?.detail || 'Failed to register. Please try again.'
+      toast.error(message)
+    } finally {
+      setIsRegistering(false)
+    }
+  }
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 event-modal">
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -72,23 +112,51 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
                   })}</span>
                 </div>
                 
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-teal-500" />
-                  <span>{event.time}</span>
-                </div>
+                {event.duration && (
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-5 w-5 text-teal-500" />
+                    <span>{event.duration} hours duration</span>
+                  </div>
+                )}
                 
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-teal-500" />
-                  <span>{event.is_online ? 'Online Event' : event.venue}</span>
+                  <span>{event.is_online ? 'Online Event' : (event.location || event.venue || 'Location TBA')}</span>
                 </div>
                 
-                <div className="flex items-center gap-3">
-                  <User className="h-5 w-5 text-teal-500" />
-                  <span>Organized by {event.organizer}</span>
-                </div>
+                {event.meeting_link && event.is_online && (
+                  <div className="flex items-center gap-3">
+                    <Zap className="h-5 w-5 text-teal-500" />
+                    <a href={event.meeting_link} target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">
+                      Join Meeting Link
+                    </a>
+                  </div>
+                )}
+                
+                {event.organizer && (
+                  <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-teal-500" />
+                    <span>Organized by {event.organizer}</span>
+                  </div>
+                )}
+                
+                {event.max_participants && (
+                  <div className="flex items-center gap-3">
+                    <Users className="h-5 w-5 text-teal-500" />
+                    <span>{event.participants_count || 0} / {event.max_participants} Participants</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
+          
+          {/* Requirements */}
+          {event.requirements && (
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Requirements</h3>
+              <p className="text-gray-700 whitespace-pre-line">{event.requirements}</p>
+            </div>
+          )}
           
           {/* Event Agenda */}
           {event.agenda && event.agenda.length > 0 && (
@@ -143,15 +211,38 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
             <p className="text-gray-600 mb-4">
               Secure your spot at this event by registering now. Don't miss this opportunity!
             </p>
-            <a
-              href={event.registrationLink}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-colors duration-200"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={handleRegister}
+              disabled={isRegistering || isRegistered || isLoading}
+              className={`inline-flex items-center gap-2 px-6 py-3 rounded-md transition-colors duration-200 font-semibold ${
+                isRegistered
+                  ? 'bg-green-500 text-white cursor-not-allowed'
+                  : isLoading
+                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                  : 'bg-teal-500 text-white hover:bg-teal-600 disabled:bg-gray-400'
+              }`}
             >
-              Register Now
-              <ArrowRight size={16} />
-            </a>
+              {isLoading ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  Loading...
+                </>
+              ) : isRegistering ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  Registering...
+                </>
+              ) : isRegistered ? (
+                <>
+                  ✓ Already Registered
+                </>
+              ) : (
+                <>
+                  Register Now
+                  <ArrowRight size={16} />
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>

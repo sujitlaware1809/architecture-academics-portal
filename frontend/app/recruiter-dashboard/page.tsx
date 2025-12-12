@@ -55,10 +55,20 @@ export default function RecruiterDashboard() {
     // Fetch recruiter's jobs
     const fetchMyJobs = async () => {
       try {
-        const response = await api.get('/jobs/my-jobs')
-        setMyJobs(response)
+        const response = await api.get('/jobs/my')
+        console.log('Jobs response:', response)
+        
+        if (response && Array.isArray(response.data)) {
+          setMyJobs(response.data)
+        } else if (Array.isArray(response)) {
+          setMyJobs(response)
+        } else {
+          console.log('Jobs data:', response)
+          setMyJobs([])
+        }
       } catch (error) {
         console.error('Error fetching jobs:', error)
+        setMyJobs([])
       } finally {
         setLoading(false)
       }

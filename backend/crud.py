@@ -9,8 +9,11 @@ from email_service import generate_otp, send_otp_email  # Use real email sending
 
 # User CRUD operations
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
-    """Get user by email"""
-    return db.query(User).filter(User.email == email).first()
+    """Get user by email (case-insensitive)"""
+    if not email:
+        return None
+    email = email.lower().strip()
+    return db.query(User).filter(func.lower(User.email) == email).first()
 
 def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
     """Get user by ID"""
@@ -26,7 +29,7 @@ def create_user(db: Session, user: schemas.UserCreate) -> User:
     token_expires = datetime.utcnow() + timedelta(hours=24)  # Token valid for 24 hours
     
     db_user = User(
-        email=user.email,
+        email=user.email.lower().strip(),
         first_name=user.first_name,
         last_name=user.last_name,
         hashed_password=hashed_password,
@@ -219,11 +222,15 @@ def reset_password_with_token(db: Session, token: str, new_password: str) -> boo
 
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     """Authenticate user with email and password"""
+    print(f"Authenticating user: {email}")
     user = get_user_by_email(db, email)
     if not user:
+        print(f"User not found: {email}")
         return None
     if not verify_password(password, user.hashed_password):
+        print(f"Invalid password for user: {email}")
         return None
+    print(f"User authenticated successfully: {email}")
     return user
 
 def update_user_profile(db: Session, user_id: int, profile_data: schemas.UserProfileUpdate) -> Optional[User]:
@@ -540,7 +547,7 @@ def get_user_saved_jobs(db: Session, user_id: int, skip: int = 0, limit: int = 5
 # Create predefined recruiter account
 def create_predefined_recruiter(db: Session):
     # Check if recruiter already exists
-    existing_recruiter = get_user_by_email(db, "recruiter@architectureacademics.com")
+    existing_recruiter = get_user_by_email(db, "recruiter@architecture-academics.online")
     if existing_recruiter:
         # Ensure it's verified
         if not existing_recruiter.is_verified:
@@ -551,7 +558,7 @@ def create_predefined_recruiter(db: Session):
         return existing_recruiter
     
     recruiter_data = schemas.UserCreate(
-        email="recruiter@architectureacademics.com",
+        email="recruiter@architecture-academics.online",
         password="Recruiter@123",
         confirm_password="Recruiter@123",
         first_name="Architecture",
@@ -583,7 +590,7 @@ def create_predefined_recruiter(db: Session):
 # Create predefined admin account
 def create_predefined_admin(db: Session):
     # Check if admin already exists
-    existing_admin = get_user_by_email(db, "admin@architectureacademics.com")
+    existing_admin = get_user_by_email(db, "admin@architecture-academics.online")
     if existing_admin:
         # Ensure it's verified
         if not existing_admin.is_verified:
@@ -594,7 +601,7 @@ def create_predefined_admin(db: Session):
         return existing_admin
     
     admin_data = schemas.UserCreate(
-        email="admin@architectureacademics.com",
+        email="admin@architecture-academics.online",
         password="Admin@123",
         confirm_password="Admin@123",
         first_name="System",
@@ -1115,6 +1122,209 @@ def increment_blog_views(db: Session, blog_id: int):
         db.commit()
         db.refresh(blog)
     return blog
+
+
+# Analytics helpers
+def get_top_blogs(db: Session, limit: int = 5):
+    """Return top blogs ordered by views_count (published only)"""
+    from database import Blog
+    query = db.query(Blog).filter(Blog.status == schemas.BlogStatus.PUBLISHED).order_by(Blog.views_count.desc())
+    return query.limit(limit).all()
+
+
+def get_competition_metrics(db: Session, limit: int = 5):
+    """Return events that look like competitions and simple metrics for each"""
+    from database import Event, EventRegistration
+    from sqlalchemy import or_, func
+
+    # Heuristic: title or short_description contains 'competition'
+    q = db.query(Event).filter(
+        or_(
+            Event.title.ilike('%competition%'),
+            Event.short_description.ilike('%competition%')
+        )
+    ).order_by(Event.date.desc()).limit(limit)
+
+    events = q.all()
+    results = []
+    for e in events:
+        reg_count = db.query(func.count(EventRegistration.id)).filter(EventRegistration.event_id == e.id).scalar() or 0
+        attended = db.query(func.count(EventRegistration.id)).filter(EventRegistration.event_id == e.id, EventRegistration.attended == True).scalar() or 0
+        results.append({
+            'id': e.id,
+            'title': e.title,
+            'date': e.date,
+            'registrations': reg_count,
+            'attended': attended,
+            'short_description': e.short_description,
+            'image_url': e.image_url
+        })
+    return results
+
+
+def get_blog_timeseries(db: Session, days: int = 30):
+    """Return per-day published blog counts for the last `days` days (best-effort)."""
+    from database import Blog
+    from sqlalchemy import func
+    from datetime import datetime, timedelta
+
+    end = datetime.utcnow().date()
+    start = end - timedelta(days=days-1)
+
+    rows = db.query(func.date(Blog.created_at).label('day'), func.count(Blog.id).label('count'))\
+        .filter(Blog.created_at >= start, Blog.status == schemas.BlogStatus.PUBLISHED)\
+        .group_by(func.date(Blog.created_at))\
+        .order_by(func.date(Blog.created_at))\
+        .all()
+
+    counts_by_day = {str(r.day): r.count for r in rows}
+
+    series = []
+    for i in range(days):
+        day = start + timedelta(days=i)
+        series.append({ 'date': day.isoformat(), 'count': int(counts_by_day.get(str(day), 0)) })
+
+    return series
+
+
+def get_competition_timeseries(db: Session, days: int = 30):
+    """Return per-day registration counts for competition-like events for the last `days` days."""
+    from database import Event, EventRegistration
+    from sqlalchemy import func, or_
+    from datetime import datetime, timedelta
+
+    # identify competition event ids
+    comp_events = db.query(Event.id).filter(
+        or_(Event.title.ilike('%competition%'), Event.short_description.ilike('%competition%'))
+    ).all()
+    comp_ids = [c.id for c in comp_events]
+
+    end = datetime.utcnow().date()
+    start = end - timedelta(days=days-1)
+
+    if not comp_ids:
+        # return zero series
+        return [{ 'date': (start + timedelta(days=i)).isoformat(), 'count': 0 } for i in range(days)]
+
+    rows = db.query(func.date(EventRegistration.registered_at).label('day'), func.count(EventRegistration.id).label('count'))\
+        .filter(EventRegistration.registered_at >= start, EventRegistration.event_id.in_(comp_ids))\
+        .group_by(func.date(EventRegistration.registered_at))\
+        .order_by(func.date(EventRegistration.registered_at))\
+        .all()
+
+    counts_by_day = {str(r.day): r.count for r in rows}
+    series = []
+    for i in range(days):
+        day = start + timedelta(days=i)
+        series.append({ 'date': day.isoformat(), 'count': int(counts_by_day.get(str(day), 0)) })
+
+    return series
+
+
+def get_user_competition_rank(db: Session, user_id: int):
+    """Return user's competition participation count, rank among users, total users and percentile."""
+    from database import Event, EventRegistration
+    from sqlalchemy import func, or_
+
+    # identify competition event ids
+    comp_events = db.query(Event.id).filter(
+        or_(Event.title.ilike('%competition%'), Event.short_description.ilike('%competition%'))
+    ).all()
+    comp_ids = [c.id for c in comp_events]
+
+    if not comp_ids:
+        return {
+            'user_participations': 0,
+            'rank': 0,
+            'total_users': 0,
+            'percentile': 0
+        }
+
+    # count participations per user for these competition events
+    rows = db.query(EventRegistration.participant_id, func.count(EventRegistration.id).label('cnt'))\
+        .filter(EventRegistration.event_id.in_(comp_ids))\
+        .group_by(EventRegistration.participant_id)\
+        .order_by(func.count(EventRegistration.id).desc())\
+        .all()
+
+    # build mapping
+    counts = {r.participant_id: r.cnt for r in rows}
+    total_users = len(counts)
+    user_count = counts.get(user_id, 0)
+
+    # rank: 1 + number of users with count greater than user_count
+    higher = sum(1 for v in counts.values() if v > user_count)
+    rank = higher + 1 if total_users > 0 else 0
+
+    percentile = 0
+    if total_users > 0:
+        # percentile where higher rank is better; compute percent of users below or equal to user
+        num_below_or_equal = sum(1 for v in counts.values() if v <= user_count)
+        percentile = round((num_below_or_equal / total_users) * 100)
+
+    return {
+        'user_participations': int(user_count),
+        'rank': int(rank),
+        'total_users': int(total_users),
+        'percentile': int(percentile)
+    }
+
+
+def get_user_engagement_timeseries(db: Session, user_id: int, days: int = 30):
+    """Return per-day engagement score for a user over the last `days` days.
+
+    Engagement is a best-effort score summing these actions per day:
+    - blog posts by user (Blog.created_at)
+    - discussion posts by user (Discussion.created_at)
+    - event registrations by user (EventRegistration.registered_at)
+    - workshop registrations by user (WorkshopRegistration.registered_at)
+    - job applications by user (JobApplication.applied_at)
+    """
+    from database import Blog, Discussion, EventRegistration, WorkshopRegistration, JobApplication
+    from sqlalchemy import func
+    from datetime import datetime, timedelta
+
+    end = datetime.utcnow().date()
+    start = end - timedelta(days=days-1)
+
+    # Blog posts
+    blog_rows = db.query(func.date(Blog.created_at).label('day'), func.count(Blog.id).label('count'))\
+        .filter(Blog.author_id == user_id, Blog.created_at >= start)\
+        .group_by(func.date(Blog.created_at)).all()
+    blogs_by_day = {str(r.day): r.count for r in blog_rows}
+
+    # Discussions
+    disc_rows = db.query(func.date(Discussion.created_at).label('day'), func.count(Discussion.id).label('count'))\
+        .filter(Discussion.author_id == user_id, Discussion.created_at >= start)\
+        .group_by(func.date(Discussion.created_at)).all()
+    disc_by_day = {str(r.day): r.count for r in disc_rows}
+
+    # Event registrations
+    ev_rows = db.query(func.date(EventRegistration.registered_at).label('day'), func.count(EventRegistration.id).label('count'))\
+        .filter(EventRegistration.participant_id == user_id, EventRegistration.registered_at >= start)\
+        .group_by(func.date(EventRegistration.registered_at)).all()
+    ev_by_day = {str(r.day): r.count for r in ev_rows}
+
+    # Workshop registrations
+    wk_rows = db.query(func.date(WorkshopRegistration.registered_at).label('day'), func.count(WorkshopRegistration.id).label('count'))\
+        .filter(WorkshopRegistration.participant_id == user_id, WorkshopRegistration.registered_at >= start)\
+        .group_by(func.date(WorkshopRegistration.registered_at)).all()
+    wk_by_day = {str(r.day): r.count for r in wk_rows}
+
+    # Job applications
+    job_rows = db.query(func.date(JobApplication.applied_at).label('day'), func.count(JobApplication.id).label('count'))\
+        .filter(JobApplication.applicant_id == user_id, JobApplication.applied_at >= start)\
+        .group_by(func.date(JobApplication.applied_at)).all()
+    job_by_day = {str(r.day): r.count for r in job_rows}
+
+    series = []
+    for i in range(days):
+        day = start + timedelta(days=i)
+        key = str(day)
+        score = int(blogs_by_day.get(key, 0) or 0) + int(disc_by_day.get(key, 0) or 0) + int(ev_by_day.get(key, 0) or 0) + int(wk_by_day.get(key, 0) or 0) + int(job_by_day.get(key, 0) or 0)
+        series.append({ 'date': day.isoformat(), 'score': score })
+
+    return series
 
 # Blog Comment CRUD operations
 def create_blog_comment(db: Session, comment: schemas.BlogCommentCreate, author_id: int):

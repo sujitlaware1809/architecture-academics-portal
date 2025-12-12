@@ -23,6 +23,8 @@ export default function EventsPortal() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [showAllUpcoming, setShowAllUpcoming] = useState(false)
+  const [showAllPast, setShowAllPast] = useState(false)
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -118,25 +120,41 @@ export default function EventsPortal() {
   const now = new Date()
   const upcomingEvents = filteredEvents.filter(event => new Date(event.date) >= now)
   const pastEvents = filteredEvents.filter(event => new Date(event.date) < now)
+  
+  // Apply view limits
+  const upcomingToShow = showAllUpcoming ? upcomingEvents : upcomingEvents.slice(0, 6)
+  const pastToShow = showAllPast ? pastEvents : pastEvents.slice(0, 6)
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-sky-50 to-white">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 md:px-6 lg:px-8 text-center bg-gradient-to-r from-teal-500 to-sky-400 hero-section">
-        <div className="relative max-w-5xl mx-auto">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">Discover Events Around You</h1>
-          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-3xl mx-auto">
-            Join architecture workshops, seminars, conferences, and more to expand your knowledge and network with professionals
+      <section className="relative py-12 px-4 md:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-green-900 via-emerald-800 to-black opacity-95"></div>
+        <div className="absolute inset-0 opacity-25">
+          <div className="absolute top-5 left-5 w-32 h-32 bg-emerald-400 rounded-full mix-blend-multiply filter blur-2xl"></div>
+          <div className="absolute bottom-5 right-5 w-32 h-32 bg-green-500 rounded-full mix-blend-multiply filter blur-2xl"></div>
+          <div className="absolute top-1/3 right-1/4 w-28 h-28 bg-teal-400 rounded-full mix-blend-multiply filter blur-2xl"></div>
+        </div>
+        
+        <div className="relative max-w-5xl mx-auto text-center">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">
+            Discover Architecture <span className="bg-gradient-to-r from-emerald-300 via-green-300 to-teal-300 bg-clip-text text-transparent">Events</span>
+          </h1>
+          
+          <p className="text-base md:text-lg text-gray-100 mb-6 max-w-2xl mx-auto">
+            Network with professionals and grow your skills through curated architecture events
           </p>
-          <div className="flex gap-4 justify-center">
+          
+          <div className="flex gap-3 justify-center flex-wrap">
             <button
-              className="explore-button"
+              className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm flex items-center gap-2"
               onClick={() => document.getElementById('upcoming-events')?.scrollIntoView({ behavior: 'smooth' })}
             >
+              <Calendar className="h-4 w-4" />
               Upcoming Events
             </button>
             <button
-              className="px-8 py-3 bg-white/10 backdrop-blur-sm border-2 border-white text-white font-semibold rounded-full hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="px-6 py-2 bg-black/40 backdrop-blur-sm border border-emerald-400/50 text-white font-semibold rounded-full hover:bg-black/60 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm"
               onClick={() => document.getElementById('past-events')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Past Events
@@ -146,25 +164,32 @@ export default function EventsPortal() {
       </section>
 
       {/* Search and Filters */}
-      <section className="max-w-7xl mx-auto px-4 py-8 -mt-8 z-10 relative">
-        <div className="bg-white rounded-xl shadow-xl p-6 search-card">
+      <section className="max-w-7xl mx-auto px-4 py-8 -mt-12 z-10 relative">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <svg className="h-5 w-5 text-teal-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3h2V4a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-3h-2v3H4V3z" clipRule="evenodd" />
+            </svg>
+            Search & Filter Events
+          </h3>
+          
           <div className="flex flex-col md:flex-row gap-4 items-stretch">
             <div className="relative flex-grow">
-              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
               <Input 
                 type="text"
                 placeholder="Search events by title, description, or tags..."
-                className="pl-10 h-12 border-gray-200"
+                className="pl-12 h-14 border-2 border-gray-200 focus:border-teal-500 focus:ring-teal-500 rounded-lg text-gray-900"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-3 flex-wrap">
               {/* Category Filter */}
-              <div className="relative min-w-[150px]">
+              <div className="relative">
                 <select
-                  className="filter-select"
+                  className="h-14 px-4 border-2 border-gray-200 focus:border-teal-500 rounded-lg bg-white text-gray-700 font-medium cursor-pointer appearance-none pr-10"
                   value={filters.category}
                   onChange={(e) => setFilters({...filters, category: e.target.value})}
                 >
@@ -175,39 +200,42 @@ export default function EventsPortal() {
                   <option value="hackathon">Hackathon</option>
                   <option value="exhibition">Exhibition</option>
                 </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                </div>
               </div>
 
               {/* Date Filter */}
-              <div className="relative min-w-[150px]">
+              <div className="relative">
                 <input
                   type="date"
-                  className="filter-select"
+                  className="h-14 px-4 border-2 border-gray-200 focus:border-teal-500 rounded-lg bg-white text-gray-700 font-medium"
                   value={filters.date}
                   onChange={(e) => setFilters({...filters, date: e.target.value})}
                 />
               </div>
 
               {/* Location Filter */}
-              <div className="relative min-w-[150px]">
+              <div className="relative">
                 <input
                   type="text"
                   placeholder="Location"
-                  className="filter-select"
+                  className="h-14 px-4 border-2 border-gray-200 focus:border-teal-500 rounded-lg text-gray-700 font-medium"
                   value={filters.location}
                   onChange={(e) => setFilters({...filters, location: e.target.value})}
                 />
               </div>
 
               {/* Online Filter */}
-              <div className="flex items-center h-12 px-3 border border-gray-200 rounded-md bg-white">
+              <div className="flex items-center h-14 px-4 border-2 border-gray-200 rounded-lg bg-white hover:border-teal-500 transition-colors">
                 <input
                   type="checkbox"
                   id="online-filter"
-                  className="h-4 w-4 text-teal-500 focus:ring-teal-500"
+                  className="h-5 w-5 text-teal-500 focus:ring-teal-500 rounded cursor-pointer"
                   checked={filters.isOnline}
                   onChange={(e) => setFilters({...filters, isOnline: e.target.checked})}
                 />
-                <label htmlFor="online-filter" className="ml-2 text-sm">
+                <label htmlFor="online-filter" className="ml-3 text-sm font-medium text-gray-700 cursor-pointer">
                   Online Only
                 </label>
               </div>
@@ -215,10 +243,10 @@ export default function EventsPortal() {
               {/* Reset Button */}
               <button
                 onClick={resetFilters}
-                className="h-12 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center gap-1 transition-colors"
+                className="h-14 px-6 bg-gradient-to-r from-gray-100 to-gray-50 hover:from-gray-200 hover:to-gray-100 text-gray-700 font-semibold rounded-lg flex items-center gap-2 transition-all duration-300 border-2 border-gray-200"
               >
-                <X size={16} />
-                <span>Reset</span>
+                <X size={18} />
+                Reset
               </button>
             </div>
           </div>
@@ -228,20 +256,32 @@ export default function EventsPortal() {
       {/* Events Listing */}
       <section id="events-listing" className="max-w-7xl mx-auto px-4 py-12">
         {/* Upcoming Events Section */}
-        <div id="upcoming-events" className="mb-16">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">Upcoming Events</h2>
-            <p className="text-gray-600">{upcomingEvents.length} events found</p>
+        <div id="upcoming-events" className="mb-20">
+          <div className="flex justify-between items-center mb-10">
+            <div>
+              <h2 className="text-4xl font-bold text-gray-900 flex items-center gap-3">
+                <Calendar className="h-8 w-8 text-teal-500" />
+                Upcoming Events
+              </h2>
+              <p className="text-gray-600 mt-2 text-lg">{upcomingEvents.length} exciting events waiting for you</p>
+            </div>
           </div>
 
           {upcomingEvents.length === 0 ? (
-            <div className="text-center py-16 bg-gray-50 rounded-lg">
-              <h3 className="text-xl font-medium text-gray-600">No upcoming events match your criteria</h3>
-              <p className="text-gray-500 mt-2">Try adjusting your filters or search terms</p>
+            <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-dashed border-gray-300">
+              <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-2xl font-semibold text-gray-600 mb-2">No upcoming events match your criteria</h3>
+              <p className="text-gray-500 text-lg">Try adjusting your filters or search terms to discover more events</p>
+              <button
+                onClick={resetFilters}
+                className="mt-6 px-6 py-3 bg-teal-500 text-white font-semibold rounded-full hover:bg-teal-600 transition-all duration-300"
+              >
+                Clear Filters
+              </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((event) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {upcomingToShow.map((event) => (
                 <EventCard 
                   key={event.id} 
                   event={event}
@@ -250,28 +290,81 @@ export default function EventsPortal() {
               ))}
             </div>
           )}
+          
+          {upcomingEvents.length > 6 && (
+            <div className="flex justify-center mt-12">
+              <button
+                onClick={() => setShowAllUpcoming(!showAllUpcoming)}
+                className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-full transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                {showAllUpcoming ? (
+                  <>
+                    Show Less
+                    <X className="h-5 w-5" />
+                  </>
+                ) : (
+                  <>
+                    View All {upcomingEvents.length} Events
+                    <Calendar className="h-5 w-5" />
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Past Events Section */}
         <div id="past-events">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">Past Events</h2>
-            <p className="text-gray-600">{pastEvents.length} events found</p>
+          <div className="flex justify-between items-center mb-10">
+            <div>
+              <h2 className="text-4xl font-bold text-gray-600 flex items-center gap-3">
+                <svg className="h-8 w-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v2H4a2 2 0 00-2 2v2h16V7a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v2H7V3a1 1 0 00-1-1zm0 5H4v6a2 2 0 002 2h8a2 2 0 002-2V7h-2v2a1 1 0 11-2 0V7H8v2a1 1 0 11-2 0V7z" clipRule="evenodd" />
+                </svg>
+                Past Events
+              </h2>
+              <p className="text-gray-500 mt-2 text-lg">{pastEvents.length} previously held events</p>
+            </div>
           </div>
 
           {pastEvents.length === 0 ? (
-            <div className="text-center py-16 bg-gray-50 rounded-lg">
-              <h3 className="text-xl font-medium text-gray-600">No past events match your criteria</h3>
+            <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-dashed border-gray-300">
+              <svg className="h-16 w-16 text-gray-300 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v2H4a2 2 0 00-2 2v2h16V7a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v2H7V3a1 1 0 00-1-1zm0 5H4v6a2 2 0 002 2h8a2 2 0 002-2V7h-2v2a1 1 0 11-2 0V7H8v2a1 1 0 11-2 0V7z" clipRule="evenodd" />
+              </svg>
+              <h3 className="text-2xl font-semibold text-gray-600">No past events found</h3>
+              <p className="text-gray-500 mt-2 text-lg">Check back soon for event archives</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75">
-              {pastEvents.map((event) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-75">
+              {pastToShow.map((event) => (
                 <EventCard 
                   key={event.id} 
                   event={event}
                   onViewDetails={openEventDetails}
                 />
               ))}
+            </div>
+          )}
+          
+          {pastEvents.length > 6 && (
+            <div className="flex justify-center mt-12">
+              <button
+                onClick={() => setShowAllPast(!showAllPast)}
+                className="px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-full transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                {showAllPast ? (
+                  <>
+                    Show Less
+                    <X className="h-5 w-5" />
+                  </>
+                ) : (
+                  <>
+                    View All {pastEvents.length} Events
+                    <Calendar className="h-5 w-5" />
+                  </>
+                )}
+              </button>
             </div>
           )}
         </div>

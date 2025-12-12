@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // API Response types
 interface ApiResponse<T> {
@@ -128,7 +128,7 @@ export const api = {
       if (!navigator.onLine) {
         return { error: 'No internet connection. Please check your network.' };
       }
-      return { error: 'Unable to connect to the server. Please make sure the backend server is running at http://127.0.0.1:8000' };
+      return { error: 'Unable to connect to the server. Please make sure the backend server is running.' };
     }
   },
 
@@ -402,7 +402,7 @@ export const api = {
   },
 
   // Generic HTTP methods
-  async get(endpoint: string, options: {params?: any} = {}): Promise<any> {
+  async get(endpoint: string, options: {params?: any, allow401?: boolean} = {}): Promise<any> {
     try {
       // Ensure endpoint starts with /api if not already present
       const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
@@ -427,6 +427,13 @@ export const api = {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
+      // Debug: indicate whether Authorization header will be sent
+      try {
+        // Avoid printing tokens — just presence
+        // eslint-disable-next-line no-console
+        console.debug('API GET', finalEndpoint, 'Authorization present:', !!headers['Authorization']);
+      } catch (e) {}
+
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers,
@@ -443,6 +450,10 @@ export const api = {
         const errorMsg = typeof data.detail === 'object' 
           ? JSON.stringify(data.detail) 
           : (data.detail || 'Request failed');
+        // Allow caller to handle 401 without exceptions
+        if (response.status === 401 && options.allow401) {
+          return { error: errorMsg, status: 401, data };
+        }
         const error: any = new Error(errorMsg);
         error.response = {
           status: response.status,
@@ -469,7 +480,7 @@ export const api = {
     }
   },
 
-  async post(endpoint: string, body: any): Promise<any> {
+  async post(endpoint: string, body: any, options: {allow401?: boolean} = {}): Promise<any> {
     try {
       const token = this.getStoredToken();
       const headers: HeadersInit = {
@@ -483,6 +494,7 @@ export const api = {
       // Ensure endpoint starts with /api if not already present
       const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
       const finalEndpoint = cleanEndpoint.startsWith('/api') ? cleanEndpoint : '/api' + cleanEndpoint;
+      try { console.debug('API POST', finalEndpoint, 'Authorization present:', !!headers['Authorization']); } catch (e) {}
 
       const response = await fetch(`${API_BASE_URL}${finalEndpoint}`, {
         method: 'POST',
@@ -496,6 +508,9 @@ export const api = {
         const errorMsg = typeof data.detail === 'object' 
           ? JSON.stringify(data.detail) 
           : (data.detail || 'Request failed');
+        if (response.status === 401 && options.allow401) {
+          return { error: errorMsg, status: 401, data };
+        }
         const error: any = new Error(errorMsg);
         error.response = { status: response.status, data };
         throw error;
@@ -508,7 +523,7 @@ export const api = {
     }
   },
 
-  async put(endpoint: string, body: any): Promise<any> {
+  async put(endpoint: string, body: any, options: {allow401?: boolean} = {}): Promise<any> {
     try {
       const token = this.getStoredToken();
       const headers: HeadersInit = {
@@ -522,6 +537,7 @@ export const api = {
       // Ensure endpoint starts with /api if not already present
       const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
       const finalEndpoint = cleanEndpoint.startsWith('/api') ? cleanEndpoint : '/api' + cleanEndpoint;
+      try { console.debug('API PUT', finalEndpoint, 'Authorization present:', !!headers['Authorization']); } catch (e) {}
 
       const response = await fetch(`${API_BASE_URL}${finalEndpoint}`, {
         method: 'PUT',
@@ -535,6 +551,9 @@ export const api = {
         const errorMsg = typeof data.detail === 'object' 
           ? JSON.stringify(data.detail) 
           : (data.detail || 'Request failed');
+        if (response.status === 401 && options.allow401) {
+          return { error: errorMsg, status: 401, data };
+        }
         throw new Error(errorMsg);
       }
 
@@ -545,7 +564,7 @@ export const api = {
     }
   },
 
-  async delete(endpoint: string): Promise<any> {
+  async delete(endpoint: string, options: {allow401?: boolean} = {}): Promise<any> {
     try {
       const token = this.getStoredToken();
       const headers: HeadersInit = {
@@ -559,6 +578,7 @@ export const api = {
       // Ensure endpoint starts with /api if not already present
       const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
       const finalEndpoint = cleanEndpoint.startsWith('/api') ? cleanEndpoint : '/api' + cleanEndpoint;
+      try { console.debug('API DELETE', finalEndpoint, 'Authorization present:', !!headers['Authorization']); } catch (e) {}
 
       const response = await fetch(`${API_BASE_URL}${finalEndpoint}`, {
         method: 'DELETE',
@@ -571,6 +591,9 @@ export const api = {
         const errorMsg = typeof data.detail === 'object' 
           ? JSON.stringify(data.detail) 
           : (data.detail || 'Request failed');
+        if (response.status === 401 && options.allow401) {
+          return { error: errorMsg, status: 401, data };
+        }
         throw new Error(errorMsg);
       }
 

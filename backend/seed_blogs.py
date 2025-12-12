@@ -72,7 +72,7 @@ Choosing the right architecture school is crucial for your career. Consider fact
 """,
                 "category": BlogCategory.EDUCATION.value,
                 "tags": "architecture schools, education, career, IIT, SPA",
-                "featured_image": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+                "featured_image": "https://images.unsplash.com/photo-1562774053-701939374585?w=800",
                 "author_id": default_author_id,
                 "is_featured": True,
                 "status": BlogStatus.PUBLISHED.value,
@@ -138,7 +138,7 @@ With consistent practice and the right strategy, you can definitely crack NATA 2
 """,
                 "category": BlogCategory.EDUCATION.value,
                 "tags": "NATA, exam preparation, architecture entrance, study tips",
-                "featured_image": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",
+                "featured_image": "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800",
                 "author_id": default_author_id,
                 "is_featured": True,
                 "status": BlogStatus.PUBLISHED.value,
@@ -204,7 +204,7 @@ As architects, we have a responsibility to design buildings that are not just be
 """,
                 "category": BlogCategory.SUSTAINABLE_DESIGN.value,
                 "tags": "sustainable design, green building, eco-friendly, future architecture",
-                "featured_image": "https://images.unsplash.com/photo-1518005068251-37900150dfca?w=800",
+                "featured_image": "https://images.unsplash.com/photo-1518005020951-ecc8e1213af8?w=800",
                 "author_id": default_author_id,
                 "is_featured": True,
                 "status": BlogStatus.PUBLISHED.value,
@@ -298,7 +298,7 @@ Architecture offers incredible career diversity. Choose a path that aligns with 
 """,
                 "category": BlogCategory.CAREER_ADVICE.value,
                 "tags": "career, job opportunities, architecture careers, career guide",
-                "featured_image": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800",
+                "featured_image": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
                 "author_id": default_author_id,
                 "is_featured": False,
                 "status": BlogStatus.PUBLISHED.value,
@@ -420,7 +420,7 @@ Mastering these digital tools will give you a competitive edge in the architectu
 """,
                 "category": BlogCategory.TECHNOLOGY.value,
                 "tags": "software, digital tools, AutoCAD, Revit, BIM, tutorials",
-                "featured_image": "https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=800",
+                "featured_image": "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800",
                 "author_id": default_author_id,
                 "is_featured": True,
                 "status": BlogStatus.PUBLISHED.value,
@@ -512,7 +512,7 @@ Understanding architectural history helps us appreciate the evolution of design 
 """,
                 "category": BlogCategory.DESIGN_TRENDS.value,
                 "tags": "architectural history, design styles, architecture theory",
-                "featured_image": "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800",
+                "featured_image": "https://images.unsplash.com/photo-1548625361-e88c60eb355c?w=800",
                 "author_id": default_author_id,
                 "is_featured": False,
                 "status": BlogStatus.PUBLISHED.value,
@@ -530,7 +530,12 @@ Understanding architectural history helps us appreciate the evolution of design 
                 db.add(blog)
                 print(f"Added blog: {blog.title}")
             else:
-                print(f"Blog already exists: {blog_data['title']}")
+                # Update existing blog with new image and content
+                existing_blog.featured_image = blog_data["featured_image"]
+                existing_blog.content = blog_data["content"]
+                existing_blog.excerpt = blog_data["excerpt"]
+                existing_blog.title = blog_data["title"]
+                print(f"Updated blog: {blog_data['title']}")
         
         db.commit()
         print(f"✅ Blog seeding completed")

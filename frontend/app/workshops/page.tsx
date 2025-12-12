@@ -32,6 +32,8 @@ export default function WorkshopsPortal() {
   const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [showAllUpcoming, setShowAllUpcoming] = useState(false)
+  const [showAllPast, setShowAllPast] = useState(false)
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -154,74 +156,87 @@ export default function WorkshopsPortal() {
   // Get all unique categories from workshops
   const categories = [...new Set(workshops.map(w => w.category).filter(Boolean))] as string[]
 
-  // Split workshops into upcoming and past
+  // Split workshops into upcoming and past (combine workshops and FDPs)
   const now = new Date()
-  const upcomingWorkshops = filteredWorkshops.filter(w => new Date(w.date) >= now)
-  const pastWorkshops = filteredWorkshops.filter(w => new Date(w.date) < now)
+  const allFiltered = [...filteredWorkshops, ...filteredFDPs]
+  const upcomingAll = allFiltered.filter(w => new Date(w.date) >= now)
+  const pastAll = allFiltered.filter(w => new Date(w.date) < now)
   
-  const upcomingFDPs = filteredFDPs.filter(w => new Date(w.date) >= now)
-  const pastFDPs = filteredFDPs.filter(w => new Date(w.date) < now)
+  // Apply view limits
+  const upcomingToShow = showAllUpcoming ? upcomingAll : upcomingAll.slice(0, 6)
+  const pastToShow = showAllPast ? pastAll : pastAll.slice(0, 6)
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 md:px-6 lg:px-8 text-center hero-section">
-        <div className="relative max-w-5xl mx-auto">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">Upgrade Your Skills with Hands-on Workshops</h1>
-          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-3xl mx-auto">
-            Join expert-led workshops and faculty development programs designed to enhance your architectural knowledge and teaching skills
+      <section className="relative py-12 px-4 md:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-green-900 via-emerald-800 to-black opacity-95"></div>
+        <div className="absolute inset-0 opacity-25">
+          <div className="absolute top-5 left-5 w-32 h-32 bg-emerald-400 rounded-full mix-blend-multiply filter blur-2xl"></div>
+          <div className="absolute bottom-5 right-5 w-32 h-32 bg-green-500 rounded-full mix-blend-multiply filter blur-2xl"></div>
+          <div className="absolute top-1/3 right-1/4 w-28 h-28 bg-teal-400 rounded-full mix-blend-multiply filter blur-2xl"></div>
+        </div>
+        
+        <div className="relative max-w-5xl mx-auto text-center">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">
+            Upgrade Your <span className="bg-gradient-to-r from-emerald-300 via-green-300 to-teal-300 bg-clip-text text-transparent">Skills</span>
+          </h1>
+          
+          <p className="text-base md:text-lg text-gray-100 mb-6 max-w-2xl mx-auto">
+            Master hands-on workshops and faculty development programs led by industry experts
           </p>
-          <div className="flex gap-4 justify-center">
+          
+          <div className="flex gap-3 justify-center flex-wrap">
             <button
-              className="cta-button"
+              className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm flex items-center gap-2"
               onClick={() => document.getElementById('upcoming-workshops')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Upcoming Workshops
+              <BookOpen className="h-4 w-4" />
+              Upcoming Programs
             </button>
             <button
-              className="px-8 py-3 bg-white/10 backdrop-blur-sm border-2 border-white text-white font-semibold rounded-full hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="px-6 py-2 bg-black/40 backdrop-blur-sm border border-emerald-400/50 text-white font-semibold rounded-full hover:bg-black/60 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm"
               onClick={() => document.getElementById('past-workshops')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Past Workshops
+              Past Programs
             </button>
           </div>
         </div>
       </section>
 
       {/* Search and Filters */}
-      <section className="max-w-7xl mx-auto px-4 py-8 -mt-8 z-10 relative">
-        <div className="bg-white rounded-xl shadow-xl p-6 search-card">
+      <section className="max-w-7xl mx-auto px-4 py-8 -mt-12 z-10 relative">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <Sliders className="h-5 w-5 text-blue-500" />
+            Search & Filter Workshops
+          </h3>
+          
           <div className="flex flex-col md:flex-row gap-4 items-stretch">
             <div className="relative flex-grow">
-              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
               <Input 
                 type="text"
                 placeholder="Search workshops by title, trainer, or category..."
-                className="pl-10 h-12 border-gray-200"
+                className="pl-12 h-14 border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg text-gray-900"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               {searchQuery && (
                 <button 
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
                 >
                   <X className="h-5 w-5" />
                 </button>
               )}
             </div>
 
-            <div className="flex gap-2 flex-wrap">
-              {/* Filter Label */}
-              <div className="flex items-center text-sm text-gray-500 mr-1">
-                <Sliders className="h-4 w-4 mr-1" />
-                <span>Filters:</span>
-              </div>
-              
+            <div className="flex gap-3 flex-wrap">
               {/* Category Filter */}
-              <div className="relative min-w-[150px]">
+              <div className="relative">
                 <select
-                  className="filter-select"
+                  className="h-14 px-4 border-2 border-gray-200 focus:border-blue-500 rounded-lg bg-white text-gray-700 font-medium cursor-pointer appearance-none pr-10"
                   value={filters.category}
                   onChange={(e) => setFilters({...filters, category: e.target.value})}
                 >
@@ -230,12 +245,15 @@ export default function WorkshopsPortal() {
                     <option key={category} value={category}>{category}</option>
                   ))}
                 </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                </div>
               </div>
 
               {/* Difficulty Filter */}
-              <div className="relative min-w-[150px]">
+              <div className="relative">
                 <select
-                  className="filter-select"
+                  className="h-14 px-4 border-2 border-gray-200 focus:border-blue-500 rounded-lg bg-white text-gray-700 font-medium cursor-pointer appearance-none pr-10"
                   value={filters.difficulty}
                   onChange={(e) => setFilters({...filters, difficulty: e.target.value})}
                 >
@@ -244,12 +262,15 @@ export default function WorkshopsPortal() {
                   <option value="intermediate">Intermediate</option>
                   <option value="advanced">Advanced</option>
                 </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                </div>
               </div>
 
               {/* Price Filter */}
-              <div className="relative min-w-[150px]">
+              <div className="relative">
                 <select
-                  className="filter-select"
+                  className="h-14 px-4 border-2 border-gray-200 focus:border-blue-500 rounded-lg bg-white text-gray-700 font-medium cursor-pointer appearance-none pr-10"
                   value={filters.price}
                   onChange={(e) => setFilters({...filters, price: e.target.value})}
                 >
@@ -257,23 +278,26 @@ export default function WorkshopsPortal() {
                   <option value="free">Free</option>
                   <option value="paid">Paid</option>
                 </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                </div>
               </div>
 
               {/* Trainer Filter */}
-              <div className="relative min-w-[150px]">
+              <div className="relative">
                 <input
                   type="text"
                   placeholder="Trainer Name"
-                  className="filter-select"
+                  className="h-14 px-4 border-2 border-gray-200 focus:border-blue-500 rounded-lg text-gray-700 font-medium"
                   value={filters.trainer}
                   onChange={(e) => setFilters({...filters, trainer: e.target.value})}
                 />
                 {filters.trainer && (
                   <button 
                     onClick={() => setFilters({...filters, trainer: ""})}
-                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-4 text-gray-400 hover:text-gray-600"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                   </button>
                 )}
               </div>
@@ -282,10 +306,10 @@ export default function WorkshopsPortal() {
               {(filters.category || filters.difficulty || filters.price || filters.trainer || searchQuery) && (
                 <button
                   onClick={resetFilters}
-                  className="h-12 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center gap-1 transition-colors"
+                  className="h-14 px-6 bg-gradient-to-r from-gray-100 to-gray-50 hover:from-gray-200 hover:to-gray-100 text-gray-700 font-semibold rounded-lg flex items-center gap-2 transition-all duration-300 border-2 border-gray-200"
                 >
-                  <RefreshCw size={16} />
-                  <span>Reset</span>
+                  <RefreshCw size={18} />
+                  Reset
                 </button>
               )}
             </div>
@@ -352,195 +376,117 @@ export default function WorkshopsPortal() {
         </div>
       </section>
 
-      {/* Workshops Listing */}
-      <section id="workshops-listing" className="max-w-7xl mx-auto px-4 workshops-section">
-        {/* Upcoming Workshops */}
-        <div id="upcoming-workshops" className="mb-16">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="section-title">Upcoming Workshops</h2>
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-500" />
-              <p className="text-gray-600">
-                {upcomingWorkshops.length} workshop{upcomingWorkshops.length !== 1 ? 's' : ''} available
+      {/* Workshops & FDPs Listing */}
+      <section id="workshops-listing" className="max-w-7xl mx-auto px-4 workshops-section py-12">
+        {/* Upcoming Workshops & FDPs */}
+        <div id="upcoming-workshops" className="mb-20">
+          <div className="flex justify-between items-center mb-10">
+            <div>
+              <h2 className="text-4xl font-bold text-gray-900 flex items-center gap-3">
+                <BookOpen className="h-8 w-8 text-emerald-500" />
+                Upcoming Workshops & Faculty Development Programs
+              </h2>
+              <p className="text-gray-600 mt-2 text-lg">
+                {upcomingAll.length} workshop{upcomingAll.length !== 1 ? 's' : ''} and FDP{upcomingAll.length !== 1 ? 's' : ''} available for registration
               </p>
             </div>
           </div>
 
-          {upcomingWorkshops.length === 0 ? (
+          {upcomingAll.length === 0 ? (
             <EmptyState 
-              title="No upcoming workshops found" 
-              message="Try adjusting your filters or search terms to find workshops that match your interests."
+              title="No upcoming programs found" 
+              message="Try adjusting your filters or search terms to find workshops and FDPs that match your interests."
               icon={<Calendar className="h-10 w-10 text-blue-400" />}
               resetFilters={resetFilters}
             />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingWorkshops.map((workshop) => (
-                <WorkshopCard 
-                  key={workshop.id} 
-                  workshop={workshop}
-                  onViewDetails={openWorkshopDetails}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {upcomingToShow.map((workshop) => (
+                  <WorkshopCard 
+                    key={workshop.id} 
+                    workshop={workshop}
+                    onViewDetails={openWorkshopDetails}
+                  />
+                ))}
+              </div>
+              {upcomingAll.length > 6 && (
+                <div className="flex justify-center mt-12">
+                  <button
+                    onClick={() => setShowAllUpcoming(!showAllUpcoming)}
+                    className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-full transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  >
+                    {showAllUpcoming ? (
+                      <>
+                        Show Less
+                        <X className="h-5 w-5" />
+                      </>
+                    ) : (
+                      <>
+                        View All {upcomingAll.length} Workshops & FDPs
+                        <BookOpen className="h-5 w-5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
 
-        {/* Past Workshops */}
+        {/* Past Workshops & FDPs */}
         <div id="past-workshops">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="section-title">Past Workshops</h2>
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-gray-500" />
-              <p className="text-gray-600">
-                {pastWorkshops.length} workshop{pastWorkshops.length !== 1 ? 's' : ''} available
+          <div className="flex justify-between items-center mb-10">
+            <div>
+              <h2 className="text-4xl font-bold text-gray-600 flex items-center gap-3">
+                <Award className="h-8 w-8 text-gray-400" />
+                Past Workshops & Faculty Development Programs
+              </h2>
+              <p className="text-gray-500 mt-2 text-lg">
+                {pastAll.length} workshop{pastAll.length !== 1 ? 's' : ''} and FDP{pastAll.length !== 1 ? 's' : ''} previously conducted
               </p>
             </div>
           </div>
 
-          {pastWorkshops.length === 0 ? (
-            <div className="text-center py-16 bg-gray-50 rounded-lg">
-              <h3 className="text-xl font-medium text-gray-600">No past workshops found</h3>
+          {pastAll.length === 0 ? (
+            <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-dashed border-gray-300">
+              <Award className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-2xl font-semibold text-gray-600">No past programs found</h3>
+              <p className="text-gray-500 mt-2 text-lg">Check back soon for program archives and recordings</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75">
-              {pastWorkshops.map((workshop) => (
-                <WorkshopCard 
-                  key={workshop.id} 
-                  workshop={workshop}
-                  onViewDetails={openWorkshopDetails}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-75">
+                {pastToShow.map((workshop) => (
+                  <WorkshopCard 
+                    key={workshop.id} 
+                    workshop={workshop}
+                    onViewDetails={openWorkshopDetails}
+                  />
+                ))}
+              </div>
+              {pastAll.length > 6 && (
+                <div className="flex justify-center mt-12">
+                  <button
+                    onClick={() => setShowAllPast(!showAllPast)}
+                    className="px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-full transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  >
+                    {showAllPast ? (
+                      <>
+                        Show Less
+                        <X className="h-5 w-5" />
+                      </>
+                    ) : (
+                      <>
+                        View All {pastAll.length} Workshops & FDPs
+                        <BookOpen className="h-5 w-5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </>
           )}
-        </div>
-      </section>
-
-      {/* FDP Section */}
-      <section className="fdp-section">
-        <div className="max-w-7xl mx-auto px-4">
-          {/* Upcoming FDPs */}
-          <div className="mb-16">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="section-title">Upcoming Faculty Development Programs</h2>
-              <div className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-indigo-500" />
-                <p className="text-gray-600">
-                  {upcomingFDPs.length} FDP{upcomingFDPs.length !== 1 ? 's' : ''} available
-                </p>
-              </div>
-            </div>
-
-            {upcomingFDPs.length === 0 ? (
-              <EmptyState 
-                title="No upcoming FDPs found" 
-                message="Try adjusting your filters or search terms to find Faculty Development Programs that match your interests."
-                icon={<GraduationCap className="h-10 w-10 text-indigo-400" />}
-                resetFilters={resetFilters}
-                isForFdp={true}
-              />
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {upcomingFDPs.map((workshop) => (
-                  <WorkshopCard 
-                    key={workshop.id} 
-                    workshop={workshop}
-                    onViewDetails={openWorkshopDetails}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Past FDPs */}
-          <div>
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="section-title">Past Faculty Development Programs</h2>
-              <div className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-gray-500" />
-                <p className="text-gray-600">
-                  {pastFDPs.length} FDP{pastFDPs.length !== 1 ? 's' : ''} available
-                </p>
-              </div>
-            </div>
-
-            {pastFDPs.length === 0 ? (
-              <div className="text-center py-16 bg-gray-50 rounded-lg">
-                <h3 className="text-xl font-medium text-gray-600">No past FDPs found</h3>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75">
-                {pastFDPs.map((workshop) => (
-                  <WorkshopCard 
-                    key={workshop.id} 
-                    workshop={workshop}
-                    onViewDetails={openWorkshopDetails}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="py-16 px-4 mt-16 bg-gradient-to-r from-blue-100 to-cyan-100 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full" 
-               style={{
-                 backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236b46c1' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
-               }}
-          ></div>
-        </div>
-        
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <span className="px-4 py-1 bg-white/60 text-blue-700 rounded-full text-sm font-medium inline-block mb-4">
-            Custom Programs Available
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Looking for Custom Workshops or FDPs?</h2>
-          <p className="text-lg text-gray-700 mb-8 max-w-3xl mx-auto">
-            We offer tailored workshops and faculty development programs for institutions and organizations. Our team of experts can design specialized training solutions to meet your specific educational goals.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="cta-button">
-              Request Custom Program
-            </button>
-            <button className="px-6 py-3 bg-white text-blue-700 font-semibold rounded-full hover:bg-gray-100 transition-colors">
-              Learn More
-            </button>
-          </div>
-          
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-sm">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Customized Curriculum</h3>
-              <p className="text-gray-600 text-sm">
-                Tailored content based on your institution's specific requirements and learning objectives
-              </p>
-            </div>
-            
-            <div className="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-sm">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Expert Trainers</h3>
-              <p className="text-gray-600 text-sm">
-                Learn from industry leaders and academic experts with extensive practical experience
-              </p>
-            </div>
-            
-            <div className="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-sm">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Award className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Certification</h3>
-              <p className="text-gray-600 text-sm">
-                Provide participants with recognized certifications to enhance their professional portfolios
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 

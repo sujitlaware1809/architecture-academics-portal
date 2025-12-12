@@ -4,22 +4,46 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { 
-  GraduationCap, 
   BookOpen, 
-  Video, 
-  Building2, 
-  Trophy, 
+  ArrowRight,
   TrendingUp,
-  CheckCircle2,
-  Clock
+  Trophy,
+  Target,
+  Clock,
+  Award,
+  CheckCircle2
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import LineChartSimple from "@/components/charts/LineChartSimple"
+import DonutChart from "@/components/charts/DonutChart"
+import BarChartSimple from "@/components/charts/BarChartSimple"
+import { api } from "@/lib/api"
+
+// Reusable Dashboard Section Component (kept for backwards compatibility but not used)
+const DashboardSection = ({ title, icon: Icon, link, linkText, accentColor, children }: any) => (
+  <div className={`space-y-4 border-t-4 ${accentColor} pt-4`}>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className={`p-2 rounded-lg ${accentColor.replace('border-', 'bg-').replace('-500', '-100')}`}>
+          <Icon className={`h-5 w-5 ${accentColor.replace('border-', 'text-')}`} />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+      </div>
+      <Link href={link} className={`text-sm font-medium ${accentColor.replace('border-', 'text-')} hover:underline flex items-center gap-1`}>
+        {linkText} <ArrowRight className="h-4 w-4" />
+      </Link>
+    </div>
+    {children}
+  </div>
+)
 
 export default function NATADashboard() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [nataCourses, setNataCourses] = useState<any[]>([])
 
   useEffect(() => {
     const token = localStorage.getItem('access_token')
@@ -32,8 +56,31 @@ export default function NATADashboard() {
     
     const parsedUser = JSON.parse(userData)
     setUser(parsedUser)
-    setLoading(false)
+    
+    // Fetch NATA courses
+    fetchNataCourses()
   }, [router])
+
+  const fetchNataCourses = async () => {
+    try {
+      const response = await api.get('/api/nata-courses')
+      if (response?.data?.data) {
+        // Limit to first 3 courses for dashboard display
+        setNataCourses(response.data.data.slice(0, 3))
+      }
+    } catch (error) {
+      console.error('Error fetching NATA courses:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Compute profile progress (from user or derived from course completion)
+  const displayProfileProgress = user?.profession_progress 
+    ? user.profession_progress
+    : user?.enrolled_courses && user?.completed_courses
+      ? Math.round((user.completed_courses / user.enrolled_courses) * 100)
+      : 0
 
   if (loading) {
     return (
@@ -49,15 +96,15 @@ export default function NATADashboard() {
   if (!user) return null
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-gray-900 via-orange-600 to-gray-900 text-white rounded-xl shadow-lg overflow-hidden">
-        <div className="px-6 py-8 md:px-8 md:py-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div className="flex items-center gap-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="space-y-6 p-6 max-w-7xl mx-auto">
+        {/* Welcome Header with Profile Progress */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex items-center gap-4">
               <div className="relative">
                 {user.profile_image_url ? (
-                  <div className="h-20 w-20 rounded-full overflow-hidden border-4 border-white/30 shadow-xl">
+                  <div className="h-16 w-16 rounded-full overflow-hidden">
                     <img 
                       src={`${process.env.NEXT_PUBLIC_API_URL}${user.profile_image_url}`} 
                       alt={user.first_name}
@@ -65,156 +112,242 @@ export default function NATADashboard() {
                     />
                   </div>
                 ) : (
-                  <div className="h-20 w-20 rounded-full bg-white/20 flex items-center justify-center border-4 border-white/30 shadow-xl">
-                    <span className="text-3xl font-bold text-white">
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-white">
                       {user.first_name ? user.first_name.charAt(0).toUpperCase() : "N"}
                     </span>
                   </div>
                 )}
               </div>
               <div>
-                <h1 className="text-3xl font-bold mb-2">Welcome back, {user.first_name}!</h1>
-                <p className="text-orange-100">Your complete NATA exam preparation portal</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Welcome back, {user.first_name}!
+                </h1>
+                <p className="text-gray-500 text-sm">
+                  Ready to continue your learning journey?
+                </p>
               </div>
             </div>
             
-            <div className="flex gap-3">
-              <Link href="/nata-dashboard/tests">
-                <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0">
-                  <Trophy className="h-4 w-4 mr-2" />
-                  Take Mock Test
+            <div className="flex gap-4 items-center">
+              {/* Circular Profile Progress */}
+              <div className="text-center">
+                <div className="relative h-20 w-20 mx-auto">
+                  <svg className="transform -rotate-90" width="80" height="80">
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="34"
+                      stroke="#e5e7eb"
+                      strokeWidth="8"
+                      fill="none"
+                    />
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="34"
+                      stroke="#f97316"
+                      strokeWidth="8"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 34}`}
+                      strokeDashoffset={`${2 * Math.PI * 34 * (1 - displayProfileProgress / 100)}`}
+                      strokeLinecap="round"
+                      className="transition-all duration-500"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-lg font-bold text-gray-900">{displayProfileProgress}%</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Profile</p>
+              </div>
+              <Link href="/nata-dashboard/profile">
+                <Button className="bg-gray-900 hover:bg-gray-800 text-white px-6">
+                  Edit Profile
                 </Button>
               </Link>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-none shadow-md hover:shadow-lg transition-all duration-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600">
-                <BookOpen className="h-6 w-6" />
+        {/* Analytics Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="bg-white border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-gray-600">Test Scores</CardTitle>
+                <div className="h-10 w-10 bg-green-50 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-green-600" />
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Enrolled Courses</p>
-                <h3 className="text-2xl font-bold text-gray-900">3</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-md hover:shadow-lg transition-all duration-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600">
-                <Trophy className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Tests Completed</p>
-                <h3 className="text-2xl font-bold text-gray-900">12</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-md hover:shadow-lg transition-all duration-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 text-yellow-600">
-                <TrendingUp className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Average Score</p>
-                <h3 className="text-2xl font-bold text-gray-900">85%</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-md hover:shadow-lg transition-all duration-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-600">
-                <Video className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Videos Watched</p>
-                <h3 className="text-2xl font-bold text-gray-900">45</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Recent Activity */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="border-none shadow-md">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-900">Recent Activity</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 bg-orange-200 rounded-lg flex items-center justify-center">
-                        <BookOpen className="h-6 w-6 text-orange-700" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">Perspective Drawing Module</h4>
-                        <p className="text-sm text-gray-500">Completed 2 lessons</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm">Continue</Button>
-                  </div>
-                ))}
+              <div className="text-3xl font-bold text-gray-900 mb-1">142/200</div>
+              <p className="text-xs text-green-600 font-medium mb-4">+15 points from last mock</p>
+              <div className="h-[100px]">
+                <LineChartSimple 
+                  data={[120, 125, 135, 130, 140, 138, 142]}
+                  height={100}
+                  color="#10b981"
+                  compact={true}
+                />
               </div>
-              <div className="mt-4">
-                <Link href="/nata-dashboard/courses">
-                  <Button variant="outline" className="w-full">View All Courses</Button>
-                </Link>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-gray-600">Study Hours</CardTitle>
+                <div className="h-10 w-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900 mb-1">24.5h</div>
+              <p className="text-xs text-gray-500 font-medium mb-4">This week</p>
+              <div className="h-[100px]">
+                <BarChartSimple 
+                  labels={['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
+                  values={[3, 4, 2.5, 4.5, 3.5, 3, 4]}
+                  height={100}
+                  colors={['#3b82f6']}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-gray-600">Syllabus Covered</CardTitle>
+                <div className="h-10 w-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                  <BookOpen className="h-5 w-5 text-purple-600" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900 mb-1">65%</div>
+              <p className="text-xs text-gray-500 font-medium mb-4">On track for exam</p>
+              <div className="h-[100px] flex justify-center">
+                <DonutChart 
+                  value={65}
+                  total={100}
+                  height={100}
+                  colors={['#8b5cf6', '#e5e7eb']}
+                  compact={true}
+                />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Column - Upcoming Tests */}
+        {/* Main Content Grid */}
         <div className="space-y-6">
-          <Card className="border-none shadow-md">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-900">Upcoming Tests</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">
-                    <div className="flex-shrink-0 w-12 text-center">
-                      <span className="block text-xs font-bold text-orange-600 uppercase">NOV</span>
-                      <span className="block text-xl font-bold text-gray-900">{15 + i}</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900">NATA Mock Test {i}</h4>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                        <Clock className="h-3 w-3" />
-                        <span>10:00 AM - 01:00 PM</span>
+          
+          {/* NATA Courses Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                  <BookOpen className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">My NATA Courses</h2>
+                  <p className="text-xs text-gray-500">Continue your learning journey</p>
+                </div>
+              </div>
+              <Link href="/nata-courses">
+                <Button variant="outline" className="text-sm border-gray-300 hover:bg-gray-50">
+                  View All
+                </Button>
+              </Link>
+            </div>          
+            {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="border border-gray-200 animate-pulse">
+                  <div className="h-28 bg-gray-200"></div>
+                  <CardContent className="p-4">
+                    <div className="h-5 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-3"></div>
+                    <div className="h-1.5 bg-gray-200 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : nataCourses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {nataCourses.map((course) => {
+                // Safely parse skills and features if they're JSON strings
+                let skills = [];
+                try {
+                  skills = typeof course.skills === 'string' ? JSON.parse(course.skills) : (Array.isArray(course.skills) ? course.skills : []);
+                } catch (e) {
+                  // If JSON parse fails, try to split by comma (it might be a comma-separated string)
+                  skills = typeof course.skills === 'string' ? course.skills.split(',').map((s: string) => s.trim()) : [];
+                }
+                const progress = Math.floor(Math.random() * 40) + 30; // Mock progress 30-70%
+                
+                return (
+                  <Link key={course.id} href={`/nata-courses/${course.id}`}>
+                    <Card className="group border border-gray-200 hover:shadow-lg transition-shadow duration-200 cursor-pointer h-full overflow-hidden">
+                      <div className="h-28 bg-gradient-to-br from-orange-400 to-orange-600 relative">
+                        <div className="absolute top-3 left-3">
+                          <Badge className="bg-white text-orange-600 hover:bg-white border-0 text-xs font-semibold">
+                            {course.category || 'NATA'}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                      <CardContent className="p-4">
+                        <h3 className="font-bold text-gray-900 text-sm mb-2 group-hover:text-orange-600 transition-colors line-clamp-2 min-h-[2.5rem]">
+                          {course.title}
+                        </h3>
+                        <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                          <span className="flex items-center gap-1">
+                            <BookOpen className="h-3 w-3" /> {course.lessons_count || 0} Lessons
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> {course.duration || 'N/A'}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-500">Progress</span>
+                            <span className="text-orange-600 font-bold">{progress}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                            <div 
+                              className="bg-orange-500 h-1.5 rounded-full transition-all duration-300" 
+                              style={{ width: `${progress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
+              <div className="h-14 w-14 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <BookOpen className="h-7 w-7 text-orange-600" />
               </div>
-              <div className="mt-4">
-                <Link href="/nata-dashboard/tests">
-                  <Button variant="outline" className="w-full">View All Tests</Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+              <h3 className="text-base font-semibold text-gray-900 mb-1">No courses yet</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Start your NATA preparation journey
+              </p>
+              <Link href="/nata-courses">
+                <Button className="bg-gray-900 hover:bg-gray-800 text-white">
+                  Browse NATA Courses
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
+      </div>
       </div>
     </div>
   )

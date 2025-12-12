@@ -45,6 +45,13 @@ export default function HomePage() {
     checkAuth()
   }, [])
 
+  const getUserRole = (u: any) => {
+    if (!u) return "";
+    if (typeof u.role === "string") return u.role;
+    if (typeof u.role === "object" && u.role !== null && "value" in u.role) return u.role.value;
+    return "";
+  }
+
   const mainSections = [
     { title: "COURSES", icon: BookOpen, description: "Explore architecture courses", color: "bg-slate-800", href: "/courses" },
     { title: "JOBS", icon: Briefcase, description: "Find career opportunities", color: "bg-blue-500", href: "/jobs-portal" },
@@ -54,16 +61,16 @@ export default function HomePage() {
     { title: "WORKSHOPS & FDPs", icon: Wrench, description: "Professional development", color: "bg-blue-500", href: "/workshops" },
   ]
 
-  const recruiterSections = isAuthenticated && user && user.role === 'RECRUITER' ? [
+  const recruiterSections = isAuthenticated && user && getUserRole(user) === 'RECRUITER' ? [
     { title: "POST JOB", icon: Plus, description: "Post a new job opportunity", color: "bg-green-500", href: "/jobs-portal/post-job" },
   ] : []
 
   const secondarySections = [
-    { title: "SURVEYS", icon: Users, description: "Community surveys", color: "bg-yellow-500", href: "#", count: "0" },
-    { title: "COMPETITIONS", icon: Trophy, description: "Design competitions", color: "bg-blue-500", href: "#", count: "0" },
-    { title: "CONTEXTUAL STUDY", icon: Building, description: "Urban & rural architecture studies", color: "bg-cyan-500", href: "#", count: "0" },
-    { title: "NATA COURSES", icon: GraduationCap, description: "National Aptitude Test preparation", color: "bg-orange-500", href: "/nata-courses", count: "0" },
-    { title: "PUBLICATIONS", icon: FileText, description: "Research & publications", color: "bg-green-500", href: "#", count: "0" },
+    { title: "SURVEYS", icon: Users, description: "Community surveys", color: "bg-yellow-500", href: "/coming-soon/surveys", count: "0", status: "coming" },
+    { title: "COMPETITIONS", icon: Trophy, description: "Design competitions", color: "bg-blue-500", href: "/coming-soon/competitions", count: "0", status: "coming" },
+    { title: "CONTEXTUAL STUDY", icon: Building, description: "Urban & rural architecture studies", color: "bg-cyan-500", href: "/coming-soon/contextual-study", count: "0", status: "coming" },
+    { title: "NATA COURSES", icon: GraduationCap, description: "National Aptitude Test preparation", color: "bg-orange-500", href: "/nata-courses", count: "0", status: "explore" },
+    { title: "PUBLICATIONS", icon: FileText, description: "Research & publications", color: "bg-green-500", href: "/coming-soon/publications", count: "0", status: "coming" },
   ]
 
   // State for dynamic data
@@ -353,14 +360,8 @@ export default function HomePage() {
               return (
                 <Link 
                   key={section.title}
-                  href={section.href === "#" ? "#" : section.href}
+                  href={section.href}
                   className="group"
-                  onClick={(e) => {
-                    if (section.href === "#") {
-                      e.preventDefault()
-                      alert("Coming soon! This feature is currently under development.")
-                    }
-                  }}
                 >
                   <Card className="h-full border-2 border-gray-100 hover:border-gray-300 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-white">
                     <CardHeader className="text-center pb-4 space-y-4">
@@ -381,14 +382,10 @@ export default function HomePage() {
                       </CardDescription>
                     </CardContent>
                     <CardFooter className="justify-center pt-0">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="text-black hover:text-gray-900 hover:bg-gray-50 font-medium text-xs group-hover:gap-1 transition-all"
-                      >
-                        {section.href === "#" ? "Coming Soon" : "Explore"}
-                        <ArrowRight className="h-3 w-3 opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                      </Button>
+                      <span className="text-black text-xs font-medium group-hover:gap-1 transition-all flex items-center gap-0">
+                        {section.status === "coming" ? "Coming Soon" : "Explore"}
+                        <ArrowRight className="h-3 w-3 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                      </span>
                     </CardFooter>
                   </Card>
                 </Link>

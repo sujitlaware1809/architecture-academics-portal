@@ -398,6 +398,25 @@ html {
   }
 }
 
+/* Temporary: hide unexpected left-side narrow toolbars/sidebars that overlay content.
+   These selectors target common classnames and compact fixed rails (w-14/w-16 + h-full + fixed).
+   This is a non-destructive override intended as a quick fix; remove if you want to restore the sidebar. */
+.app-sidebar, .sidebar, .side-nav, .sidenav, .left-nav, .left-rail, .vertical-nav {
+  display: none !important;
+}
+
+/* Catch compact fixed left rails used by some layouts/extensions */
+[class*="w-14"][class*="h-full"][class*="fixed"],
+[class*="w-16"][class*="h-full"][class*="fixed"],
+.fixed.left-0.h-screen, .fixed.left-0.h-full.w-14, .fixed.left-0.w-14.h-screen, .fixed.inset-y-0.w-14, .fixed.left-0.w-16.h-screen {
+  display: none !important;
+}
+
+/* Hide nav elements that may be injected with role or aria labels */
+nav[role="navigation"], nav[aria-label*="sidebar" i], [role="complementary"], [aria-label*="side" i] {
+  display: none !important;
+}
+
 .text-gradient-animate {
   background-size: 200% auto;
   animation: gradient-xy 3s ease infinite;
