@@ -18,7 +18,7 @@ export default function Footer() {
     <footer className="bg-gradient-to-b from-gray-50 to-gray-100 border-t border-gray-200 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Footer Top */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center space-x-3 mb-4">
@@ -140,6 +140,28 @@ export default function Footer() {
               <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Feedback
               </a>
+            </div>
+          </div>
+
+          {/* Service Providers */}
+          <div>
+            <h4 className="font-bold text-gray-900 mb-4">Service Providers</h4>
+            <div className="space-y-2">
+              <Link href="/software-training" className="block text-sm text-black hover:text-emerald-600 transition-colors">
+                Software Training
+              </Link>
+              <Link href="/stationary-supplier" className="block text-sm text-black hover:text-emerald-600 transition-colors">
+                Stationary Supplier
+              </Link>
+              <Link href="/tour-organizer" className="block text-sm text-black hover:text-emerald-600 transition-colors">
+                Tour Organizer
+              </Link>
+              <Link href="/book-seller" className="block text-sm text-black hover:text-emerald-600 transition-colors">
+                Book Seller
+              </Link>
+              <Link href="/product-manufacturer" className="block text-sm text-black hover:text-emerald-600 transition-colors">
+                Product & Material Manufacturer
+              </Link>
             </div>
           </div>
         </div>
