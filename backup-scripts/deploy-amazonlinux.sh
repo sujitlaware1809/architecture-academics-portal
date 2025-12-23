@@ -108,18 +108,14 @@ AWS_ACCESS_KEY_ID=your_aws_access_key_here
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key_here
 AWS_REGION=us-east-1
 S3_BUCKET_NAME=architecture-academics-videos
-
 # Database Configuration
 DATABASE_URL=sqlite:///./architecture_academics.db
-
 # JWT Configuration - CHANGE THESE!
 SECRET_KEY=CHANGE-THIS-TO-RANDOM-STRING
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
-
 # CORS Origins
 CORS_ORIGINS=["http://15.206.47.135"]
-
 # Email Configuration
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
