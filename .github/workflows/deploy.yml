@@ -1,0 +1,86 @@
+name: CI/CD Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    name: Build and deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Prepare backend (install deps)
+        working-directory: backend
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Copy build and backend to server
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          port: ${{ secrets.EC2_PORT }}
+          key: ${{ secrets.EC2_DEPLOY_KEY }}
+          source: |
+            frontend/.next
+            frontend/public
+            frontend/package.json
+            backend
+          target: ${{ secrets.REMOTE_PATH }}
+
+      - name: Run remote deploy commands (install and restart)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          port: ${{ secrets.EC2_PORT }}
+          key: ${{ secrets.EC2_DEPLOY_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.REMOTE_PATH }}
+            # Backend: ensure venv and deps
+            if [ ! -d backend/.venv ]; then
+              cd backend
+              python3 -m venv .venv
+              source .venv/bin/activate
+              pip install -r requirements.txt
+              cd ..
+            else
+              cd backend
+              source .venv/bin/activate
+              pip install -r requirements.txt
+              cd ..
+            fi
+
+            # Frontend: ensure pnpm deps
+            cd frontend
+            pnpm install --frozen-lockfile || true
+            cd ..
+
+            # Restart via pm2
+            pm2 restart aa-backend || pm2 start ecosystem.config.js --env production
+            pm2 restart aa-frontend || pm2 start ecosystem.config.js --env production
