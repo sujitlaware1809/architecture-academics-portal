@@ -38,6 +38,11 @@ jobs:
           source .venv/bin/activate
           pip install -r requirements.txt
 
+      - name: Add EC2 host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
       - name: Copy build and backend to server
         uses: appleboy/scp-action@v0.1.6
         with:
