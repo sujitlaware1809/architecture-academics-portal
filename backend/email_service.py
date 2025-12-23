@@ -307,8 +307,9 @@ def send_password_reset_email(email: str, reset_token: str, user_name: str) -> b
     
     subject = "Reset Your Architecture Academics Password"
     
-    # Create the reset link (in production, this should be your actual domain)
-    reset_link = f"http://localhost:3000/reset-password?token={reset_token}"
+    # Create the reset link dynamically using FRONTEND_BASE_URL
+    frontend_base_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000")
+    reset_link = f"{frontend_base_url}/reset-password?token={reset_token}"
     
     html_body = f"""
     <!DOCTYPE html>

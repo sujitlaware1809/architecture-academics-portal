@@ -40,7 +40,7 @@ export function AuthMiddleware({ children }: { children: React.ReactNode }) {
       }
 
       // Skip auth check for paths that start with public prefixes
-      const publicPrefixes = ['/courses/', '/nata-courses/', '/blogs/', '/jobs-portal/', '/events/', '/workshops/'];
+      const publicPrefixes = ['/courses/', '/nata-courses/', '/blogs/', '/jobs-portal/', '/events/', '/workshops/', '/search'];
       if (publicPrefixes.some(prefix => pathname.startsWith(prefix))) {
         return;
       }

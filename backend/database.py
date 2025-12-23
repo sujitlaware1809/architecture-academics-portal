@@ -291,6 +291,26 @@ class CourseQuestion(Base):
     student = relationship("User", foreign_keys=[student_id])
     replies = relationship("QuestionReply", back_populates="question", cascade="all, delete-orphan")
 
+class CourseReview(Base):
+    __tablename__ = "course_reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    rating = Column(Integer, nullable=False)  # 1-5
+    review_text = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Foreign keys
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # Relationships
+    course = relationship("Course", back_populates="reviews")
+    user = relationship("User")
+
+# Add reverse relationship on Course and User
+Course.reviews = relationship("CourseReview", back_populates="course", cascade="all, delete-orphan")
+User.course_reviews = relationship("CourseReview", back_populates="user")
+
 class QuestionReply(Base):
     __tablename__ = "question_replies"
 

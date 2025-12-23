@@ -17,6 +17,9 @@ class SearchResult(BaseModel):
 
 @router.get("", response_model=List[SearchResult])
 def search(q: str = Query(..., min_length=1), db: Session = Depends(get_db)):
+    """
+    Search endpoint explicitly allows unauthenticated access.
+    """
     results = []
     search_term = f"%{q}%"
 

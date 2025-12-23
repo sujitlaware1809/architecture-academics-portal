@@ -266,6 +266,8 @@ export default function ProfilePage() {
         </div>
       )}
       
+      
+      
       {/* Header */}
       <div className="max-w-4xl mx-auto px-4 pt-8 mb-6">
         <div className="bg-gradient-to-r from-gray-900 via-emerald-500 to-gray-900 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
@@ -275,45 +277,6 @@ export default function ProfilePage() {
             <h1 className="text-3xl font-bold mb-2">My Profile</h1>
             <p className="text-emerald-50">Manage your personal information and preferences</p>
           </div>
-        </div>
-      </div>
-      
-      {/* Quick Navigation */}
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Link
-            href="/profile/my-courses"
-            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-blue-100 hover:border-blue-300"
-          >
-            <BookOpen className="h-5 w-5 text-blue-600" />
-            <span className="text-sm font-medium text-gray-700">My Courses</span>
-          </Link>
-          
-          <Link
-            href="/profile/my-applications"
-            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-blue-100 hover:border-blue-300 relative"
-          >
-            <Briefcase className="h-5 w-5 text-blue-600" />
-            <span className="text-sm font-medium text-gray-700">My Applications</span>
-            {/* Notification badge - will show if there are messages */}
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse"></span>
-          </Link>
-          
-          <Link
-            href="/profile/my-events"
-            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-blue-100 hover:border-blue-300"
-          >
-            <BookOpen className="h-5 w-5 text-blue-600" />
-            <span className="text-sm font-medium text-gray-700">My Events</span>
-          </Link>
-          
-          <Link
-            href="/profile/my-workshops"
-            className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-blue-100 hover:border-blue-300"
-          >
-            <BookOpen className="h-5 w-5 text-blue-600" />
-            <span className="text-sm font-medium text-gray-700">My Workshops</span>
-          </Link>
         </div>
       </div>
 

@@ -352,6 +352,26 @@ class CourseDetailResponse(CourseResponse):
         from_attributes = True
         use_enum_values = True
 
+
+# Course review schemas (top-level)
+class CourseReviewCreate(BaseModel):
+    rating: int
+    review_text: Optional[str] = None
+
+
+class CourseReviewResponse(BaseModel):
+    id: int
+    course_id: int
+    user_id: int
+    rating: int
+    review_text: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+
 # System Settings Schemas
 class SystemSettingBase(BaseModel):
     key: str

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { api } from "@/lib/api"
@@ -83,6 +83,10 @@ export default function CoursesPortal() {
     difficulty: "",
     price: ""
   });
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
+  const [showDifficultyDropdown, setShowDifficultyDropdown] = useState(false)
+  const categoryRef = useRef<HTMLDivElement | null>(null)
+  const difficultyRef = useRef<HTMLDivElement | null>(null)
 
   // Fetch courses from API
   useEffect(() => {
@@ -211,6 +215,20 @@ export default function CoursesPortal() {
     setFilteredCourses(result);
   }, [searchQuery, filters, courses]);
 
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+        setShowCategoryDropdown(false)
+      }
+      if (difficultyRef.current && !difficultyRef.current.contains(e.target as Node)) {
+        setShowDifficultyDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [])
+
   const handleFilterChange = (filterType: keyof FilterOptions, value: string) => {
     setFilters(prev => ({
       ...prev,
@@ -280,23 +298,7 @@ export default function CoursesPortal() {
             <p className="text-xl text-gray-200 max-w-2xl mx-auto mb-8">
               Discover world-class architecture courses taught by industry experts. Learn at your own pace.
             </p>
-            <div className="flex items-center justify-center gap-4">
-              <a
-                href="#course-catalog"
-                className="inline-flex items-center px-6 py-3 rounded-full bg-white text-slate-900 font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
-              >
-                Browse Courses
-              </a>
-              {isAuthenticated && (
-                <Link
-                  href="/profile/my-courses"
-                  className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  My Courses
-                </Link>
-              )}
-            </div>
+            
           </div>
         </div>
         <div className="absolute inset-0 overflow-hidden opacity-20">
@@ -330,45 +332,63 @@ export default function CoursesPortal() {
           {/* Filters */}
           <div className="flex flex-wrap gap-2 items-center">
             {/* Category Filter */}
-            <div className="relative">
-              <button className={`flex items-center px-4 py-2 rounded-full text-sm ${filters.category ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'} hover:bg-blue-100 hover:text-blue-800 transition-colors`}>
+            <div className="relative" ref={categoryRef}>
+              <button onClick={() => setShowCategoryDropdown(s => !s)} className={`flex items-center px-4 py-2 rounded-full text-sm ${filters.category ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'} hover:bg-blue-100 hover:text-blue-800 transition-colors`}>
                 <Tag className="mr-2 h-4 w-4" />
                 <span className="mr-1">Category:</span>
                 <span className="font-medium">{filters.category || 'All'}</span>
                 <ChevronDown className="ml-1 h-4 w-4" />
               </button>
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 py-2 hidden group-hover:block">
-                {['Design', 'Theory', 'Sustainability', 'Digital Tools', 'Urban Design', 'History', 'Drawing', 'Construction', 'Acoustics'].map(category => (
+              {showCategoryDropdown && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 py-2">
                   <button
-                    key={category}
-                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${filters.category === category ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'}`}
-                    onClick={() => handleFilterChange('category', category)}
+                    key="all"
+                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${filters.category === '' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'}`}
+                    onClick={() => { handleFilterChange('category', ''); setShowCategoryDropdown(false) }}
                   >
-                    {category}
+                    All
                   </button>
-                ))}
-              </div>
+                  {['Design', 'Theory', 'Sustainability', 'Digital Tools', 'Urban Design', 'History', 'Drawing', 'Construction', 'Acoustics'].map(category => (
+                    <button
+                      key={category}
+                      className={`block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${filters.category === category ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'}`}
+                      onClick={() => { handleFilterChange('category', category); setShowCategoryDropdown(false) }}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Difficulty Filter */}
-            <div className="relative">
-              <button className={`flex items-center px-4 py-2 rounded-full text-sm ${filters.difficulty ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'} hover:bg-blue-100 hover:text-blue-800 transition-colors`}>
+            <div className="relative" ref={difficultyRef}>
+              <button onClick={() => setShowDifficultyDropdown(s => !s)} className={`flex items-center px-4 py-2 rounded-full text-sm ${filters.difficulty ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'} hover:bg-blue-100 hover:text-blue-800 transition-colors`}>
                 <Users className="mr-2 h-4 w-4" />
                 <span className="mr-1">Level:</span>
                 <span className="font-medium">{filters.difficulty || 'All'}</span>
                 <ChevronDown className="ml-1 h-4 w-4" />
               </button>
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 py-2 hidden group-hover:block">
-                {['Beginner', 'Intermediate', 'Advanced'].map(level => (
+              {showDifficultyDropdown && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 py-2">
                   <button
-                    key={level}
-                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${filters.difficulty === level ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'}`}
-                    onClick={() => handleFilterChange('difficulty', level)}
+                    key="all-level"
+                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${filters.difficulty === '' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'}`}
+                    onClick={() => { handleFilterChange('difficulty', ''); setShowDifficultyDropdown(false) }}
                   >
-                    {level}
+                    All
                   </button>
-                ))}
-              </div>
+                  {['Beginner', 'Intermediate', 'Advanced'].map(level => (
+                    <button
+                      key={level}
+                      className={`block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${filters.difficulty === level ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'}`}
+                      onClick={() => { handleFilterChange('difficulty', level); setShowDifficultyDropdown(false) }}
+                    >
+                      {level}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
 

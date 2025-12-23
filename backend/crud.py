@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, func
-from database import User, Job, JobApplication, SavedJob, Course, CourseEnrollment, Workshop, WorkshopRegistration, Event, EventRegistration, SystemSettings, CourseLesson, CourseMaterial, LessonProgress
+from database import User, Job, JobApplication, SavedJob, Course, CourseEnrollment, Workshop, WorkshopRegistration, Event, EventRegistration, SystemSettings, CourseLesson, CourseMaterial, LessonProgress, CourseReview
 import schemas
 from auth import get_password_hash, verify_password
 from typing import Optional, List
@@ -14,6 +14,27 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
         return None
     email = email.lower().strip()
     return db.query(User).filter(func.lower(User.email) == email).first()
+
+
+def get_user_by_phone(db: Session, phone: str) -> Optional[User]:
+    """Get user by phone number. Normalizes digits and compares to stored phones."""
+    if not phone:
+        return None
+    import re
+    norm = re.sub(r"\D", "", phone)
+
+    # Quick exact match first
+    user = db.query(User).filter(User.phone == phone).first()
+    if user:
+        return user
+
+    # Fallback: compare normalized digits for all users with phone set
+    users = db.query(User).filter(User.phone != None).all()
+    for u in users:
+        if u.phone:
+            if re.sub(r"\D", "", u.phone) == norm:
+                return u
+    return None
 
 def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
     """Get user by ID"""
@@ -684,6 +705,60 @@ def get_course_by_id(db: Session, course_id: int) -> Optional[Course]:
         course.total_lessons = len(course.lessons)
         course.total_duration = sum(lesson.video_duration or 0 for lesson in course.lessons)
     return course
+
+def create_or_update_course_review(db: Session, course_id: int, user_id: int, rating: int, review_text: Optional[str] = None):
+    """Create a new review or update existing review by the same user for a course."""
+    # Validate course exists
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise Exception("Course not found")
+
+    # Ensure rating is within 1-5
+    try:
+        rating_val = int(rating)
+    except Exception:
+        raise Exception("Invalid rating")
+    if rating_val < 1 or rating_val > 5:
+        raise Exception("Rating must be between 1 and 5")
+
+    # Check existing review by user
+    existing = db.query(CourseReview).filter(
+        CourseReview.course_id == course_id,
+        CourseReview.user_id == user_id
+    ).first()
+
+    if existing:
+        existing.rating = rating_val
+        existing.review_text = review_text
+        existing.created_at = datetime.utcnow()
+        db.commit()
+        db.refresh(existing)
+        return existing
+
+    # Create new
+    new_review = CourseReview(
+        course_id=course_id,
+        user_id=user_id,
+        rating=rating_val,
+        review_text=review_text,
+        created_at=datetime.utcnow()
+    )
+    db.add(new_review)
+    db.commit()
+    db.refresh(new_review)
+    return new_review
+
+def get_course_reviews(db: Session, course_id: int):
+    """Return list of reviews for a course ordered by created_at desc"""
+    reviews = db.query(CourseReview).filter(CourseReview.course_id == course_id).order_by(CourseReview.created_at.desc()).all()
+    return reviews
+
+def get_course_average_rating(db: Session, course_id: int):
+    """Return average rating and count for a course"""
+    result = db.query(func.avg(CourseReview.rating).label('avg'), func.count(CourseReview.id).label('count')).filter(CourseReview.course_id == course_id).first()
+    avg = float(result.avg) if result and result.avg is not None else None
+    count = int(result.count) if result and result.count is not None else 0
+    return {"average": avg, "count": count}
 
 def create_course(db: Session, course: schemas.CourseCreate) -> Course:
     """Create a new course"""

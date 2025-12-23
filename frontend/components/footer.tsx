@@ -21,7 +21,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
           {/* Brand */}
           <div className="md:col-span-1">
-            <div className="flex items-center space-x-3 mb-4">
+            <Link href="/" className="flex items-center space-x-3 mb-4">
               <Image 
                 src="/logo.jpg" 
                 alt="AAO - Architecture Academics Online Logo" 
@@ -37,7 +37,7 @@ export default function Footer() {
                   architecture-academics.online
                 </span>
               </div>
-            </div>
+            </Link>
             <p className="text-sm text-black mb-4">
               India's premier online platform for architecture education, NATA preparation, career growth, and professional networking.
             </p>
@@ -91,17 +91,11 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-gray-900 mb-4">Resources</h4>
             <div className="space-y-2">
-              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
+              <a href="/nata-courses" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 NATA Courses
               </a>
-              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
+              <a href="/architecture-tours" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Architecture Tours
-              </a>
-              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
-                CoA Portal
-              </a>
-              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
-                IIA Portal
               </a>
               <Link href="/competitions" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Competitions
@@ -118,6 +112,28 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Service Providers */}
+          <div>
+            <h4 className="font-bold text-gray-900 mb-4">Service Providers</h4>
+            <div className="space-y-2">
+              <a href="/software-training" className="block text-sm text-black hover:text-emerald-600 transition-colors">
+                Software Training
+              </a>
+              <a href="/stationary-supplier" className="block text-sm text-black hover:text-emerald-600 transition-colors">
+                Stationary Supplier
+              </a>
+              <a href="/tour-organizer" className="block text-sm text-black hover:text-emerald-600 transition-colors">
+                Tour Organizer
+              </a>
+              <a href="/book-seller" className="block text-sm text-black hover:text-emerald-600 transition-colors">
+                Book Seller
+              </a>
+              <a href="/product-manufacturer" className="block text-sm text-black hover:text-emerald-600 transition-colors">
+                Product & Material Manufacturer
+              </a>
+            </div>
+          </div>
+
           {/* Company */}
           <div>
             <h4 className="font-bold text-gray-900 mb-4">Company</h4>
@@ -128,40 +144,18 @@ export default function Footer() {
               <Link href="/advertise-with-us" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Advertise With Us
               </Link>
-              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
+              <a href="/about-us" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 About Us
               </a>
-              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
+              <a href="/terms-and-conditions" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Terms & Conditions
               </a>
-              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
+              <a href="/privacy-policy" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Privacy Policy
               </a>
-              <a href="#" className="block text-sm text-black hover:text-purple-600 transition-colors">
+              <a href="/feedback" className="block text-sm text-black hover:text-purple-600 transition-colors">
                 Feedback
               </a>
-            </div>
-          </div>
-
-          {/* Service Providers */}
-          <div>
-            <h4 className="font-bold text-gray-900 mb-4">Service Providers</h4>
-            <div className="space-y-2">
-              <Link href="/software-training" className="block text-sm text-black hover:text-emerald-600 transition-colors">
-                Software Training
-              </Link>
-              <Link href="/stationary-supplier" className="block text-sm text-black hover:text-emerald-600 transition-colors">
-                Stationary Supplier
-              </Link>
-              <Link href="/tour-organizer" className="block text-sm text-black hover:text-emerald-600 transition-colors">
-                Tour Organizer
-              </Link>
-              <Link href="/book-seller" className="block text-sm text-black hover:text-emerald-600 transition-colors">
-                Book Seller
-              </Link>
-              <Link href="/product-manufacturer" className="block text-sm text-black hover:text-emerald-600 transition-colors">
-                Product & Material Manufacturer
-              </Link>
             </div>
           </div>
         </div>
@@ -173,16 +167,16 @@ export default function Footer() {
               © 2025 Architecture Academics. All rights reserved. Empowering the next generation of architects.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <a href="#" className="text-sm text-black hover:text-purple-600 transition-colors">
+              <a href="/privacy" className="text-sm text-black hover:text-purple-600 transition-colors">
                 Privacy
               </a>
-              <a href="#" className="text-sm text-black hover:text-purple-600 transition-colors">
+              <a href="/terms" className="text-sm text-black hover:text-purple-600 transition-colors">
                 Terms
               </a>
-              <a href="#" className="text-sm text-black hover:text-purple-600 transition-colors">
+              <a href="/cookies" className="text-sm text-black hover:text-purple-600 transition-colors">
                 Cookies
               </a>
-              <a href="#" className="text-sm text-black hover:text-purple-600 transition-colors">
+              <a href="/accessibility" className="text-sm text-black hover:text-purple-600 transition-colors">
                 Accessibility
               </a>
             </div>

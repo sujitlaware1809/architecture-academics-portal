@@ -4,8 +4,9 @@ import { Inter, Poppins, Syne } from "next/font/google"
 import "./globals.css"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import AuthenticatedLayout from "@/components/authenticated-layout"
 import { AuthMiddleware } from "@/components/auth-middleware"
-import { Toaster } from "react-hot-toast"
+import ToasterClient from '@/components/toaster-client'
 
 const inter = Inter({
   subsets: ["latin"],
@@ -70,37 +71,12 @@ export default function RootLayout({
       <body className="font-inter flex flex-col min-h-screen bg-white text-gray-900 transition-colors duration-300">
         <AuthMiddleware>
           <Header />
-          <main className="flex-1">{children}</main>
+          <AuthenticatedLayout>
+            {children}
+          </AuthenticatedLayout>
           <Footer />
         </AuthMiddleware>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#ffffff',
-              color: '#374151',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              fontSize: '14px',
-              fontWeight: '500',
-              padding: '12px 16px',
-              maxWidth: '420px',
-            },
-            success: {
-              iconTheme: {
-                primary: '#10b981',
-                secondary: '#ffffff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#ef4444',
-                secondary: '#ffffff',
-              },
-            },
-          }}
-        />
+        <ToasterClient />
       </body>
     </html>
   )

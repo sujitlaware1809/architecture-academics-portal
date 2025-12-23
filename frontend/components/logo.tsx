@@ -9,13 +9,15 @@ interface LogoProps {
   showText?: boolean
   variant?: 'default' | 'white' | 'dark'
   size?: 'sm' | 'md' | 'lg'
+  inlineText?: boolean
 }
 
 const Logo: React.FC<LogoProps> = ({ 
   className = '', 
   showText = true, 
   variant = 'default',
-  size = 'md'
+  size = 'md',
+  inlineText = false,
 }) => {
   const sizeClasses = {
     sm: 'h-6 w-6',
@@ -35,37 +37,46 @@ const Logo: React.FC<LogoProps> = ({
     dark: 'text-gray-900'
   }
 
+  const pixelSizes: Record<string, number> = {
+    sm: 24,
+    md: 32,
+    lg: 48,
+  }
+
   return (
-    <Link href="/" className={`flex items-center space-x-2 ${className}`}>
-      <div className={`${sizeClasses[size]} relative`}>
+    <Link href="/" className={`flex items-center space-x-3 ${className}`}>
+      {/* Icon: rounded gray square with logo image centered */}
+      <div className={`${sizeClasses[size]} flex-shrink-0 rounded-lg overflow-hidden bg-gray-300 flex items-center justify-center`}> 
         <Image
           src="/logo.jpg"
-          alt="AAO Logo"
-          width={32}
-          height={32}
-          className="object-contain rounded-lg"
-          priority
+          alt="AAO logo"
+          width={pixelSizes[size]}
+          height={pixelSizes[size]}
+          className="object-contain p-1"
+          priority={true}
         />
       </div>
+
       {showText && (
-        <div className="flex flex-col">
-          <span className={`font-bold ${textSizeClasses[size]} leading-tight ${
-            variant === 'white' 
-              ? 'text-white' 
-              : 'bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'
-          }`}>
-            AAO
-          </span>
-          {size !== 'sm' && (
-            <span className={`text-xs leading-tight ${
-              variant === 'white' 
-                ? 'text-white opacity-75' 
-                : 'text-gray-500 font-medium lowercase'
-            }`}>
-              architecture-academics.online
+        inlineText ? (
+          <div className="flex items-center gap-2 leading-none whitespace-nowrap">
+            <span className={`font-semibold ${textSizeClasses[size]} ${variant === 'white' ? 'text-white' : 'text-gray-900'}`}>
+              AAO
             </span>
-          )}
-        </div>
+            {size !== 'sm' && (
+              <span className={`text-xs ${variant === 'white' ? 'text-white/85' : 'text-gray-500'} lowercase`}>architecture-academics.online</span>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col leading-tight">
+            <span className={`font-semibold ${textSizeClasses[size]} ${variant === 'white' ? 'text-white' : 'text-gray-900'}`}>
+              AAO
+            </span>
+            {size !== 'sm' && (
+              <span className={`text-xs ${variant === 'white' ? 'text-white/85' : 'text-gray-500'} lowercase`}>architecture-academics.online</span>
+            )}
+          </div>
+        )
       )}
     </Link>
   )

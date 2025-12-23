@@ -178,21 +178,7 @@ export default function NATACoursesPage() {
             <p className="text-xl text-gray-200 max-w-2xl mx-auto mb-8">
               Comprehensive NATA preparation covering drawing, mathematics, general aptitude, and complete exam strategies from industry experts
             </p>
-            <div className="flex items-center justify-center gap-4">
-              <a
-                href="#course-catalog"
-                className="inline-flex items-center px-6 py-3 rounded-full bg-white text-slate-900 font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
-              >
-                Browse Lessons
-              </a>
-              <Link
-                href="/profile/my-courses"
-                className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 duration-300"
-              >
-                <Users className="h-4 w-4 mr-2" />
-                My Lessons
-              </Link>
-            </div>
+            
           </div>
         </div>
         <div className="absolute inset-0 overflow-hidden opacity-20">

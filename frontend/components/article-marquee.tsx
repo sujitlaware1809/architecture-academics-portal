@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useRef, useEffect } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -34,11 +34,58 @@ export function ArticleMarquee({ articles, speed = 50, direction = 'left' }: Art
   const animationClass = direction === 'left' ? 'animate-marquee' : 'animate-marquee-reverse'
   const animationClass2 = direction === 'left' ? 'animate-marquee2' : 'animate-marquee2-reverse'
 
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const primaryRef = useRef<HTMLDivElement | null>(null)
+  const secondaryRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const pause = () => {
+      if (primaryRef.current) primaryRef.current.style.animationPlayState = 'paused'
+      if (secondaryRef.current) secondaryRef.current.style.animationPlayState = 'paused'
+      // Temporarily disable group hover effects for marquee rows only
+      container.querySelectorAll('[data-marquee-group]').forEach(g => g.classList.remove('group'))
+    }
+    const resume = () => {
+      if (primaryRef.current) primaryRef.current.style.animationPlayState = 'running'
+      if (secondaryRef.current) secondaryRef.current.style.animationPlayState = 'running'
+      // Re-enable group hover effects for marquee rows only
+      container.querySelectorAll('[data-marquee-group]').forEach(g => g.classList.add('group'))
+    }
+
+    // Pause when user interacts (mouse/touch/hover) to avoid jumpy resumes
+    container.addEventListener('pointerenter', pause)
+    container.addEventListener('pointerleave', resume)
+    container.addEventListener('pointerdown', pause)
+    container.addEventListener('pointerup', resume)
+    container.addEventListener('touchstart', pause, { passive: true })
+    container.addEventListener('touchend', resume)
+
+    // Also pause when window/tab loses focus
+    const handleVisibility = () => {
+      if (document.hidden) pause()
+      else resume()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      container.removeEventListener('pointerdown', pause)
+      container.removeEventListener('touchstart', pause)
+      container.removeEventListener('pointerup', resume)
+      container.removeEventListener('pointerleave', resume)
+      container.removeEventListener('touchend', resume)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [])
+
   return (
-    <div className="relative w-full overflow-hidden py-10 bg-white">
-      <div className="relative flex overflow-hidden group">
+    <div ref={containerRef} className="relative w-full overflow-hidden py-10 bg-white">
+      <div className="relative flex overflow-hidden" data-marquee-group-wrapper>
         <div 
-          className={`flex ${animationClass} hover:[animation-play-state:paused]`}
+          ref={primaryRef}
+          className={`flex ${animationClass} hover:[animation-play-state:paused] group`} data-marquee-group
           style={{ animationDuration: `${speed}s` }}
         >
           {items.map((article, idx) => (
@@ -46,7 +93,8 @@ export function ArticleMarquee({ articles, speed = 50, direction = 'left' }: Art
           ))}
         </div>
         <div 
-          className={`flex absolute top-0 ${animationClass2} hover:[animation-play-state:paused]`}
+          ref={secondaryRef}
+          className={`flex absolute top-0 ${animationClass2} hover:[animation-play-state:paused] group`} data-marquee-group
           style={{ animationDuration: `${speed}s` }}
         >
           {items.map((article, idx) => (

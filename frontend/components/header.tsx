@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   ArrowRight,
+  ChevronDown,
   BookOpen,
   Briefcase,
   Calendar,
@@ -47,7 +48,6 @@ export default function Header() {
   const [user, setUser] = useState<any>(null)
   const [notifications, setNotifications] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState<number>(0)
-  const [unreadMessagesCount, setUnreadMessagesCount] = useState<number>(0)
   const [showNotifications, setShowNotifications] = useState<boolean>(false)
 
   useEffect(() => {
@@ -106,27 +106,7 @@ export default function Header() {
     fetchNotifications()
   }, [isAuthenticated])
 
-  // Fetch unread messages count
-  useEffect(() => {
-    const fetchUnreadMessages = async () => {
-      if (!isAuthenticated) return
-      try {
-        const response = await api.get('/messages/unread-count', { allow401: true })
-        if (response && response.status === 401) {
-          // ignore - user not authenticated
-        } else if (response && response.data) {
-          setUnreadMessagesCount(response.data.count)
-        }
-      } catch (err) {
-        console.error("Failed to fetch unread messages count", err)
-      }
-    }
-
-    fetchUnreadMessages()
-    // Poll every minute
-    const interval = setInterval(fetchUnreadMessages, 60000)
-    return () => clearInterval(interval)
-  }, [isAuthenticated])
+  // (messages button removed — unread messages polling not required)
 
   const getDashboardLink = () => {
     if (!user) return "/dashboard"
@@ -242,98 +222,80 @@ export default function Header() {
     window.location.href = "/"
   }
 
+  const servicesLinks = [
+    { href: "/software-training", label: "Software Training" },
+    { href: "/product-manufacturer", label: "Product & Material Manufacturer" },
+    { href: "/book-seller", label: "Architectural Books" },
+    { href: "/tour-organizer", label: "Architectural Tour" },
+    { href: "/stationary-supplier", label: "Stationary Supplies" },
+  ];
+
+  const isActiveLink = (href: string) => {
+    if (!pathname) return false
+    return pathname === href || pathname.startsWith(href + '/')
+  }
+
+  const isServiceActive = () => {
+    if (!pathname) return false
+    return servicesLinks.some(s => pathname === s.href || pathname.startsWith(s.href + '/'))
+  }
+
   return (
     <div className="sticky top-0 z-50 flex flex-col transition-all duration-300">
       {/* Main Navigation Header with Integrated Search */}
       <header className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center h-16">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Logo 
-                size="md" 
-                variant="white" 
+              <Logo
+                size="md"
+                variant="white"
+                inlineText={false}
                 className="hover:scale-105 transition-transform duration-200"
               />
             </div>
 
             {/* Main Navigation with Search - Desktop */}
-            <div className="hidden lg:flex items-center space-x-6 flex-1 justify-center">
+            <div className="hidden lg:flex items-center space-x-4 flex-1 justify-center">
               <nav className="flex items-center space-x-1">
-                <Link href="/" className="px-3 py-2 text-sm font-medium text-white hover:text-white/80 hover:bg-white/10 rounded-md transition-all duration-200">
+                <Link href="/" className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${isActiveLink('/') ? 'bg-white text-blue-600' : 'text-white border border-white/20 hover:text-white/80 hover:bg-white/10'}`}>
                   Home
                 </Link>
+                <div className="relative group">
+                  <button aria-haspopup="menu" aria-expanded="false" className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 inline-flex items-center gap-1 ${isServiceActive() ? 'bg-white text-blue-600' : 'text-white border border-white/20 hover:text-white/80 hover:bg-white/10'}`}>
+                    <span>Services</span>
+                    <ChevronDown className="h-4 w-4 text-white/90" />
+                  </button>
+                  <div className="absolute left-0 mt-2 w-56 bg-white text-gray-900 border border-gray-200 rounded shadow-lg hidden group-hover:block z-50">
+                    {servicesLinks.map((s) => (
+                      <Link
+                        key={s.href}
+                        href={s.href}
+                        className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                      >
+                        {s.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               
               {isAuthenticated ? (
                 <>
-                  {!isFacultyOrArchitect() && (
-                    <Link href="/courses" className="px-3 py-2 text-sm font-medium text-white hover:text-white/80 hover:bg-white/10 rounded-md transition-all duration-200 flex items-center gap-1">
-                      <BookOpen className="h-4 w-4" />
-                      Courses
-                    </Link>
-                  )}
-                  <Link href="/events" className="px-3 py-2 text-sm font-medium text-white hover:text-cyan-200 hover:bg-cyan-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    Events
-                  </Link>
+                  {/* Courses and Events moved to user sidebar */}
                   {isFacultyOrArchitect() && (
                     <Link href="/discussions" className="px-3 py-2 text-sm font-medium text-white hover:text-pink-200 hover:bg-pink-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
                       <MessageSquare className="h-4 w-4" />
                       Discussions
                     </Link>
                   )}
-                  <Link href="/jobs-portal" className="px-3 py-2 text-sm font-medium text-white hover:text-green-200 hover:bg-green-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
-                    <Briefcase className="h-4 w-4" />
-                    Jobs
-                  </Link>
-                  <Link href="/blogs" className="px-3 py-2 text-sm font-medium text-white hover:text-purple-200 hover:bg-purple-500/20 rounded-md transition-all duration-200 flex items-center gap-1">
-                    <FileText className="h-4 w-4" />
-                    Blogs
-                  </Link>
+                  {/* Jobs and Blogs moved to user sidebar */}
                 </>
-              ) : (
-                <>
-                  <div className="flex items-center gap-3 text-xs text-white border-l border-r border-white/20 px-4 mx-4">
-                    <span className="flex items-center gap-1 hover:text-white/80 transition-colors cursor-pointer">
-                      <Phone className="h-3 w-3" />
-                      +91 98765 43210
-                    </span>
-                    <span className="flex items-center gap-1 hover:text-white/80 transition-colors cursor-pointer">
-                      <Mail className="h-3 w-3" />
-                      info@architecture-academics.online
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <a href="#" className="p-1.5 text-white hover:text-white/80 hover:bg-white/10 rounded transition-all duration-200" title="Facebook">
-                      <Facebook className="h-4 w-4" />
-                    </a>
-                    <a href="#" className="p-1.5 text-white hover:text-white/80 hover:bg-white/10 rounded transition-all duration-200" title="LinkedIn">
-                      <Linkedin className="h-4 w-4" />
-                    </a>
-                    <a href="#" className="p-1.5 text-white hover:text-white/80 hover:bg-white/10 rounded transition-all duration-200" title="Twitter">
-                      <Twitter className="h-4 w-4" />
-                    </a>
-                    <a href="#" className="p-1.5 text-white hover:text-white/80 hover:bg-white/10 rounded transition-all duration-200" title="Instagram">
-                      <Instagram className="h-4 w-4" />
-                    </a>
-                  </div>
-                </>
-              )}
+              ) : null}
               </nav>
-              
-              {/* Integrated Search Bar */}
-              <div className="relative ml-4">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-white/70 h-3.5 w-3.5" />
-                  <Input
-                    placeholder="Search courses, jobs, blogs..."
-                    className="pl-8 pr-3 w-56 h-7 text-xs bg-white/15 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/20 focus:border-white/50 focus:ring-0 focus:outline-none rounded-md"
-                    value={searchQuery}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                  />
-                </div>
+
+              {/* Main Navigation only — contact and search moved to right column so nav stays centered */}
+              {/* Integrated Search Bar removed from center to keep nav centered */}
                 {(searchResults.length > 0 || isSearching) && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 overflow-hidden max-h-96 overflow-y-auto">
                     {isSearching && searchResults.length === 0 && (
@@ -357,11 +319,29 @@ export default function Header() {
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
 
-            {/* Auth Buttons - Desktop (with Notifications) */}
-            <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
+              
+
+              {/* Right-side controls - contact, search, notifications, user */}
+            <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
+              {/* Contact (desktop) */}
+              <div className="hidden lg:flex items-center gap-3 mr-2 whitespace-nowrap">
+                <a href="tel:+919876543210" className="flex items-center gap-1 text-xs text-white/90 hover:text-white">
+                  <Phone className="h-3 w-3 text-white/80" />
+                  <span className="text-xs font-medium">+91 98765 43210</span>
+                </a>
+                {!isAuthenticated && (
+                  <a href="mailto:info@architecture-academics.online" className="flex items-center gap-1 text-xs text-white/90 hover:text-white">
+                    <Mail className="h-3 w-3 text-white/80" />
+                    <span className="text-xs font-medium">info@architecture-academics.online</span>
+                  </a>
+                )}
+              </div>
+
+             
+
+              {/* Auth Buttons - Desktop (with Notifications) */}
+            </div>
               {isAuthenticated ? (
                 <>
                   <div className="relative">
@@ -431,7 +411,31 @@ export default function Header() {
                       </div>
                     )}
                   </div>
+                    {/* Messages quick link */}
+                <Link href="/messages">
+  <button
+    title="Messages"
+    className="px-2 py-1.5 rounded-md text-white hover:bg-white/10 transition-colors flex items-center gap-1 relative"
+  >
+    <MessageSquare className="h-4 w-4 text-white" />
+    <span className="sr-only">Messages</span>
+    <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-pink-500" />
+  </button>
+</Link>
 
+ {/* Search (desktop) */}
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-white/70 h-3.5 w-3.5" />
+                  <Input
+                    placeholder="Search courses, jobs, blogs..."
+                    className={`pl-8 pr-2 ${isAuthenticated ? 'w-48' : 'w-36'} h-8 text-sm bg-white/15 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/20 focus:border-white/50 focus:ring-0 focus:outline-none rounded-md`}
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                  />
+                </div>
+              </div>
                   {/* Dashboard quick link next to notifications */}
                   <Link href={getDashboardLink()}>
                     <button className="px-2 py-1.5 rounded-md text-white hover:bg-white/10 transition-colors flex items-center gap-1" title="Dashboard">
@@ -439,66 +443,72 @@ export default function Header() {
                       <span className="text-sm font-medium hidden xl:inline">Dashboard</span>
                     </button>
                   </Link>
-                  
-                  <Link href="/messages">
-                    <button className="p-2 rounded-md text-white hover:bg-white/10 transition-colors relative" title="Messages">
-                      <Mail className="h-4 w-4" />
-                      {unreadMessagesCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-black"></span>
-                      )}
-                    </button>
-                  </Link>
+                  {/* Messages button removed per request; contact is shown in header/topbar */}
 
-                  {/* User info display */}
+                
+
+                  {/* User info display (show before logout) */}
                   <Link href="/profile">
-                    <div className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-3 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer">
                       {user && (user.avatar || user.profile_image_url) ? (
-                        <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-white/40 relative">
-                          <img 
-                            src={user.avatar || (user.profile_image_url?.startsWith('http') ? user.profile_image_url : `${process.env.NEXT_PUBLIC_API_URL}${user.profile_image_url}`)} 
-                            alt={user.name || 'avatar'} 
+                        <div className="h-8 w-8 rounded-full overflow-hidden border-2 border-white/30 relative">
+                          <img
+                            src={user.avatar || (user.profile_image_url?.startsWith('http') ? user.profile_image_url : `${process.env.NEXT_PUBLIC_API_URL}${user.profile_image_url}`)}
+                            alt={user.name || 'avatar'}
                             className="h-full w-full object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                               e.currentTarget.parentElement?.classList.add('hidden');
-                              // Fallback to showing the initial if image fails
                               const fallback = document.getElementById('user-initial-fallback');
                               if (fallback) fallback.style.display = 'flex';
                             }}
                           />
                         </div>
                       ) : (
-                        <div id="user-initial-fallback" className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-sm text-white border-2 border-white/40 font-bold flex-shrink-0">
+                        <div id="user-initial-fallback" className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-sm text-white border-2 border-white/30 font-bold flex-shrink-0">
                           {user && user.first_name ? user.first_name.charAt(0).toUpperCase() : (user && user.name ? user.name.charAt(0).toUpperCase() : <User className="h-4 w-4 text-white" />)}
                         </div>
                       )}
                       {user && (
-                        <span className="text-sm font-semibold text-white">
-                          {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : (user.name || 'User')}
-                        </span>
+                        <span className="text-sm font-medium text-white">{user.first_name ? user.first_name : (user.name ? user.name.split(' ')[0] : 'User')}</span>
                       )}
                     </div>
                   </Link>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  {/* Logout button next to profile */}
+                  <button
                     onClick={handleLogout}
-                    className="text-white hover:text-white/80 hover:bg-red-500/20 border border-white/20 backdrop-blur-sm text-xs px-2 py-1.5 flex-shrink-0"
+                    className="ml-2 px-2 py-1.5 rounded-md text-white hover:bg-white/10 transition-colors flex items-center gap-1"
+                    title="Logout"
                   >
-                    <LogOut className="h-3.5 w-3.5 mr-1" />
-                    Logout
-                  </Button>
+                    <LogOut className="h-4 w-4" />
+                    <span className="text-sm font-medium hidden xl:inline"></span>
+                  </button>
+
+                  {/* Logout moved to the user sidebar for authenticated users */}
                 </>
               ) : (
                 <>
+                  {/* Small desktop search shown just before Login for logged-out users */}
+                  <div className="hidden lg:flex items-center mr-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-white/70 h-3.5 w-3.5" />
+                      <Input
+                        placeholder="Search courses, jobs..."
+                        className="pl-8 pr-2 w-40 h-8 text-sm bg-white/15 border border-white/30 text-white placeholder:text-white/70 focus:bg-white/20 focus:border-white/50 focus:ring-0 focus:outline-none rounded-md"
+                        value={searchQuery}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                      />
+                    </div>
+                  </div>
                   <Link href="/login">
-                    <Button variant="ghost" size="sm" className="text-white hover:text-white/80 hover:bg-white/10 border border-white/20 backdrop-blur-sm text-sm">
+                    <Button size="sm" className={`${isActiveLink('/login') ? 'bg-white text-blue-600' : 'bg-transparent text-white border border-white/20'} hover:bg-white/90 hover:text-blue-700 text-sm font-medium`}>
                       Login
                     </Button>
                   </Link>
                   <Link href="/register">
-                    <Button size="sm" className="bg-white text-blue-600 hover:bg-gray-50 hover:text-blue-700 text-sm font-medium">
+                    <Button size="sm" className={`${isActiveLink('/register') ? 'bg-white text-blue-600' : 'bg-transparent text-white border border-white/20'} hover:bg-white/90 hover:text-blue-700 text-sm font-medium`}>
                       Sign Up
                     </Button>
                   </Link>
@@ -507,17 +517,19 @@ export default function Header() {
             </div>
 
             {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors duration-200"
-              aria-label="Toggle mobile menu"
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+            {pathname !== "/" && (
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors duration-200"
+                aria-label="Toggle mobile menu"
+              >
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu */}
-          {isMobileMenuOpen && (
+          {pathname !== "/" && isMobileMenuOpen && (
             <div className="lg:hidden absolute top-full left-0 right-0 bg-white border border-gray-200 shadow-xl mx-4 mt-1 rounded-lg max-h-[80vh] overflow-y-auto z-50">
               <div className="px-3 py-3 space-y-1">
                 {/* Mobile Search */}
@@ -554,35 +566,23 @@ export default function Header() {
 
                 {/* Mobile Navigation Links */}
                 <div className="space-y-1">
-                  <Link
-                    href="/"
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Building className="h-4 w-4" />
-                    Home
-                  </Link>
+                  {/* Services (mobile) */}
+                  <div className="px-3 pb-1 text-sm font-medium text-gray-600">Services</div>
+                  {servicesLinks.map((s) => (
+                    <Link
+                      key={s.href}
+                      href={s.href}
+                      className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Building className="h-4 w-4" />
+                      {s.label}
+                    </Link>
+                  ))}
                   
                   {isAuthenticated ? (
                     <>
-                      {!isFacultyOrArchitect() && (
-                        <Link
-                          href="/courses"
-                          className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <BookOpen className="h-4 w-4" />
-                          Courses
-                        </Link>
-                      )}
-                      <Link
-                        href="/events"
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-cyan-600 hover:bg-cyan-50 transition-colors duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <Calendar className="h-4 w-4" />
-                        Events
-                      </Link>
+                      {/* Courses, Events, Jobs, Blogs moved to user sidebar for authenticated users */}
                       {isFacultyOrArchitect() && (
                         <Link
                           href="/discussions"
@@ -593,22 +593,6 @@ export default function Header() {
                           Discussions
                         </Link>
                       )}
-                      <Link
-                        href="/jobs-portal"
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-green-600 hover:bg-green-50 transition-colors duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <Briefcase className="h-4 w-4" />
-                        Jobs
-                      </Link>
-                      <Link
-                        href="/blogs"
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-colors duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <FileText className="h-4 w-4" />
-                        Blogs
-                      </Link>
 
                       {/* Mobile User Menu for authenticated users */}
                       <div className="pt-2 border-t border-gray-200 space-y-1">
@@ -634,7 +618,7 @@ export default function Header() {
                           }}
                           className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-red-600 hover:bg-red-50 transition-colors duration-200 w-full text-left"
                         >
-                          <LogOut className="h-4 w-4" />
+                          <LogOut className="h-3.5 w-3.5" />
                           Logout
                         </button>
                       </div>
@@ -649,8 +633,8 @@ export default function Header() {
                           <span>+91 98765 43210</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Mail className="h-3 w-3 text-white-500" />
-                          <span>info@architecture-academics.online</span>
+                          <Mail className="h-3 w-3 text-gray-500" />
+                          <a href="mailto:info@architecture-academics.online" className="hover:underline">info@architecture-academics.online</a>
                         </div>
                         <div className="flex items-center gap-2 pt-1">
                           <a href="#" className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors duration-200" title="Facebook">
@@ -673,14 +657,14 @@ export default function Header() {
                         <div className="text-xs font-medium text-gray-500 px-3 pb-1">Account</div>
                         <Link
                           href="/login"
-                          className="flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                          className={`${isActiveLink('/login') ? 'flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md bg-blue-600 text-white' : 'flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md bg-transparent text-gray-700 border border-gray-200' } transition-colors duration-200`}
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Login
                         </Link>
                         <Link
                           href="/register"
-                          className="flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+                          className={`${isActiveLink('/register') ? 'flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md bg-blue-600 text-white' : 'flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md bg-transparent text-gray-700 border border-gray-200' } transition-colors duration-200`}
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Sign Up

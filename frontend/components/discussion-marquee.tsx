@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useRef, useEffect } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -30,7 +30,7 @@ interface DiscussionMarqueeProps {
   speed?: number
 }
 
-export function DiscussionMarquee({ discussions, speed = 40, singleRow = false, direction = 'left' }: DiscussionMarqueeProps & { singleRow?: boolean, direction?: 'left' | 'right' }) {
+export function DiscussionMarquee({ discussions, speed = 50, singleRow = false, direction = 'left' }: DiscussionMarqueeProps & { singleRow?: boolean, direction?: 'left' | 'right' }) {
   // If singleRow is true, use all discussions in one row
   // Otherwise split into two rows
   
@@ -47,12 +47,58 @@ export function DiscussionMarquee({ discussions, speed = 40, singleRow = false, 
   const animationClass2 = 'animate-marquee-reverse'
   const animationClass2Dup = 'animate-marquee2-reverse'
 
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const p1Ref = useRef<HTMLDivElement | null>(null)
+  const s1Ref = useRef<HTMLDivElement | null>(null)
+  const p2Ref = useRef<HTMLDivElement | null>(null)
+  const s2Ref = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const pauseAll = () => {
+      [p1Ref.current, s1Ref.current, p2Ref.current, s2Ref.current].forEach(el => { if (el) el.style.animationPlayState = 'paused' })
+      // remove group classes inside this marquee to avoid stuck hover transforms
+      container.querySelectorAll('[data-marquee-group]').forEach(g => g.classList.remove('group'))
+    }
+    const resumeAll = () => {
+      [p1Ref.current, s1Ref.current, p2Ref.current, s2Ref.current].forEach(el => { if (el) el.style.animationPlayState = 'running' })
+      // re-enable group classes for marquee rows only
+      container.querySelectorAll('[data-marquee-group]').forEach(g => g.classList.add('group'))
+    }
+
+    container.addEventListener('pointerenter', pauseAll)
+    container.addEventListener('pointerleave', resumeAll)
+    container.addEventListener('pointerdown', pauseAll)
+    container.addEventListener('pointerup', resumeAll)
+    container.addEventListener('touchstart', pauseAll, { passive: true })
+    container.addEventListener('touchend', resumeAll)
+
+    const handleVisibility = () => {
+      if (document.hidden) pauseAll()
+      else resumeAll()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      container.removeEventListener('pointerenter', pauseAll)
+      container.removeEventListener('pointerleave', resumeAll)
+      container.removeEventListener('pointerdown', pauseAll)
+      container.removeEventListener('pointerup', resumeAll)
+      container.removeEventListener('touchstart', pauseAll)
+      container.removeEventListener('touchend', resumeAll)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [])
+
   return (
-    <div className="relative w-full overflow-hidden py-10 bg-gradient-to-b from-white to-blue-50/30">
+    <div ref={containerRef} className="relative w-full overflow-hidden py-10 bg-gradient-to-b from-white to-blue-50/30">
       {/* First Row */}
-      <div className={`relative flex ${!singleRow ? 'mb-8' : ''} overflow-hidden group`}>
+      <div className={`relative flex ${!singleRow ? 'mb-8' : ''} overflow-hidden`} data-marquee-group-wrapper>
         <div 
-          className={`flex ${animationClass1} hover:[animation-play-state:paused]`}
+          ref={p1Ref}
+          className={`flex ${animationClass1} hover:[animation-play-state:paused] group`} data-marquee-group
           style={{ animationDuration: `${speed}s` }}
         >
           {r1.map((discussion, idx) => (
@@ -60,7 +106,8 @@ export function DiscussionMarquee({ discussions, speed = 40, singleRow = false, 
           ))}
         </div>
         <div 
-          className={`flex absolute top-0 ${animationClass1Dup} hover:[animation-play-state:paused]`}
+          ref={s1Ref}
+          className={`flex absolute top-0 ${animationClass1Dup} hover:[animation-play-state:paused] group`} data-marquee-group
           style={{ animationDuration: `${speed}s` }}
         >
           {r1.map((discussion, idx) => (
@@ -71,9 +118,10 @@ export function DiscussionMarquee({ discussions, speed = 40, singleRow = false, 
 
       {/* Second Row (only if not singleRow) */}
       {!singleRow && (
-        <div className="relative flex overflow-hidden group">
+        <div className="relative flex overflow-hidden" data-marquee-group-wrapper>
           <div 
-            className={`flex ${animationClass2} hover:[animation-play-state:paused]`}
+            ref={p2Ref}
+            className={`flex ${animationClass2} hover:[animation-play-state:paused] group`} data-marquee-group
             style={{ animationDuration: `${speed}s` }}
           >
             {r2.map((discussion, idx) => (
@@ -81,7 +129,8 @@ export function DiscussionMarquee({ discussions, speed = 40, singleRow = false, 
             ))}
           </div>
           <div 
-            className={`flex absolute top-0 ${animationClass2Dup} hover:[animation-play-state:paused]`}
+            ref={s2Ref}
+            className={`flex absolute top-0 ${animationClass2Dup} hover:[animation-play-state:paused] group`} data-marquee-group
             style={{ animationDuration: `${speed}s` }}
           >
             {r2.map((discussion, idx) => (

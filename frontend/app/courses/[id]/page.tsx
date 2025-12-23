@@ -170,16 +170,46 @@ export default function CourseDetail({ params }: { params: Promise<{ id: string 
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
-    const comment = {
-      id: Date.now(),
-      user: "Current User",
-      text: newComment,
-      rating: newRating,
-      date: new Date().toLocaleDateString()
-    };
-    setComments([comment, ...comments]);
-    setNewComment('');
-    setNewRating(5);
+    if (!api.isAuthenticated()) {
+      alert('Please login to post a review')
+      window.location.href = '/login'
+      return
+    }
+
+    // Submit review to backend
+    (async () => {
+      try {
+        const payload = { rating: newRating, review_text: newComment }
+        const res = await api.post(`/api/courses/${courseId}/reviews`, payload)
+        if (res && res.data) {
+          // Prepend to local comments list for immediate UI feedback
+          const created = res.data
+          const comment = {
+            id: created.id || Date.now(),
+            user: localStorage.getItem('userName') || 'You',
+            text: created.review_text || newComment,
+            rating: created.rating || newRating,
+            date: new Date(created.created_at || Date.now()).toLocaleDateString()
+          }
+          setComments([comment, ...comments])
+          setNewComment('')
+          setNewRating(5)
+
+          // Refresh course data to update aggregate rating/counts
+          try {
+            const cRes = await api.get(`/api/courses/${courseId}`)
+            if (cRes && cRes.data) {
+              setCourse(prev => ({ ...prev, rating: cRes.data.rating || prev.rating, reviewCount: cRes.data.reviewCount || prev.reviewCount }))
+            }
+          } catch (err) {
+            // ignore
+          }
+        }
+      } catch (err: any) {
+        console.error('Error submitting review', err)
+        alert(err?.response?.data?.detail || 'Failed to submit review')
+      }
+    })()
   };
 
   const handleEnroll = async () => {

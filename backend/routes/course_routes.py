@@ -264,6 +264,40 @@ async def get_public_course_detail(
         materials=[schemas.CourseMaterialResponse(**material.__dict__) for material in materials]
     )
 
+
+@router.get("/{course_id}/reviews", response_model=List[schemas.CourseReviewResponse])
+async def get_course_reviews_api(
+    course_id: int,
+    db: Session = Depends(get_db)
+):
+    """Get public reviews for a course"""
+    course = crud.get_course_by_id(db, course_id)
+    if not course or course.status != schemas.CourseStatus.PUBLISHED:
+        raise HTTPException(status_code=404, detail="Course not found or not published")
+
+    reviews = crud.get_course_reviews(db, course_id)
+    return [schemas.CourseReviewResponse(**r.__dict__) for r in reviews]
+
+
+@router.post("/{course_id}/reviews", response_model=schemas.CourseReviewResponse)
+async def submit_course_review_api(
+    course_id: int,
+    review: schemas.CourseReviewCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Submit or update a review for a course (authenticated users)"""
+    course = crud.get_course_by_id(db, course_id)
+    if not course or course.status != schemas.CourseStatus.PUBLISHED:
+        raise HTTPException(status_code=404, detail="Course not found or not published")
+
+    # Optionally, require enrollment to review. Currently allow any logged-in user.
+    try:
+        r = crud.create_or_update_course_review(db, course_id, current_user.id, review.rating, review.review_text)
+        return schemas.CourseReviewResponse(**r.__dict__)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.get("/{course_id}/lessons")
 async def get_course_lessons_public(
     course_id: int,
